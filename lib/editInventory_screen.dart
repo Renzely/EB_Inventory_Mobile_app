@@ -44,9 +44,9 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
   late TextEditingController _periodController;
   late TextEditingController _weekController;
   late TextEditingController _monthController;
-  late TextEditingController _categoryController;
+  // late TextEditingController _categoryController;
   late TextEditingController _skuDesController;
-  late TextEditingController _productController;
+  //late TextEditingController _productController;
   late TextEditingController _skuCodeController;
   late TextEditingController _statusController;
   late TextEditingController _beginningController;
@@ -105,12 +105,12 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
     _weekController = TextEditingController(text: '');
     _monthController = TextEditingController(text: '');
 
-    _categoryController =
-        TextEditingController(text: widget.inventoryItem.category ?? '');
+    // _categoryController =
+    //     TextEditingController(text: widget.inventoryItem.category ?? '');
     _skuDesController =
         TextEditingController(text: widget.inventoryItem.skuDescription ?? '');
-    _productController =
-        TextEditingController(text: widget.inventoryItem.products ?? '');
+    // _productController =
+    //     TextEditingController(text: widget.inventoryItem.products ?? '');
     _skuCodeController =
         TextEditingController(text: widget.inventoryItem.skuCode ?? '');
     _statusController =
@@ -184,9 +184,9 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
     _periodController.dispose();
     _weekController.dispose();
     _monthController.dispose();
-    _categoryController.dispose();
+    //_categoryController.dispose();
     _skuDesController.dispose();
-    _productController.dispose();
+    //_productController.dispose();
     _skuCodeController.dispose();
     _statusController.dispose();
     _beginningController.dispose();
@@ -461,9 +461,9 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
         'period': _selectedPeriod,
         'month': _monthController.text,
         'week': _weekController.text,
-        'category': _categoryController.text,
+        //'category': _categoryController.text,
         'skuDescription': _skuDesController.text,
-        'products': _productController.text,
+        //'products': _productController.text,
         'skuCode': _skuCodeController.text,
         'status': status,
         'beginning': beginningValue.toString(),
@@ -592,7 +592,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
         child: Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: false,
-              backgroundColor: Colors.grey[600],
+              backgroundColor: Color.fromARGB(210, 46, 0, 77),
               elevation: 0,
               title: Text(
                 'Next Week Inventory',
@@ -817,22 +817,22 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                       readOnly:
                           true, // Keep readOnly to prevent direct user input
                     ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Category',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _categoryController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                      enabled: false,
-                    ),
+                    //SizedBox(height: 16),
+                    // Text(
+                    //   'Category',
+                    //   style: TextStyle(
+                    //     fontWeight: FontWeight.bold,
+                    //     fontSize: 16,
+                    //   ),
+                    // ),
+                    // SizedBox(height: 16),
+                    // TextField(
+                    //   controller: _categoryController,
+                    //   decoration: InputDecoration(
+                    //       border: OutlineInputBorder(),
+                    //       contentPadding: EdgeInsets.symmetric(horizontal: 12)),
+                    //   enabled: false,
+                    // ),
                     SizedBox(height: 16),
                     Text(
                       'SKU Description',
@@ -849,22 +849,22 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                           contentPadding: EdgeInsets.symmetric(horizontal: 12)),
                       enabled: false,
                     ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Product',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _productController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                      enabled: false,
-                    ),
+                    // SizedBox(height: 16),
+                    // Text(
+                    //   'Product',
+                    //   style: TextStyle(
+                    //     fontWeight: FontWeight.bold,
+                    //     fontSize: 16,
+                    //   ),
+                    // ),
+                    // SizedBox(height: 16),
+                    // TextField(
+                    //   controller: _productController,
+                    //   decoration: InputDecoration(
+                    //       border: OutlineInputBorder(),
+                    //       contentPadding: EdgeInsets.symmetric(horizontal: 12)),
+                    //   enabled: false,
+                    // ),
                     SizedBox(height: 16),
                     Text(
                       'SKU Code',
@@ -1010,7 +1010,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     SizedBox(height: 20),
                     SizedBox(height: 20),
                     Text(
-                      'Expiry Pcs',
+                      'Expiration',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -1036,7 +1036,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                           side: BorderSide(
                               width: 2.0,
                               color: _isFieldsEnabled()
-                                  ? Colors.grey
+                                  ? Color.fromARGB(210, 46, 0, 77)
                                   : Colors.grey),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
@@ -1047,8 +1047,8 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                           style: TextStyle(
                             color: _isFieldsEnabled()
                                 ? Colors.black
-                                : Colors
-                                    .grey, // Change text color when disabled
+                                : Color.fromARGB(210, 46, 0,
+                                    77), // Change text color when disabled
                           ),
                         ),
                       ),
@@ -1136,93 +1136,51 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     if (_selectedNumberOfDaysOOS != null &&
                         _selectedNumberOfDaysOOS! > 0 &&
                         _isFieldsEnabled()) ...[
-                      Text(
-                        'Remarks',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                          labelStyle: TextStyle(
+                      SizedBox(height: 10),
+                      if (_selectedNumberOfDaysOOS != null &&
+                          _selectedNumberOfDaysOOS! > 0) ...[
+                        Text(
+                          'Remarks',
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
-                        value: _remarksOOS,
-                        onChanged: (newValue) {
-                          setState(() {
-                            _remarksOOS = newValue;
-                            _showNoDeliveryDropdown = _remarksOOS ==
-                                'No Delivery'; // Show Reason dropdown only if No Delivery is selected
-                            _selectedNoDeliveryOption = _showNoDeliveryDropdown
-                                ? _selectedNoDeliveryOption
-                                : null; // Reset Reason if No Delivery is not selected
-                            checkSaveEnabled(); // Check if Save button should be enabled
-                          });
-                        },
-                        items: [
-                          DropdownMenuItem<String>(
-                            value: 'No P.O',
-                            child: Text('No P.O'),
+                        SizedBox(height: 10),
+                        TextFormField(
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 12),
+                            labelText:
+                                'Enter Remarks', // You can customize the label if needed
+                            labelStyle: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                          DropdownMenuItem<String>(
-                            value: 'Unserved',
-                            child: Text('Unserved'),
-                          ),
-                          DropdownMenuItem<String>(
-                            value: 'No Delivery',
-                            child: Text('No Delivery'),
-                          ),
-                        ],
-                      ),
+                          onChanged: (value) {
+                            setState(() {
+                              _remarksOOS = value;
+
+                              // Show or hide the Select Reason dropdown based on the Remarks input
+                              if (_remarksOOS == 'No Delivery' &&
+                                  _selectedNumberOfDaysOOS! > 0) {
+                                _showNoDeliveryDropdown = true;
+                              } else {
+                                _showNoDeliveryDropdown = false;
+                                _selectedNoDeliveryOption = null;
+                              }
+
+                              // Check if Save button should be enabled
+                              checkSaveEnabled();
+                            });
+                          },
+                        ),
+                      ],
                     ],
                     SizedBox(height: 16),
-                    if (_showNoDeliveryDropdown && _isFieldsEnabled()) ...[
-                      Text(
-                        'Reason',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                          labelStyle: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        value: _selectedNoDeliveryOption,
-                        onChanged: (newValue) {
-                          setState(() {
-                            _selectedNoDeliveryOption = newValue;
-                            checkSaveEnabled(); // Check if Save button should be enabled
-                          });
-                        },
-                        items: [
-                          DropdownMenuItem<String>(
-                            value: 'With S.O but without P.O',
-                            child: Text('With S.O but without P.O'),
-                          ),
-                          DropdownMenuItem<String>(
-                            value: 'With P.O but without Delivery',
-                            child: Text('With P.O but without Delivery'),
-                          ),
-                          DropdownMenuItem<String>(
-                            value: 'AR ISSUES',
-                            child: Text('AR ISSUES'),
-                          ),
-                        ],
-                      ),
-                    ],
+                    if (_showNoDeliveryDropdown && _isFieldsEnabled()) ...[],
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1242,8 +1200,8 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                             minimumSize: MaterialStateProperty.all<Size>(
                               const Size(150, 50),
                             ),
-                            backgroundColor:
-                                MaterialStateProperty.all<Color>(Colors.grey),
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Color.fromARGB(210, 46, 0, 77)),
                           ),
                           child: const Text(
                             'Cancel',
@@ -1315,7 +1273,9 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                                 ),
                                 backgroundColor:
                                     MaterialStateProperty.all<Color>(
-                                  _isSaveEnabled ? Colors.grey : Colors.grey,
+                                  _isSaveEnabled
+                                      ? Color.fromARGB(210, 46, 0, 77)
+                                      : Colors.grey,
                                 ),
                               ),
                               child: const Text(
@@ -1355,8 +1315,14 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                   setState(() {
                     selectedMonth = newValue;
                     _selectedMonths[index] = selectedMonth!;
-                    _updateExpiryField(
-                        index, selectedMonth!, pcsController.text);
+                    pcsController
+                        .clear(); // Clear TextField when a new month is selected
+
+                    // Only update if a month is selected
+                    if (selectedMonth != null) {
+                      _updateExpiryField(
+                          index, selectedMonth!, pcsController.text);
+                    }
                   });
                 },
                 decoration: InputDecoration(
@@ -1404,7 +1370,6 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
           ],
         ),
         SizedBox(height: 16),
-        // for (int i = 0; i < _pcsControllers.length; i++)
         TextField(
           controller: pcsController,
           decoration: InputDecoration(
@@ -1414,7 +1379,13 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
           ),
           keyboardType: TextInputType.number,
           onChanged: (value) {
-            _updateExpiryField(index, selectedMonth!, pcsController.text);
+            // Only call _updateExpiryField if selectedMonth is not null
+            if (selectedMonth != null) {
+              _updateExpiryField(index, selectedMonth!, pcsController.text);
+            } else {
+              // Optionally, show a message or handle the case where no month is selected
+              print('Please select a month before entering PCS.');
+            }
           },
         ),
       ],

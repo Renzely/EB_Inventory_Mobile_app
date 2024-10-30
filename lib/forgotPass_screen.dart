@@ -72,9 +72,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.grey[900]!,
-                  Colors.grey[800]!,
-                  Colors.grey[400]!,
+                  Color.fromARGB(210, 46, 0, 77)!,
+                  Color.fromARGB(210, 88, 12, 139)!,
+                  Color.fromARGB(255, 255, 196, 0)!,
                 ],
               ),
             ),
@@ -126,6 +126,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                             decoration: InputDecoration(
                               hintText: 'Enter your email',
                               prefixIcon: Icon(Icons.email),
+                              prefixIconColor: Color.fromARGB(210, 46, 0, 77)!,
                             ),
                           ),
                           if (otpMessage != null) ...[
@@ -148,8 +149,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: _isLoading || _isCooldown
                                   ? Colors.grey
-                                  : Colors
-                                      .grey[900], // Grey if loading or cooldown
+                                  : Color.fromARGB(210, 46, 0,
+                                      77)!, // Grey if loading or cooldown
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
                               ),
