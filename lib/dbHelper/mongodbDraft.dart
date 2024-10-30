@@ -95,10 +95,12 @@ class TimeLog {
   DateTime? timeOut; // Nullable DateTime
   String? timeInLocation; // Nullable location for time in
   String? timeOutLocation; // Nullable location for time out
+  String accountNameBranchManning;
 
   TimeLog({
     required this.id,
     required this.userEmail,
+    required this.accountNameBranchManning,
     required this.timeIn,
     this.timeOut,
     required String date,
@@ -109,6 +111,7 @@ class TimeLog {
   factory TimeLog.fromJson(Map<String, dynamic> json) => TimeLog(
         id: json['_id'] ?? ObjectId(),
         userEmail: json['userEmail'] ?? '',
+        accountNameBranchManning: json['accountNameBranchManning'] ?? '',
         timeIn: DateTime.parse(json['timeIn']),
         timeOut:
             json['timeOut'] != null ? DateTime.tryParse(json['timeOut']) : null,
@@ -120,6 +123,7 @@ class TimeLog {
   Map<String, dynamic> toJson() => {
         '_id': id,
         'userEmail': userEmail,
+        'accountNameBranchManning': accountNameBranchManning,
         'timeIn': timeIn.toIso8601String(),
         'timeOut': timeOut?.toIso8601String(), // Convert to string if not null
         'timeInLocation': timeInLocation,
@@ -139,13 +143,13 @@ class InventoryItem {
   String period;
   String month;
   String week;
-  String category;
+  //String category;
   String skuDescription;
-  String products;
+  //String products;
   String skuCode;
   String status; // Carried, Not Carried, Delisted
   String remarksOOS;
-  String reasonOOS;
+  //String reasonOOS;
   dynamic beginningSA;
   dynamic beginningWA;
   dynamic beginning;
@@ -169,9 +173,9 @@ class InventoryItem {
     required this.period,
     required this.month,
     required this.week,
-    required this.category,
+    //required this.category,
     required this.skuDescription,
-    required this.products,
+    //required this.products,
     required this.skuCode,
     required this.status,
     required this.beginning,
@@ -186,7 +190,7 @@ class InventoryItem {
     required this.noOfDaysOOS,
     required this.expiryFields,
     required this.remarksOOS,
-    required this.reasonOOS,
+    //required this.reasonOOS,
     required this.isEditing,
   });
 
@@ -200,9 +204,9 @@ class InventoryItem {
         period: json['period'] ?? '',
         month: json['month'] ?? '',
         week: json['week'] ?? '',
-        category: json['category'] ?? '',
+        //category: json['category'] ?? '',
         skuDescription: json['skuDescription'] ?? '',
-        products: json['products'] ?? '',
+        //products: json['products'] ?? '',
         skuCode: json['skuCode'] ?? '',
         status: json['status'] ?? '',
         beginning: json['beginning'] ?? 0,
@@ -222,7 +226,7 @@ class InventoryItem {
                 .toList() ??
             [], // Ensure expiryFields is not null
         remarksOOS: json['remarksOOS'] ?? '',
-        reasonOOS: json['reasonOOS'] ?? '',
+        //reasonOOS: json['reasonOOS'] ?? '',
         isEditing: json['isEditing'] ?? false, // Default value if null
       );
 
@@ -236,9 +240,9 @@ class InventoryItem {
         'period': period,
         'month': month,
         'week': week,
-        'category': category,
+        //'category': category,
         'skuDescription': skuDescription,
-        'products': products,
+        //'products': products,
         'skuCode': skuCode,
         'status': status,
         'beginning': beginning,
@@ -253,7 +257,7 @@ class InventoryItem {
         'noOfDaysOOS': noOfDaysOOS,
         'expiryFields': expiryFields,
         'remarksOOS': remarksOOS,
-        'reasonOOS': reasonOOS,
+        //'reasonOOS': reasonOOS,
         'isEditing': isEditing, // Include in JSON
       };
   void _saveToDatabase(InventoryItem newItem) async {
@@ -281,80 +285,80 @@ class InventoryItem {
   }
 }
 
-// class ReturnToVendor {
-//   ObjectId id;
-//   String inputId;
-//   String userEmail;
-//   String date;
-//   String merchandiserName;
-//   String outlet;
-//   String category;
-//   String item;
-//   String quantity;
-//   String driverName;
-//   String plateNumber;
-//   String pullOutReason;
+class ReturnToVendor {
+  ObjectId id;
+  String inputId;
+  String userEmail;
+  String date;
+  String merchandiserName;
+  String outlet;
+  //String category;
+  String item;
+  String quantity;
+  String driverName;
+  String plateNumber;
+  String pullOutReason;
 
-//   ReturnToVendor({
-//     required this.inputId,
-//     required this.id,
-//     required this.userEmail,
-//     required this.date,
-//     required this.merchandiserName,
-//     required this.outlet,
-//     required this.category,
-//     required this.item,
-//     required this.quantity,
-//     required this.driverName,
-//     required this.plateNumber,
-//     required this.pullOutReason,
-//   });
+  ReturnToVendor({
+    required this.inputId,
+    required this.id,
+    required this.userEmail,
+    required this.date,
+    required this.merchandiserName,
+    required this.outlet,
+    //required this.category,
+    required this.item,
+    required this.quantity,
+    required this.driverName,
+    required this.plateNumber,
+    required this.pullOutReason,
+  });
 
-//   factory ReturnToVendor.fromJson(Map<String, dynamic> json) => ReturnToVendor(
-//         id: json['_id'] ?? ObjectId(),
-//         inputId: json['inputId'] ?? '',
-//         userEmail: json['userEmail'] ?? '',
-//         date: json['date'] ?? '',
-//         merchandiserName: json['merchandiserName'] ?? '',
-//         outlet: json['outlet'] ?? '',
-//         category: json['category'] ?? '',
-//         item: json['item'] ?? '',
-//         quantity: json['quantity'] ?? '',
-//         driverName: json['driverName'] ?? '',
-//         plateNumber: json['plateNumber'] ?? '',
-//         pullOutReason: json['pullOutReason'] ?? '',
-//       );
+  factory ReturnToVendor.fromJson(Map<String, dynamic> json) => ReturnToVendor(
+        id: json['_id'] ?? ObjectId(),
+        inputId: json['inputId'] ?? '',
+        userEmail: json['userEmail'] ?? '',
+        date: json['date'] ?? '',
+        merchandiserName: json['merchandiserName'] ?? '',
+        outlet: json['outlet'] ?? '',
+        //category: json['category'] ?? '',
+        item: json['item'] ?? '',
+        quantity: json['quantity'] ?? '',
+        driverName: json['driverName'] ?? '',
+        plateNumber: json['plateNumber'] ?? '',
+        pullOutReason: json['pullOutReason'] ?? '',
+      );
 
-//   Map<String, dynamic> toJson() => {
-//         '_id': id,
-//         "inputId": inputId,
-//         'userEmail': userEmail,
-//         'date': date,
-//         'merchandiserName': merchandiserName,
-//         'outlet': outlet,
-//         'category': category,
-//         'Item': item,
-//         'quantity': quantity,
-//         'driverName': driverName,
-//         'plateNumber': plateNumber,
-//         'pullOutReason': pullOutReason,
-//       };
+  Map<String, dynamic> toJson() => {
+        '_id': id,
+        "inputId": inputId,
+        'userEmail': userEmail,
+        'date': date,
+        'merchandiserName': merchandiserName,
+        'outlet': outlet,
+        //'category': category,
+        'Item': item,
+        'quantity': quantity,
+        'driverName': driverName,
+        'plateNumber': plateNumber,
+        'pullOutReason': pullOutReason,
+      };
 
-//   void saveToDatabase(ReturnToVendor newItem) async {
-//     final db = Db(MONGO_CONN_URL);
-//     await db.open();
+  void saveToDatabase(ReturnToVendor newItem) async {
+    final db = Db(MONGO_CONN_URL);
+    await db.open();
 
-//     final collection = db.collection(USER_RTV);
+    final collection = db.collection(USER_RTV);
 
-//     final Map<String, dynamic> itemMap = newItem.toJson();
+    final Map<String, dynamic> itemMap = newItem.toJson();
 
-//     try {
-//       await collection.insert(itemMap);
-//       print('Return to vendor saved to database');
-//     } catch (e) {
-//       print('Error saving return to vendor: $e');
-//     }
+    try {
+      await collection.insert(itemMap);
+      print('Return to vendor saved to database');
+    } catch (e) {
+      print('Error saving return to vendor: $e');
+    }
 
-//     await db.close();
-//   }
-// }
+    await db.close();
+  }
+}

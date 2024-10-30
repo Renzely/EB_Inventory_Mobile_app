@@ -206,9 +206,9 @@ class _LoginPageState extends State<LoginPage> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.grey[900]!,
-              Colors.grey[800]!,
-              Colors.grey[400]!,
+              Color.fromARGB(210, 46, 0, 77)!,
+              Color.fromARGB(210, 88, 12, 139)!,
+              Color.fromARGB(255, 255, 196, 0)!,
             ],
           ),
         ),
@@ -224,13 +224,13 @@ class _LoginPageState extends State<LoginPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        "Login",
+                        "LOGIN",
                         style: GoogleFonts.roboto(
                             color: Colors.white, fontSize: 40),
                       ),
                       SizedBox(height: 10),
                       Text(
-                        "Welcome to Inventory",
+                        "WELCOME TO EB INVENTORY",
                         style: GoogleFonts.roboto(
                             color: Colors.white, fontSize: 18),
                       ),
@@ -260,8 +260,9 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(
-                                    0.8), // Adjust the opacity if needed
+                                color: Color.fromARGB(210, 46, 0, 77)
+                                    .withOpacity(
+                                        0.8), // Adjust the opacity if needed
                                 blurRadius: 20,
                                 offset: Offset(0, 10),
                               ),
@@ -273,7 +274,7 @@ class _LoginPageState extends State<LoginPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Username',
+                                    'USERNAME',
                                     style: GoogleFonts.roboto(
                                       color: Colors.grey[900],
                                       fontWeight: FontWeight.bold,
@@ -290,6 +291,8 @@ class _LoginPageState extends State<LoginPage> {
                                       hintText: 'Enter your username',
                                       border: InputBorder.none,
                                       prefixIcon: Icon(Icons.account_box),
+                                      prefixIconColor:
+                                          Color.fromARGB(210, 46, 0, 77),
                                       errorText: usernameErrorText.isNotEmpty
                                           ? usernameErrorText
                                           : null,
@@ -302,7 +305,7 @@ class _LoginPageState extends State<LoginPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Password',
+                                    'PASSWORD',
                                     style: GoogleFonts.roboto(
                                       color: Colors.grey[900],
                                       fontWeight: FontWeight.bold,
@@ -319,6 +322,8 @@ class _LoginPageState extends State<LoginPage> {
                                     decoration: InputDecoration(
                                       hintText: 'Enter your password',
                                       prefixIcon: Icon(Icons.lock),
+                                      prefixIconColor:
+                                          Color.fromARGB(210, 46, 0, 77),
                                       border: InputBorder.none,
                                       errorText: passwordErrorText.isNotEmpty
                                           ? passwordErrorText
@@ -354,7 +359,8 @@ class _LoginPageState extends State<LoginPage> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: _isLoading
                                 ? Colors.grey
-                                : Colors.grey[900], // Grey if loading
+                                : Color.fromARGB(
+                                    210, 46, 0, 77), // Grey if loading
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(50),
                             ),
@@ -389,7 +395,8 @@ class _LoginPageState extends State<LoginPage> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[900], // Button color
+                            backgroundColor:
+                                Color.fromARGB(210, 46, 0, 77), // Button color
                             shape: RoundedRectangleBorder(
                               borderRadius:
                                   BorderRadius.circular(50), // Rounded corners
@@ -424,7 +431,8 @@ class _LoginPageState extends State<LoginPage> {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[900], // Button color
+                            backgroundColor:
+                                Color.fromARGB(210, 46, 0, 77), // Button color
                             shape: RoundedRectangleBorder(
                               borderRadius:
                                   BorderRadius.circular(50), // Rounded corners

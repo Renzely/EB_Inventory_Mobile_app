@@ -234,7 +234,7 @@ class _AddInventoryState extends State<AddInventory> {
             debugShowCheckedModeBanner: false,
             home: Scaffold(
               appBar: AppBar(
-                backgroundColor: Colors.grey[600],
+                backgroundColor: Color.fromARGB(210, 46, 0, 77),
                 elevation: 0,
                 title: Text(
                   'Inventory Input',
@@ -605,7 +605,8 @@ class _AddInventoryState extends State<AddInventory> {
                                       ),
                                       backgroundColor:
                                           MaterialStateProperty.all<Color>(
-                                              Colors.grey)),
+                                        Color.fromARGB(210, 46, 0, 77)!,
+                                      )),
                                   child: const Text(
                                     'Cancel',
                                     style: TextStyle(
@@ -655,7 +656,7 @@ class _AddInventoryState extends State<AddInventory> {
                                     ),
                                     backgroundColor: _isSaveEnabled
                                         ? MaterialStateProperty.all<Color>(
-                                            Colors.grey)
+                                            Color.fromARGB(210, 46, 0, 77))
                                         : MaterialStateProperty.all<Color>(
                                             Colors.grey),
                                   ),
@@ -732,7 +733,7 @@ class _SKUInventoryState extends State<SKUInventory> {
   String? _statusSelected;
   String? _selectedPeriod;
   String? _remarksOOS;
-  String? _reasonOOS;
+  //String? _reasonOOS;
   String? _selectedNoDeliveryOption;
   String _inputid = '';
   int? _selectedNumberOfDaysOOS;
@@ -804,7 +805,7 @@ class _SKUInventoryState extends State<SKUInventory> {
     String product = _productDetails ?? '';
     String skucode = _skuCode ?? '';
     String remarksOOS = _remarksOOS ?? '';
-    String reasonOOS = _reasonOOS ?? '';
+    //String reasonOOS = _reasonOOS ?? '';
     bool edit = _isEditing;
     int numberOfDaysOOS = _selectedNumberOfDaysOOS ?? 0;
 
@@ -881,9 +882,9 @@ class _SKUInventoryState extends State<SKUInventory> {
       period: widget.SelectedPeriod,
       month: widget.selectedMonth,
       week: widget.selectedWeek,
-      category: Version,
+      //category: Version,
       skuDescription: SKUDescription,
-      products: product,
+      //products: product,
       skuCode: skucode,
       status: status,
       beginning: beginningValue,
@@ -898,7 +899,7 @@ class _SKUInventoryState extends State<SKUInventory> {
       noOfDaysOOS: noOfDaysOOSValue,
       expiryFields: _expiryFieldsValues,
       remarksOOS: remarksOOS,
-      reasonOOS: reasonOOS,
+      //reasonOOS: reasonOOS,
       isEditing: true, // Set to false when saving new item
     );
 
@@ -991,354 +992,38 @@ class _SKUInventoryState extends State<SKUInventory> {
   }
 
   Map<String, List<String>> _categoryToSkuDescriptions = {
-    'V1': [
-      "KOPIKO COFFEE CANDY 24X175G",
-      "KOPIKO COFFEE CANDY JAR 6X560G",
-      "KOPIKO CAPPUCCINO CANDY 24X175G",
-      "FRES BARLEY MINT 24X50X3G",
-      "FRES MINT BARLEY JAR 12X200X3G",
-      "FRES CHERRY CANDY, 24 X 50 X 3G",
-      "FRES CHERRY JAR, 12X 200 X 3G",
-      "FRES GRAPE CANDY, 24 X 50 X 3G",
-      "FRES GRAPE JAR, 12 X 200 X 3G",
-      "FRES APPLE PEACH 24 X 50 X 3G",
-      "BENG BENG CHOCOLATE 12 X 10 X 26.5G",
-      "BENG BENG SHARE IT 16 X 95G",
-      "CAL CHEESE 10X20X8.5G",
-      "CAL CHEESE 60X35G",
-      "CAL CHEESE 60X53.5G",
-      "CAL CHEESE CHEESE CHOCO 60X53.5G",
-      "CAL CHEESE CHEESE CHOCO 60X35G",
-      "MALKIST CHOCOLATE 30X10X18G",
-      "WAFELLO CHOCOLATE WAFER 60X53.5G",
-      "WAFELLO CHOCOLATE WAFER 60X35G",
-      "WAFELLO BUTTER CARAMEL 60X35G",
-      "WAFELLO COCO CREME 60X35G",
-      "WAFELLO CREAMY VANILLA 20X10X20.5G PH",
-      "VALMER CHOCOLATE 12X10X54G",
-      "SUPERSTAR TRIPLE CHOCOLATE 12 X10 X 18G",
-      "DANISA BUTTER COOKIES 12X454G",
-      "WAFELLO BUTTER CARAMEL 60X53.5G",
-      "WAFELLO COCO CREME 60X53.5G",
-      "WAFELLO CHOCOLATE 48G X 60",
-      "WAFELLO CHOCOLATE 21G X 10 X 20",
-      "WAFELLO BUTTER CARAMEL 48G X 60",
-      "WAFELLO BUTTER CARAMEL 20.5G X 10 X 20",
-      "WAFELLO COCO CRÈME 48G X 60",
-      "WAFELLO COCONUT CRÈME 20.5G X 10 X 20",
-      "CAL CHEESE 60 X 48G",
-      "CAL CHEESE 20 X 10 X 20G",
-      "CAL CHEESE 20 X 20 X 8.5G",
-      "CAL CHEESE CHOCO 60 X 48G",
-      "CAL CHEESE CHOCO 20 X 10 X 20.5G",
-      "VALMER SANDWICH CHOCOLATE 12X10X36G",
-      "MALKIST CAPPUCCINO 30X10X18G PH",
-      "FRES CHERRY JAR PROMO",
-      "FRES BARLEY JAR PROMO",
-      "FRES GRAPE JAR PROMO",
-      "FRES MIX CANDY JAR PROMO",
-      "CAL CHEESE 20G (9+1 PROMO)",
-      "WAFELLO CHOCOLATE 21G (9+1 PROMO)",
-      "WAFELLO COCO CREME 20.5G (9+1 PROMO)",
-      "WAFELLO BUTTER CARAMEL 20.5G (9+1 PROMO)",
-      "FRES MIXED CANDY JAR 12 X 600G",
-      "WAFELLO CREAMY VANILLA 60X48G PH",
-      "MALKIST SWEET GLAZED 12X10X28G PH",
-      "MALKIST BARBECUE 12X10X28G PH"
-    ],
-    'V2': [
-      "Kopiko Black 3 in One Hanger 24 x 10 x 30g",
-      "KOPIKO BLACK 3-IN-1 BAG 8 X 30 X 30G",
-      "Kopiko Black 3 in One Promo Twin 12 x 10 x 2 x 30g",
-      "Kopiko Brown Coffee hg 27.5g 24x10x27.5g",
-      "Kopiko Brown Coffee Pouch 24x10x27.5g",
-      "Kopiko Brown Coffee Bag 8x30x27.5g",
-      "Kopiko Brown Promo Twin 12 x 10 x 53g",
-      "Kopiko Cappuccino Hanger 24 x 10 x 25g",
-      "Kopiko Cappuccino Pouch 24x10x25g",
-      "Kopiko Cappuccino Bag 8x30x25g",
-      "Kopiko L.A. Coffee hanger 24x10x25g",
-      "Kopiko LA Coffee Pouch 24x10x25g",
-      "Kopiko Blanca hanger 24x10x30g",
-      "KOPIKO BLANCA, POUCH 24 X 10 X 30G",
-      "KOPIKO BLANCA, BAG 8 X 30 X 30G",
-      "Kopiko Blanca Twinpack 12 X 10 X 2 X 29G",
-      "Toracafe White and Creamy 12 X (10 X 2) X 26G",
-      "Kopiko Creamy Caramelo 12 x (10 x 2) x 25g",
-      "Kopiko Double Cups 24 x 10 x 36g",
-      "ENERGEN CHOCOLATE HANGER 24 X 10 X 40G",
-      "Energen Chocolate Pouch 24x10x40g",
-      "Energen Chocolate Bag 8x30x40g",
-      "ENERGEN VANILLA HANGER 24 X 10 X 40G",
-      "Energen Vanilla Pouch 24x10x40g",
-      "Energen Vanilla Bag 8x30x40g",
-      "Energen Champion NBA Hanger 24 x 10 x 35g",
-      "Energen Pandesal Mate 24 x 10 x 30g",
-      "ENERGEN CHAMPION 12X10X2X35G PH",
-      "Kopiko Cafe Mocha TP 12X10X(2X25.5G) PH",
-      "Energen Champion NBA TP 15 x 8 x 2 x30g ph",
-      "KOPIKO BLACK 3IN1 TWINPACK 12X10X2X28G",
-      "KOPIKO BLACK 3IN1 HANGER 24X10X30G UNLI",
-      "KOPIKO BLACK 3IN1 TP 12X10X2X28G UNLI",
-      "KOPIKO BROWN HANGER 24X10X27.5G UNLI",
-      "KOPIKO BROWN TP 12X10X2X26.5G UNLI",
-      "CHAMPION HANGER 17+3",
-      "Champion Twin Pack 13+3",
-      "Kopiko Blanca TP Banded 6 x (18 + 2) x 2 x 29g",
-      "KOPIKO BROWN COFFEE TWINPACK BUY 12 SAVE 13 PROMO",
-      "KOPIKO BLACK TWIN BUY 10 SAVE 13",
-      "KOPIKO BLANCA HANGER GSK 12 X 2 X 10 X 30G",
-      "BLANCA TP 10+1",
-      "Champion Hanger 20x(10+2) x 35g/30g",
-      "ENERGEN CHAMPION 40X345G",
-      "KOPIKO BLACK 3-IN-1 POUCH 24 X 10 X 30G"
-    ],
-    'V3': [
-      "Le Minerale 24x330ml",
-      "Le Minerale 24x600ml",
-      "Le Minerale 12x1500ml",
-      "LE MINERALE 4 X 5000ML",
-      "KOPIKO LUCKY DAY 24BTL X 180ML",
-      "KLD 5+1 Bundling"
+    'Variant': [
+      "Engkanto Live it Up Lager",
+      "Engkanto High Hive Honey Ale",
+      "Engkanto Paint Me Purple - Ube Lager",
+      "Engkanto Mango Nation Hazy IPA",
+      "Engkanto Green Lava Double IPA",
     ],
   };
 
   Map<String, Map<String, String>> _skuToProductSkuCode = {
     //CATEGORY V1
 
-    'KOPIKO COFFEE CANDY 24X175G': {'Product': ' ', 'SKU Code': '326924'},
-    'KOPIKO COFFEE CANDY JAR 6X560G': {'Product': ' ', 'SKU Code': '329106'},
-    'KOPIKO CAPPUCCINO CANDY 24X175G': {'Product': ' ', 'SKU Code': '326925'},
-    'FRES BARLEY MINT 24X50X3G': {'Product': ' ', 'SKU Code': '326446'},
-    'FRES MINT BARLEY JAR 12X200X3G': {'Product': ' ', 'SKU Code': '329136'},
-    'FRES CHERRY CANDY, 24 X 50 X 3G': {'Product': ' ', 'SKU Code': '326447'},
-    'FRES CHERRY JAR, 12X 200 X 3G': {'Product': ' ', 'SKU Code': '329135'},
-    'FRES GRAPE CANDY, 24 X 50 X 3G': {'Product': ' ', 'SKU Code': '326448'},
-    'FRES GRAPE JAR, 12 X 200 X 3G': {'Product': ' ', 'SKU Code': '329137'},
-    'FRES APPLE PEACH 24 X 50 X 3G': {'Product': ' ', 'SKU Code': '329545'},
-    'BENG BENG CHOCOLATE 12 X 10 X 26.5G': {
+    'Engkanto Live it Up Lager': {
       'Product': ' ',
-      'SKU Code': '329067'
+      '4-Pack Barcode': '4 806534 610144'
     },
-    'BENG BENG SHARE IT 16 X 95G': {'Product': ' ', 'SKU Code': '322583'},
-    'CAL CHEESE 10X20X8.5G': {'Product': ' ', 'SKU Code': '330071'},
-    'CAL CHEESE 60X35G': {'Product': ' ', 'SKU Code': '322571'},
-    'CAL CHEESE 60X53.5G': {'Product': ' ', 'SKU Code': '329808'},
-    'CAL CHEESE CHEESE CHOCO 60X53.5G': {'Product': ' ', 'SKU Code': '322866'},
-    'CAL CHEESE CHEESE CHOCO 60X35G': {'Product': ' ', 'SKU Code': '322867'},
-    'MALKIST CHOCOLATE 30X10X18G': {'Product': ' ', 'SKU Code': '321036'},
-    'WAFELLO CHOCOLATE WAFER 60X53.5G': {'Product': ' ', 'SKU Code': '330016'},
-    'WAFELLO CHOCOLATE WAFER 60X35G': {'Product': ' ', 'SKU Code': '330025'},
-    'WAFELLO BUTTER CARAMEL 60X35G': {'Product': ' ', 'SKU Code': '322871'},
-    'WAFELLO COCO CREME 60X35G': {'Product': ' ', 'SKU Code': '322868'},
-    'WAFELLO CREAMY VANILLA 20X10X20.5G PH': {
+    'Engkanto High Hive Honey Ale': {
       'Product': ' ',
-      'SKU Code': '330073'
+      '4-Pack Barcode': '4 806534 610168'
     },
-    'VALMER CHOCOLATE 12X10X54G': {'Product': ' ', 'SKU Code': '321038'},
-    'SUPERSTAR TRIPLE CHOCOLATE 12 X10 X 18G': {
+    'Engkanto Paint Me Purple - Ube Lager': {
       'Product': ' ',
-      'SKU Code': '322894'
+      '4-Pack Barcode': '4 806534 610410'
     },
-    'DANISA BUTTER COOKIES 12X454G': {'Product': ' ', 'SKU Code': '329650'},
-    'WAFELLO BUTTER CARAMEL 60X53.5G': {'Product': ' ', 'SKU Code': '322870'},
-    'WAFELLO COCO CREME 60X53.5G': {'Product': ' ', 'SKU Code': '322869'},
-    'WAFELLO CHOCOLATE 48G X 60': {'Product': ' ', 'SKU Code': '330050'},
-    'WAFELLO CHOCOLATE 21G X 10 X 20': {'Product': ' ', 'SKU Code': '330051'},
-    'WAFELLO BUTTER CARAMEL 48G X 60': {'Product': ' ', 'SKU Code': '330056'},
-    'WAFELLO BUTTER CARAMEL 20.5G X 10 X 20': {
+    'Engkanto Mango Nation Hazy IPA': {
       'Product': ' ',
-      'SKU Code': '330057'
+      '4-Pack Barcode': '4 806534 610175'
     },
-    'WAFELLO COCO CRÈME 48G X 60': {'Product': ' ', 'SKU Code': '330058'},
-    'WAFELLO COCONUT CRÈME 20.5G X 10 X 20': {
+    'Engkanto Green Lava Double IPA': {
       'Product': ' ',
-      'SKU Code': '330059'
+      '4-Pack Barcode': '4 806534 610151'
     },
-    'CAL CHEESE 60 X 48G': {'Product': ' ', 'SKU Code': '330052'},
-    'CAL CHEESE 20 X 10 X 20G': {'Product': ' ', 'SKU Code': '330053'},
-    'CAL CHEESE 20 X 20 X 8.5G': {'Product': ' ', 'SKU Code': '330071'},
-    'CAL CHEESE CHOCO 60 X 48G': {'Product': ' ', 'SKU Code': '330054'},
-    'CAL CHEESE CHOCO 20 X 10 X 20.5G': {'Product': ' ', 'SKU Code': '330055'},
-    'VALMER SANDWICH CHOCOLATE 12X10X36G': {
-      'Product': ' ',
-      'SKU Code': '321475'
-    },
-    'MALKIST CAPPUCCINO 30X10X18G PH': {'Product': ' ', 'SKU Code': '31446'},
-    'FRES CHERRY JAR PROMO': {'Product': ' ', 'SKU Code': 'P-2023-07-329135'},
-    'FRES BARLEY JAR PROMO': {'Product': ' ', 'SKU Code': 'P-2023-07-329106'},
-    'FRES GRAPE JAR PROMO': {'Product': ' ', 'SKU Code': 'P-2023-07-329137'},
-    'FRES MIX CANDY JAR PROMO': {
-      'Product': ' ',
-      'SKU Code': 'P-2023-07-320015'
-    },
-    'CAL CHEESE 20G (9+1 PROMO)': {
-      'Product': ' ',
-      'SKU Code': 'P-2022-12-322571'
-    },
-    'WAFELLO CHOCOLATE 21G (9+1 PROMO)': {
-      'Product': ' ',
-      'SKU Code': 'P-2022-12-330051'
-    },
-    'WAFELLO COCO CREME 20.5G (9+1 PROMO)': {
-      'Product': ' ',
-      'SKU Code': 'P-2022-12-330059'
-    },
-    'WAFELLO BUTTER CARAMEL 20.5G (9+1 PROMO)': {
-      'Product': ' ',
-      'SKU Code': 'P-2022-12-330057'
-    },
-    'FRES MIXED CANDY JAR 12 X 600G': {'Product': ' ', 'SKU Code': '320015'},
-    'WAFELLO CREAMY VANILLA 60X48G PH': {'Product': ' ', 'SKU Code': '330060'},
-    'MALKIST SWEET GLAZED 12X10X28G PH': {'Product': ' ', 'SKU Code': '420559'},
-    'MALKIST BARBECUE 12X10X28G PH': {'Product': ' ', 'SKU Code': '420558'},
-
-    //CATEGORY V2
-
-    'Kopiko Black 3 in One Hanger 24 x 10 x 30g': {
-      'Product': ' ',
-      'SKU Code': '322628'
-    },
-    'KOPIKO BLACK 3-IN-1 BAG 8 X 30 X 30G': {
-      'Product': ' ',
-      'SKU Code': '322629'
-    },
-    'Kopiko Black 3 in One Promo Twin 12 x 10 x 2 x 30g': {
-      'Product': ' ',
-      'SKU Code': '322627'
-    },
-    'Kopiko Brown Coffee hg 27.5g 24x10x27.5g': {
-      'Product': ' ',
-      'SKU Code': '328890'
-    },
-    'Kopiko Brown Coffee Pouch 24x10x27.5g': {
-      'Product': ' ',
-      'SKU Code': '328883'
-    },
-    'Kopiko Brown Coffee Bag 8x30x27.5g': {
-      'Product': ' ',
-      'SKU Code': '328882'
-    },
-    'Kopiko Brown Promo Twin 12 x 10 x 53g': {
-      'Product': ' ',
-      'SKU Code': '329479'
-    },
-    'Kopiko Cappuccino Hanger 24 x 10 x 25g': {
-      'Product': ' ',
-      'SKU Code': '329701'
-    },
-    'Kopiko Cappuccino Pouch 24x10x25g': {'Product': ' ', 'SKU Code': '329703'},
-    'Kopiko Cappuccino Bag 8x30x25g': {'Product': ' ', 'SKU Code': '329704'},
-    'Kopiko L.A. Coffee hanger 24x10x25g': {
-      'Product': ' ',
-      'SKU Code': '325666'
-    },
-    'Kopiko LA Coffee Pouch 24x10x25g': {'Product': ' ', 'SKU Code': '325667'},
-    'Kopiko Blanca hanger 24x10x30g': {'Product': ' ', 'SKU Code': '328888'},
-    'KOPIKO BLANCA, POUCH 24 X 10 X 30G': {
-      'Product': ' ',
-      'SKU Code': '328887'
-    },
-    'KOPIKO BLANCA, BAG 8 X 30 X 30G': {'Product': ' ', 'SKU Code': '328889'},
-    'Kopiko Blanca Twinpack 12 X 10 X 2 X 29G': {
-      'Product': ' ',
-      'SKU Code': '322711'
-    },
-    'Toracafe White and Creamy 12 X (10 X 2) X 26G': {
-      'Product': ' ',
-      'SKU Code': '322731'
-    },
-    'Kopiko Creamy Caramelo 12 x (10 x 2) x 25g': {
-      'Product': ' ',
-      'SKU Code': '322725'
-    },
-    'Kopiko Double Cups 24 x 10 x 36g': {'Product': ' ', 'SKU Code': '329744'},
-    'ENERGEN CHOCOLATE HANGER 24 X 10 X 40G': {
-      'Product': ' ',
-      'SKU Code': '328497'
-    },
-    'Energen Chocolate Pouch 24x10x40g': {'Product': ' ', 'SKU Code': '328492'},
-    'Energen Chocolate Bag 8x30x40g': {'Product': ' ', 'SKU Code': '328493'},
-    'ENERGEN VANILLA HANGER 24 X 10 X 40G': {
-      'Product': ' ',
-      'SKU Code': '328494'
-    },
-    'Energen Vanilla Pouch 24x10x40g': {'Product': ' ', 'SKU Code': '328495'},
-    'Energen Vanilla Bag 8x30x40g': {'Product': ' ', 'SKU Code': '328496'},
-    'Energen Champion NBA Hanger 24 x 10 x 35g': {
-      'Product': ' ',
-      'SKU Code': '325945'
-    },
-    'Energen Pandesal Mate 24 x 10 x 30g': {
-      'Product': ' ',
-      'SKU Code': '325899'
-    },
-    'ENERGEN CHAMPION 12X10X2X35G PH': {'Product': ' ', 'SKU Code': '325934'},
-    'Kopiko Cafe Mocha TP 12X10X(2X25.5G) PH': {
-      'Product': ' ',
-      'SKU Code': '324149'
-    },
-    'Energen Champion NBA TP 15 x 8 x 2 x30g ph': {
-      'Product': ' ',
-      'SKU Code': '325965'
-    },
-    'KOPIKO BLACK 3IN1 TWINPACK 12X10X2X28G': {
-      'Product': ' ',
-      'SKU Code': '420011'
-    },
-    'KOPIKO BLACK 3IN1 HANGER 24X10X30G UNLI': {
-      'Product': ' ',
-      'SKU Code': '420203'
-    },
-    'KOPIKO BLACK 3IN1 TP 12X10X2X28G UNLI': {
-      'Product': ' ',
-      'SKU Code': '420202'
-    },
-    'KOPIKO BROWN HANGER 24X10X27.5G UNLI': {
-      'Product': ' ',
-      'SKU Code': '420205'
-    },
-    'KOPIKO BROWN TP 12X10X2X26.5G UNLI': {
-      'Product': ' ',
-      'SKU Code': '420204'
-    },
-    'CHAMPION HANGER 17+3': {'Product': ' ', 'SKU Code': '900082'},
-    'Champion Twin Pack 13+3': {'Product': ' ', 'SKU Code': '900083'},
-    'Kopiko Blanca TP Banded 6 x (18 + 2) x 2 x 29g': {
-      'Product': ' ',
-      'SKU Code': '322789'
-    },
-    'KOPIKO BROWN COFFEE TWINPACK BUY 12 SAVE 13 PROMO': {
-      'Product': ' ',
-      'SKU Code': 'P-2022-09-329479'
-    },
-    'KOPIKO BLACK TWIN BUY 10 SAVE 13': {
-      'Product': ' ',
-      'SKU Code': 'P-2022-09-322627'
-    },
-    'KOPIKO BLANCA HANGER GSK 12 X 2 X 10 X 30G': {
-      'Product': ' ',
-      'SKU Code': 'P-2022-11-328888'
-    },
-    'BLANCA TP 10+1': {'Product': ' ', 'SKU Code': 'PROMO-2023-08-322711'},
-    'Champion Hanger 20x(10+2) x 35g/30g': {
-      'Product': ' ',
-      'SKU Code': 'P-2023-09-900084'
-    },
-    'ENERGEN CHAMPION 40X345G': {'Product': ' ', 'SKU Code': '420373'},
-    'KOPIKO BLACK 3-IN-1 POUCH 24 X 10 X 30G': {
-      'Product': ' ',
-      'SKU Code': '322630'
-    },
-
-    //CATEGORY V3
-
-    'Le Minerale 24x330ml': {'Product': ' ', 'SKU Code': '328566'},
-    'Le Minerale 24x600ml': {'Product': ' ', 'SKU Code': '328565'},
-    'Le Minerale 12x1500ml': {'Product': ' ', 'SKU Code': '326770'},
-    'LE MINERALE 4 X 5000ML': {'Product': ' ', 'SKU Code': '324045'},
-    'KOPIKO LUCKY DAY 24BTL X 180ML': {'Product': ' ', 'SKU Code': '324046'},
-    'KLD 5+1 Bundling': {'Product': ' ', 'SKU Code': 'P-2022-10-324046'}
   };
 
   // List<String> getSkuDescriptions(List<String> savedSkus) {
@@ -1405,7 +1090,7 @@ class _SKUInventoryState extends State<SKUInventory> {
       // Reset remarks, reason, and their dropdown visibility
       _remarksOOS = null; // Hide the Remarks dropdown
       _selectedNoDeliveryOption = null; // Reset No Delivery option
-      _reasonOOS = null; // Reset Reason for OOS
+      //_reasonOOS = null; // Reset Reason for OOS
       _showNoDeliveryDropdown = false; // Hide No Delivery reason dropdown
 
       // Reset No. of Days OOS
@@ -1435,7 +1120,7 @@ class _SKUInventoryState extends State<SKUInventory> {
       setState(() {
         _selectedDropdownValue = newValue;
         _productDetails = _skuToProductSkuCode[newValue]!['Product'];
-        _skuCode = _skuToProductSkuCode[newValue]!['SKU Code'];
+        _skuCode = _skuToProductSkuCode[newValue]!['4-Pack Barcode'];
       });
     }
   }
@@ -1797,7 +1482,7 @@ class _SKUInventoryState extends State<SKUInventory> {
             debugShowCheckedModeBanner: false,
             home: Scaffold(
               appBar: AppBar(
-                  backgroundColor: Colors.grey[600],
+                  backgroundColor: Color.fromARGB(210, 46, 0, 77)!,
                   elevation: 0,
                   title: Text(
                     'Inventory Input',
@@ -1901,22 +1586,22 @@ class _SKUInventoryState extends State<SKUInventory> {
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: _versionSelected == 'V1' ||
+                              onPressed: _versionSelected == 'Variant' ||
                                       _versionSelected == null
-                                  ? () => _toggleDropdown('V1')
+                                  ? () => _toggleDropdown('Variant')
                                   : null,
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(
                                     width: 2.0,
-                                    color: _versionSelected == 'V1'
-                                        ? Colors.grey
+                                    color: _versionSelected == 'Variant'
+                                        ? Color.fromARGB(210, 46, 0, 77)!
                                         : Colors.blueGrey.shade200),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
                               child: Text(
-                                'V1',
+                                'Variant',
                                 style: TextStyle(color: Colors.black),
                               ),
                             ),
@@ -1924,53 +1609,53 @@ class _SKUInventoryState extends State<SKUInventory> {
                           SizedBox(
                               width:
                                   8), // Add spacing between buttons if needed
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: _versionSelected == 'V2' ||
-                                      _versionSelected == null
-                                  ? () => _toggleDropdown('V2')
-                                  : null,
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                    width: 2.0,
-                                    color: _versionSelected == 'V2'
-                                        ? Colors.grey
-                                        : Colors.blueGrey.shade200),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                              child: Text(
-                                'V2',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                              width:
-                                  8), // Add spacing between buttons if needed
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: _versionSelected == 'V3' ||
-                                      _versionSelected == null
-                                  ? () => _toggleDropdown('V3')
-                                  : null,
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
-                                    width: 2.0,
-                                    color: _versionSelected == 'V3'
-                                        ? Colors.grey
-                                        : Colors.blueGrey.shade200),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                              child: Text(
-                                'V3',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          ),
+                          // Expanded(
+                          //   child: OutlinedButton(
+                          //     onPressed: _versionSelected == 'V2' ||
+                          //             _versionSelected == null
+                          //         ? () => _toggleDropdown('V2')
+                          //         : null,
+                          //     style: OutlinedButton.styleFrom(
+                          //       side: BorderSide(
+                          //           width: 2.0,
+                          //           color: _versionSelected == 'V2'
+                          //               ? Colors.grey
+                          //               : Colors.blueGrey.shade200),
+                          //       shape: RoundedRectangleBorder(
+                          //         borderRadius: BorderRadius.circular(4),
+                          //       ),
+                          //     ),
+                          //     child: Text(
+                          //       'V2',
+                          //       style: TextStyle(color: Colors.black),
+                          //     ),
+                          //   ),
+                          // ),
+                          // SizedBox(
+                          //     width:
+                          //         8), // Add spacing between buttons if needed
+                          // Expanded(
+                          //   child: OutlinedButton(
+                          //     onPressed: _versionSelected == 'V3' ||
+                          //             _versionSelected == null
+                          //         ? () => _toggleDropdown('V3')
+                          //         : null,
+                          //     style: OutlinedButton.styleFrom(
+                          //       side: BorderSide(
+                          //           width: 2.0,
+                          //           color: _versionSelected == 'V3'
+                          //               ? Colors.grey
+                          //               : Colors.blueGrey.shade200),
+                          //       shape: RoundedRectangleBorder(
+                          //         borderRadius: BorderRadius.circular(4),
+                          //       ),
+                          //     ),
+                          //     child: Text(
+                          //       'V3',
+                          //       style: TextStyle(color: Colors.black),
+                          //     ),
+                          //   ),
+                          // ),
                         ],
                       ),
                       SizedBox(height: 20),
@@ -1983,7 +1668,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                               padding:
                                   const EdgeInsets.symmetric(vertical: 4.0),
                               child: Text(
-                                'SKU Description',
+                                'SKUs',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16, // Adjust as needed
@@ -2023,8 +1708,8 @@ class _SKUInventoryState extends State<SKUInventory> {
                                 },
                               ).toList(),
                               decoration: InputDecoration(
-                                labelText:
-                                    'Select SKU Description', // Label for the dropdown
+                                // labelText:
+                                //     'Select SKU Description', // Label for the dropdown
                                 border:
                                     OutlineInputBorder(), // Apply border to the TextField
                                 contentPadding:
@@ -2032,28 +1717,28 @@ class _SKUInventoryState extends State<SKUInventory> {
                               ),
                             ),
                             if (_productDetails != null) ...[
+                              // SizedBox(height: 10),
+                              // Text(
+                              //   'Products',
+                              //   style: TextStyle(
+                              //       fontWeight: FontWeight.bold, fontSize: 16),
+                              // ),
+                              // TextField(
+                              //   controller:
+                              //       _productsController, // Assigning controller
+                              //   readOnly: true,
+                              //   decoration: InputDecoration(
+                              //     border:
+                              //         OutlineInputBorder(), // Apply border to the TextField
+                              //     contentPadding: EdgeInsets.symmetric(
+                              //         horizontal:
+                              //             12), // Padding inside the TextField
+                              //     hintText: _productDetails,
+                              //   ),
+                              // ),
                               SizedBox(height: 10),
                               Text(
-                                'Products',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                              TextField(
-                                controller:
-                                    _productsController, // Assigning controller
-                                readOnly: true,
-                                decoration: InputDecoration(
-                                  border:
-                                      OutlineInputBorder(), // Apply border to the TextField
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal:
-                                          12), // Padding inside the TextField
-                                  hintText: _productDetails,
-                                ),
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                'SKU Code',
+                                '4-Pack Barcode',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16),
                               ),
@@ -2090,7 +1775,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                                   side: BorderSide(
                                     width: 2.0,
                                     color: _statusSelected == 'Carried'
-                                        ? Colors.grey
+                                        ? Color.fromARGB(210, 46, 0, 77)!
                                         : Colors.blueGrey.shade200,
                                   ),
                                   shape: RoundedRectangleBorder(
@@ -2115,7 +1800,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                                   side: BorderSide(
                                     width: 2.0,
                                     color: _statusSelected == 'Not Carried'
-                                        ? Colors.grey
+                                        ? Color.fromARGB(210, 46, 0, 77)!
                                         : Colors.blueGrey.shade200,
                                   ),
                                   shape: RoundedRectangleBorder(
@@ -2140,7 +1825,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                                   side: BorderSide(
                                     width: 2.0,
                                     color: _statusSelected == 'Delisted'
-                                        ? Colors.grey
+                                        ? Color.fromARGB(210, 46, 0, 77)!
                                         : Colors.blueGrey.shade200,
                                   ),
                                   shape: RoundedRectangleBorder(
@@ -2371,8 +2056,9 @@ class _SKUInventoryState extends State<SKUInventory> {
                             child: OutlinedButton(
                               onPressed: _addExpiryField,
                               style: OutlinedButton.styleFrom(
-                                side:
-                                    BorderSide(width: 2.0, color: Colors.grey),
+                                side: BorderSide(
+                                    width: 2.0,
+                                    color: Color.fromARGB(210, 46, 0, 77)!),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
@@ -2489,7 +2175,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                               // Reset the remarks and reason when OOS changes
                               _remarksOOS = null;
                               _selectedNoDeliveryOption = null;
-                              _reasonOOS = null;
+                              //_reasonOOS = null;
 
                               // Hide the No Delivery dropdown if OOS Days is 0
                               if (_selectedNumberOfDaysOOS == 0) {
@@ -2515,103 +2201,43 @@ class _SKUInventoryState extends State<SKUInventory> {
                         Text(
                           'Remarks',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                         SizedBox(height: 10),
-                        DropdownButtonFormField<String>(
-                          decoration: _statusSelected == 'Carried'
-                              ? InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  contentPadding:
-                                      EdgeInsets.symmetric(horizontal: 12),
-                                  labelStyle: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                )
-                              : null, // No border or padding when status is not 'Carried'
-                          value: _remarksOOS, // Ensure the value is not null
-                          onChanged: (newValue) {
+                        TextFormField(
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 12),
+                            labelText:
+                                'Enter Remarks', // You can customize the label if needed
+                            labelStyle: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          onChanged: (value) {
                             setState(() {
-                              _remarksOOS = newValue;
+                              _remarksOOS = value;
 
-                              // Show or hide the Select Reason dropdown based on the Remarks selection
+                              // Show or hide the Select Reason dropdown based on the Remarks input
                               if (_remarksOOS == 'No Delivery' &&
                                   _selectedNumberOfDaysOOS! > 0) {
                                 _showNoDeliveryDropdown = true;
                               } else {
                                 _showNoDeliveryDropdown = false;
                                 _selectedNoDeliveryOption = null;
-                                _reasonOOS = null;
                               }
 
                               // Check if Save button should be enabled
                               checkSaveEnabled();
                             });
                           },
-                          items: [
-                            DropdownMenuItem<String>(
-                              value: 'No P.O',
-                              child: Text('No P.O'),
-                            ),
-                            DropdownMenuItem<String>(
-                              value: 'Unserved',
-                              child: Text('Unserved'),
-                            ),
-                            DropdownMenuItem<String>(
-                              value: 'No Delivery',
-                              child: Text('No Delivery'),
-                            ),
-                          ],
                         ),
                       ],
-                      SizedBox(height: 10),
-// Conditionally display the Reason dropdown if OOS days is greater than 0 and No Delivery is selected
-                      if (_showNoDeliveryDropdown &&
-                          _selectedNumberOfDaysOOS! > 0) ...[
-                        Text(
-                          'Reason',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                        SizedBox(height: 10),
-                        DropdownButtonFormField<String>(
-                          decoration: _statusSelected == 'Carried'
-                              ? InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  contentPadding:
-                                      EdgeInsets.symmetric(horizontal: 12),
-                                  labelStyle: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                )
-                              : null, // No border or padding when status is not 'Carried'
-                          value: _selectedNoDeliveryOption,
-                          onChanged: (newValue) {
-                            setState(() {
-                              _selectedNoDeliveryOption = newValue;
-                              _reasonOOS =
-                                  newValue; // Set the ReasonOOS value based on selection
-                              checkSaveEnabled(); // Check if Save button should be enabled
-                            });
-                          },
-                          items: [
-                            DropdownMenuItem<String>(
-                              value: 'With S.O but without P.O',
-                              child: Text('With S.O but without P.O'),
-                            ),
-                            DropdownMenuItem<String>(
-                              value: 'With P.O but without Delivery',
-                              child: Text('With P.O but without Delivery'),
-                            ),
-                            DropdownMenuItem<String>(
-                              value: 'AR ISSUES',
-                              child: Text('AR ISSUES'),
-                            ),
-                          ],
-                        ),
-                      ],
+
                       SizedBox(height: 20),
                       if (_showCarriedTextField ||
                           _showNotCarriedTextField ||
@@ -3075,23 +2701,6 @@ class _SKUInventoryState extends State<SKUInventory> {
                                                       ],
                                                     ),
                                                   ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: 'Reason OOS: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text:
-                                                                '$_reasonOOS'),
-                                                      ],
-                                                    ),
-                                                  ),
                                                 ],
                                               ),
                                             ),
@@ -3157,9 +2766,11 @@ class _SKUInventoryState extends State<SKUInventory> {
                                 minimumSize: MaterialStateProperty.all<Size>(
                                   const Size(150, 50),
                                 ),
-                                backgroundColor: MaterialStateProperty.all<
-                                        Color>(
-                                    _isSaveEnabled ? Colors.grey : Colors.grey),
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        _isSaveEnabled
+                                            ? Color.fromARGB(210, 46, 0, 77)
+                                            : Colors.grey),
                               ),
                               child: const Text(
                                 'Save',
@@ -3285,7 +2896,7 @@ class _ExpiryFieldState extends State<ExpiryField> {
           decoration: InputDecoration(
             contentPadding: EdgeInsets.symmetric(horizontal: 12),
             border: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
+              borderSide: BorderSide(color: Color.fromARGB(210, 46, 0, 77)!),
               borderRadius: BorderRadius.circular(8.0),
             ),
           ),

@@ -60,9 +60,9 @@ class _SignUpState extends State<SignUp> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Colors.grey[600]!,
-                      Colors.grey[800]!,
-                      Colors.grey[900]!,
+                      Color.fromARGB(210, 46, 0, 77)!,
+                      Color.fromARGB(210, 88, 12, 139)!,
+                      Color.fromARGB(255, 255, 196, 0)!,
                     ],
                   ),
                   borderRadius: BorderRadius.circular(30),
