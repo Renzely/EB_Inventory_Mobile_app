@@ -234,10 +234,10 @@ class _AddInventoryState extends State<AddInventory> {
             debugShowCheckedModeBanner: false,
             home: Scaffold(
               appBar: AppBar(
-                backgroundColor: Color.fromARGB(210, 46, 0, 77),
+                backgroundColor: Color.fromARGB(255, 26, 20, 71),
                 elevation: 0,
                 title: Text(
-                  'Inventory Input',
+                  'INVENTORY',
                   style: TextStyle(
                       color: Colors.white, fontWeight: FontWeight.bold),
                 ),
@@ -254,7 +254,7 @@ class _AddInventoryState extends State<AddInventory> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Date',
+                              'DATE',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -297,7 +297,7 @@ class _AddInventoryState extends State<AddInventory> {
                             // ),
                             SizedBox(height: 16),
                             Text(
-                              'Merchandiser',
+                              'MERCHANDISER',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16),
                             ),
@@ -314,7 +314,7 @@ class _AddInventoryState extends State<AddInventory> {
                             ),
                             SizedBox(height: 16),
                             Text(
-                              'Branch/Outlet',
+                              'OUTLET',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16),
                             ),
@@ -388,11 +388,7 @@ class _AddInventoryState extends State<AddInventory> {
                             if (_selectedAccount != null) ...[
                               SizedBox(height: 16),
                               Text(
-                                'Additional Information',
-                              ),
-                              SizedBox(height: 8),
-                              Text(
-                                'Weeks Covered',
+                                'WEEKS COVERED',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16),
                               ),
@@ -538,7 +534,7 @@ class _AddInventoryState extends State<AddInventory> {
                               ),
                               if (_showAdditionalInfo) ...[
                                 SizedBox(height: 16),
-                                Text('Month',
+                                Text('MONTH',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -554,9 +550,9 @@ class _AddInventoryState extends State<AddInventory> {
                                   controller: _monthController,
                                   readOnly: true,
                                 ),
-                                SizedBox(height: 8),
+                                SizedBox(height: 16),
                                 Text(
-                                  'Week',
+                                  'WEEK',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16),
@@ -573,7 +569,7 @@ class _AddInventoryState extends State<AddInventory> {
                                 ),
                               ],
                             ],
-                            SizedBox(height: 20),
+                            SizedBox(height: 25),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
@@ -605,7 +601,7 @@ class _AddInventoryState extends State<AddInventory> {
                                       ),
                                       backgroundColor:
                                           MaterialStateProperty.all<Color>(
-                                        Color.fromARGB(210, 46, 0, 77)!,
+                                        Color.fromARGB(255, 26, 20, 71),
                                       )),
                                   child: const Text(
                                     'Cancel',
@@ -656,7 +652,7 @@ class _AddInventoryState extends State<AddInventory> {
                                     ),
                                     backgroundColor: _isSaveEnabled
                                         ? MaterialStateProperty.all<Color>(
-                                            Color.fromARGB(210, 46, 0, 77))
+                                            Color.fromARGB(255, 26, 20, 71))
                                         : MaterialStateProperty.all<Color>(
                                             Colors.grey),
                                   ),
@@ -1482,10 +1478,10 @@ class _SKUInventoryState extends State<SKUInventory> {
             debugShowCheckedModeBanner: false,
             home: Scaffold(
               appBar: AppBar(
-                  backgroundColor: Color.fromARGB(210, 46, 0, 77)!,
+                  backgroundColor: Color.fromARGB(255, 26, 20, 71),
                   elevation: 0,
                   title: Text(
-                    'Inventory Input',
+                    'INVENTORY',
                     style: TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold),
                   ),
@@ -1515,7 +1511,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                     children: <Widget>[
                       SizedBox(height: 10),
                       Text(
-                        'Input ID',
+                        'INVENTORY NUMBER',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
@@ -1531,7 +1527,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Week Number',
+                        'WEEK NUMBER',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
@@ -1546,7 +1542,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Month',
+                        'MONTH',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
@@ -1561,7 +1557,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Branch/Outlet',
+                        'OUTLET',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
@@ -1575,11 +1571,11 @@ class _SKUInventoryState extends State<SKUInventory> {
                         ),
                       ),
                       SizedBox(height: 20),
-                      Text(
-                        'Category',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
+                      // Text(
+                      //   'Category',
+                      //   style: TextStyle(
+                      //       fontWeight: FontWeight.bold, fontSize: 16),
+                      // ),
                       SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1594,68 +1590,18 @@ class _SKUInventoryState extends State<SKUInventory> {
                                 side: BorderSide(
                                     width: 2.0,
                                     color: _versionSelected == 'Variant'
-                                        ? Color.fromARGB(210, 46, 0, 77)!
+                                        ? Color.fromARGB(255, 26, 20, 71)
                                         : Colors.blueGrey.shade200),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
                               child: Text(
-                                'Variant',
+                                'VARIANT',
                                 style: TextStyle(color: Colors.black),
                               ),
                             ),
                           ),
-                          SizedBox(
-                              width:
-                                  8), // Add spacing between buttons if needed
-                          // Expanded(
-                          //   child: OutlinedButton(
-                          //     onPressed: _versionSelected == 'V2' ||
-                          //             _versionSelected == null
-                          //         ? () => _toggleDropdown('V2')
-                          //         : null,
-                          //     style: OutlinedButton.styleFrom(
-                          //       side: BorderSide(
-                          //           width: 2.0,
-                          //           color: _versionSelected == 'V2'
-                          //               ? Colors.grey
-                          //               : Colors.blueGrey.shade200),
-                          //       shape: RoundedRectangleBorder(
-                          //         borderRadius: BorderRadius.circular(4),
-                          //       ),
-                          //     ),
-                          //     child: Text(
-                          //       'V2',
-                          //       style: TextStyle(color: Colors.black),
-                          //     ),
-                          //   ),
-                          // ),
-                          // SizedBox(
-                          //     width:
-                          //         8), // Add spacing between buttons if needed
-                          // Expanded(
-                          //   child: OutlinedButton(
-                          //     onPressed: _versionSelected == 'V3' ||
-                          //             _versionSelected == null
-                          //         ? () => _toggleDropdown('V3')
-                          //         : null,
-                          //     style: OutlinedButton.styleFrom(
-                          //       side: BorderSide(
-                          //           width: 2.0,
-                          //           color: _versionSelected == 'V3'
-                          //               ? Colors.grey
-                          //               : Colors.blueGrey.shade200),
-                          //       shape: RoundedRectangleBorder(
-                          //         borderRadius: BorderRadius.circular(4),
-                          //       ),
-                          //     ),
-                          //     child: Text(
-                          //       'V3',
-                          //       style: TextStyle(color: Colors.black),
-                          //     ),
-                          //   ),
-                          // ),
                         ],
                       ),
                       SizedBox(height: 20),
@@ -1717,28 +1663,9 @@ class _SKUInventoryState extends State<SKUInventory> {
                               ),
                             ),
                             if (_productDetails != null) ...[
-                              // SizedBox(height: 10),
-                              // Text(
-                              //   'Products',
-                              //   style: TextStyle(
-                              //       fontWeight: FontWeight.bold, fontSize: 16),
-                              // ),
-                              // TextField(
-                              //   controller:
-                              //       _productsController, // Assigning controller
-                              //   readOnly: true,
-                              //   decoration: InputDecoration(
-                              //     border:
-                              //         OutlineInputBorder(), // Apply border to the TextField
-                              //     contentPadding: EdgeInsets.symmetric(
-                              //         horizontal:
-                              //             12), // Padding inside the TextField
-                              //     hintText: _productDetails,
-                              //   ),
-                              // ),
-                              SizedBox(height: 10),
+                              SizedBox(height: 20),
                               Text(
-                                '4-Pack Barcode',
+                                '4-PACK BARCODE',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16),
                               ),
@@ -1775,7 +1702,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                                   side: BorderSide(
                                     width: 2.0,
                                     color: _statusSelected == 'Carried'
-                                        ? Color.fromARGB(210, 46, 0, 77)!
+                                        ? Color.fromARGB(255, 26, 20, 71)
                                         : Colors.blueGrey.shade200,
                                   ),
                                   shape: RoundedRectangleBorder(
@@ -1800,7 +1727,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                                   side: BorderSide(
                                     width: 2.0,
                                     color: _statusSelected == 'Not Carried'
-                                        ? Color.fromARGB(210, 46, 0, 77)!
+                                        ? Color.fromARGB(255, 26, 20, 71)
                                         : Colors.blueGrey.shade200,
                                   ),
                                   shape: RoundedRectangleBorder(
@@ -1825,7 +1752,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                                   side: BorderSide(
                                     width: 2.0,
                                     color: _statusSelected == 'Delisted'
-                                        ? Color.fromARGB(210, 46, 0, 77)!
+                                        ? Color.fromARGB(255, 26, 20, 71)
                                         : Colors.blueGrey.shade200,
                                   ),
                                   shape: RoundedRectangleBorder(
@@ -1844,7 +1771,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       // Conditionally showing the 'Beginning' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'Beginning PCS (Selling Area)',
+                          'BEGINNING (Selling Area)',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -1875,7 +1802,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       // Conditionally showing the 'BeginningWA' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'Beginning PCS (Warehouse Area)',
+                          'BEGINNING (Warehouse Area)',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -1905,7 +1832,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       SizedBox(height: 15),
                       if (_showCarriedTextField) ...[
                         Text(
-                          'Ending PCS (Selling Area)',
+                          'ENDING (Selling Area)',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -1936,7 +1863,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       // Conditionally showing the 'BeginningWA' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'Ending PCS (Warehouse Area)',
+                          'ENDING (Warehouse Area)',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -1967,7 +1894,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       // Conditionally showing the 'Beginning' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'Beginning',
+                          'TOTAL BEGINNING',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -1996,7 +1923,7 @@ class _SKUInventoryState extends State<SKUInventory> {
 // Conditionally showing the 'Delivery' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'Delivery PCS',
+                          'DELIVERY',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -2023,7 +1950,7 @@ class _SKUInventoryState extends State<SKUInventory> {
 // Conditionally showing the 'Ending' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'Ending',
+                          'TOTAL ENDING',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -2058,7 +1985,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(
                                     width: 2.0,
-                                    color: Color.fromARGB(210, 46, 0, 77)!),
+                                    color: Color.fromARGB(255, 26, 20, 71)),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
@@ -2096,7 +2023,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       SizedBox(height: 16),
                       if (_showCarriedTextField) ...[
                         Text(
-                          'Offtake',
+                          'OFFTAKE',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -2123,7 +2050,7 @@ class _SKUInventoryState extends State<SKUInventory> {
 // Conditionally showing the 'Inventory Days Level' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'Inventory Days Level',
+                          'INVETORY DAYS LEVEL',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -2199,7 +2126,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       if (_selectedNumberOfDaysOOS != null &&
                           _selectedNumberOfDaysOOS! > 0) ...[
                         Text(
-                          'Remarks',
+                          'REMARKS',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -2769,7 +2696,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                                 backgroundColor:
                                     MaterialStateProperty.all<Color>(
                                         _isSaveEnabled
-                                            ? Color.fromARGB(210, 46, 0, 77)
+                                            ? Color.fromARGB(255, 26, 20, 71)
                                             : Colors.grey),
                               ),
                               child: const Text(

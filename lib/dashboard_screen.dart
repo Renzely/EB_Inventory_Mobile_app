@@ -161,9 +161,10 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
     await _initializeAttendanceStatus();
   }
 
-  Future<Map<String, dynamic>?> _loadAttendanceLocally(String branch) async {
+  Future<Map<String, dynamic>?> _loadAttendanceLocally(
+      String accountNameBranchManning) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String key = '${widget.userEmail}_${branch}';
+    String key = '${widget.userEmail}_${accountNameBranchManning}';
     String? storedData = prefs.getString(key);
     if (storedData != null) {
       return jsonDecode(storedData);
@@ -194,7 +195,6 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
         Provider.of<AttendanceModel>(context, listen: false);
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    // Get the current branch
     String? currentBranch = _selectedAccount;
 
     if (currentBranch == null) {
@@ -202,66 +202,48 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
       return;
     }
 
-    // Check if we have local data for this branch
     Map<String, dynamic>? localData = _attendanceData[currentBranch];
 
     if (localData != null && localData.isNotEmpty) {
-      // Use local data if available and not empty
       _updateUIFromLocalData(localData);
     } else {
-      // Fetch data from MongoDB
       var attendanceStatus = await MongoDatabase.getAttendanceStatus(
-        widget.userEmail,
-        currentBranch,
-      );
+          widget.userEmail, _selectedAccount);
 
       if (attendanceStatus != null && attendanceStatus.isNotEmpty) {
-        // Find logs for the current branch
-        List<dynamic> rawLogs = attendanceStatus['timeLogs'];
+        if (attendanceStatus['accountNameBranchManning'] == currentBranch) {
+          List<dynamic> rawLogs = attendanceStatus['timeLogs'];
 
-        // Convert List<dynamic> to List<Map<String, dynamic>>
-        List<Map<String, dynamic>> branchLogs = rawLogs
-            .where((log) =>
-                log is Map<String, dynamic> &&
-                log['accountNameBranchManning'] == currentBranch)
-            .cast<Map<String, dynamic>>()
-            .toList();
+          Map<String, dynamic>? latestLog;
+          if (rawLogs.isNotEmpty) {
+            latestLog = rawLogs.reduce((a, b) =>
+                DateTime.parse(a['timeIn']).isAfter(DateTime.parse(b['timeIn']))
+                    ? a
+                    : b);
+          }
 
-        Map<String, dynamic>? latestLog;
+          if (latestLog != null) {
+            Map<String, dynamic> attendanceData = {
+              'timeIn': latestLog['timeIn'],
+              'timeOut': latestLog['timeOut'],
+              'timeInLocation': latestLog['timeInLocation'],
+              'timeOutLocation': latestLog['timeOutLocation'],
+              'accountNameBranchManning':
+                  attendanceStatus['accountNameBranchManning'],
+              'isTimeInRecorded': latestLog['timeIn'] != null,
+              'isTimeOutRecorded': latestLog['timeOut'] != null,
+            };
 
-        if (branchLogs.isNotEmpty) {
-          // Sort logs by timeIn and get the latest one
-          latestLog = branchLogs.reduce((a, b) =>
-              DateTime.parse(a['timeIn']).isAfter(DateTime.parse(b['timeIn']))
-                  ? a
-                  : b);
-        }
-
-        if (latestLog != null) {
-          // Prepare the data for the attendance model
-          Map<String, dynamic> attendanceData = {
-            'timeIn': latestLog['timeIn'],
-            'timeOut': latestLog['timeOut'],
-            'timeInLocation': latestLog['timeInLocation'],
-            'timeOutLocation': latestLog['timeOutLocation'],
-            'isTimeInRecorded': latestLog['timeIn'] !=
-                null, // Now correctly reflects time-in status
-            'isTimeOutRecorded': latestLog['timeOut'] !=
-                null, // Now correctly reflects time-out status
-          };
-
-          // Update the UI
-          _updateUIFromServerData(attendanceData);
-
-          // Store the data locally
-          _attendanceData[currentBranch] = attendanceData;
-          _saveAttendanceLocally(currentBranch, attendanceData);
+            _updateUIFromServerData(attendanceData);
+            _attendanceData[currentBranch] = attendanceData;
+            _saveAttendanceLocally(currentBranch, attendanceData);
+          } else {
+            _updateUIForNoAttendance();
+          }
         } else {
-          // No attendance recorded for this branch
           _updateUIForNoAttendance();
         }
       } else {
-        // No attendance records found
         _updateUIForNoAttendance();
       }
     }
@@ -290,7 +272,6 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
     final attendanceModel =
         Provider.of<AttendanceModel>(context, listen: false);
 
-    // Use null-aware operators and provide default values
     attendanceModel.updateTimeIn(serverData['timeIn'] ?? 'Not recorded');
     attendanceModel.updateTimeOut(serverData['timeOut'] ?? 'Not recorded');
     attendanceModel
@@ -298,7 +279,7 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
     attendanceModel
         .setIsTimeOutRecorded(serverData['isTimeOutRecorded'] ?? false);
 
-    if (_selectedAccount != null) {
+    if (_selectedAccount != null && serverData.isNotEmpty) {
       _attendanceData[_selectedAccount] = serverData;
       _saveAttendanceLocally(_selectedAccount, serverData);
     }
@@ -556,36 +537,33 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
                       value: branch,
                       child: Container(
                         padding: const EdgeInsets.all(1),
-                        color: Colors.white, // Background color for each item
                         child: Row(
                           children: [
                             Icon(Icons.storefront_outlined,
-                                color: Color.fromARGB(
-                                    210, 46, 0, 77)), // Prefix icon
+                                color: Color.fromARGB(255, 26, 20, 71)),
                             SizedBox(width: 8),
-                            Text(branch,
-                                style: TextStyle(
-                                    color: Colors.black)), // Text color
+                            Text(branch, style: TextStyle(color: Colors.black)),
                           ],
                         ),
                       ),
                     );
                   }).toList(),
-                  onChanged: (value) => _onBranchChanged(value!),
+                  onChanged: attendanceModel.isTimeInRecorded &&
+                          !attendanceModel.isTimeOutRecorded
+                      ? null // Disable if user is clocked in
+                      : (value) => _onBranchChanged(value!),
                   decoration: InputDecoration(
                     hintText: 'Select Branch',
-                    hintStyle: TextStyle(color: Colors.grey), // Hint text color
+                    hintStyle: TextStyle(color: Colors.grey),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5),
-                      borderSide: BorderSide(
-                          color:
-                              Color.fromARGB(210, 46, 0, 77)), // Border color
+                      borderSide:
+                          BorderSide(color: Color.fromARGB(255, 26, 20, 71)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5),
                       borderSide: BorderSide(
-                          color: Color.fromARGB(210, 46, 0, 77),
-                          width: 2), // Focused border color
+                          color: Color.fromARGB(255, 26, 20, 71), width: 2),
                     ),
                     contentPadding: EdgeInsets.symmetric(horizontal: 12),
                   ),
@@ -595,110 +573,171 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
                     }
                     return null;
                   },
-                ),
-                SizedBox(height: 5),
-                Text(
-                  "TIME IN",
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 15),
-                ElevatedButton(
-                  onPressed:
-                      !attendanceModel.isTimeInRecorded && !_isTimeInLoading
-                          ? () => _confirmAndRecordTimeIn(context)
-                          : null,
-                  style: ButtonStyle(
-                    padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                      const EdgeInsets.symmetric(vertical: 30),
-                    ),
-                    minimumSize: MaterialStateProperty.all<Size>(
-                      const Size(150, 50),
-                    ),
-                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (states) {
-                        if (!attendanceModel.isTimeInRecorded) {
-                          return Color.fromARGB(144, 78, 0, 129);
-                        } else {
-                          return Colors.grey;
-                        }
-                      },
-                    ),
-                  ),
-                  child: _isTimeInLoading
-                      ? CircularProgressIndicator(
-                          color: Colors.white,
-                        )
-                      : const Text(
-                          "Time In",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                        ),
-                ),
-                SizedBox(height: 30),
-                Text(
-                  "Time In: ${_formatTime(attendanceModel.timeIn)}",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                ),
-                Text(
-                  "Location: $timeInLocation",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
-                ),
-                SizedBox(height: 40),
-                Text(
-                  "TIME OUT",
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 15),
-                ElevatedButton(
-                  onPressed: attendanceModel.isTimeInRecorded &&
-                          !attendanceModel.isTimeOutRecorded &&
-                          !_isTimeOutLoading
-                      ? () => _confirmAndRecordTimeOut(context)
-                      : null,
-                  style: ButtonStyle(
-                    padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                      const EdgeInsets.symmetric(vertical: 30),
-                    ),
-                    minimumSize: MaterialStateProperty.all<Size>(
-                      const Size(150, 50),
-                    ),
-                    backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                      (states) {
-                        if (attendanceModel.isTimeInRecorded &&
-                            !attendanceModel.isTimeOutRecorded) {
-                          return Colors.red;
-                        } else {
-                          return Colors.grey;
-                        }
-                      },
-                    ),
-                  ),
-                  child: _isTimeOutLoading
-                      ? CircularProgressIndicator(
-                          color: Colors.white,
-                        )
-                      : const Text(
-                          "Time Out",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                          ),
-                        ),
-                ),
-                SizedBox(height: 15),
-                Text(
-                  "Time Out: ${_formatTime(attendanceModel.timeOut)}",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                ),
-                Text(
-                  "Location: $timeOutLocation",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 10),
+                  disabledHint: Text(_selectedAccount ?? 'Select Branch',
+                      style: TextStyle(color: Colors.grey)),
                 ),
                 SizedBox(height: 20),
+
+                // Time In Container
+                Container(
+                  padding: EdgeInsets.all(25),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(35),
+                        topRight: Radius.circular(35),
+                        bottomLeft: Radius.circular(35),
+                        bottomRight: Radius.circular(35)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color.fromARGB(255, 26, 20, 71)
+                            .withOpacity(0.8), // Adjust the opacity if needed
+                        blurRadius: 20,
+                        offset: Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "TIME IN",
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 15),
+                      ElevatedButton(
+                        onPressed: !attendanceModel.isTimeInRecorded &&
+                                !_isTimeInLoading
+                            ? () => _confirmAndRecordTimeIn(context)
+                            : null,
+                        style: ButtonStyle(
+                          padding:
+                              MaterialStateProperty.all<EdgeInsetsGeometry>(
+                            const EdgeInsets.symmetric(vertical: 30),
+                          ),
+                          minimumSize: MaterialStateProperty.all<Size>(
+                            const Size(150, 50),
+                          ),
+                          backgroundColor:
+                              MaterialStateProperty.resolveWith<Color>(
+                            (states) {
+                              if (!attendanceModel.isTimeInRecorded) {
+                                return Color.fromARGB(255, 26, 20, 71);
+                              } else {
+                                return Colors.grey;
+                              }
+                            },
+                          ),
+                        ),
+                        child: _isTimeInLoading
+                            ? CircularProgressIndicator(color: Colors.white)
+                            : const Text(
+                                "Time In",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                      ),
+                      SizedBox(height: 15),
+                      Text(
+                        "Time In: ${_formatTime(attendanceModel.timeIn)}",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                      Text(
+                        "Location: $timeInLocation",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 10),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 20),
+
+                // Time Out Container
+                Container(
+                  padding: EdgeInsets.all(25),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(35),
+                        topRight: Radius.circular(35),
+                        bottomLeft: Radius.circular(35),
+                        bottomRight: Radius.circular(35)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color.fromARGB(255, 26, 20, 71)
+                            .withOpacity(0.8), // Adjust the opacity if needed
+                        blurRadius: 20,
+                        offset: Offset(0, 10),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "TIME OUT",
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 15),
+                      ElevatedButton(
+                        onPressed: attendanceModel.isTimeInRecorded &&
+                                !attendanceModel.isTimeOutRecorded &&
+                                !_isTimeOutLoading
+                            ? () => _confirmAndRecordTimeOut(context)
+                            : null,
+                        style: ButtonStyle(
+                          padding:
+                              MaterialStateProperty.all<EdgeInsetsGeometry>(
+                            const EdgeInsets.symmetric(vertical: 30),
+                          ),
+                          minimumSize: MaterialStateProperty.all<Size>(
+                            const Size(150, 50),
+                          ),
+                          backgroundColor:
+                              MaterialStateProperty.resolveWith<Color>(
+                            (states) {
+                              if (attendanceModel.isTimeInRecorded &&
+                                  !attendanceModel.isTimeOutRecorded) {
+                                return Colors.red;
+                              } else {
+                                return Colors.grey;
+                              }
+                            },
+                          ),
+                        ),
+                        child: _isTimeOutLoading
+                            ? CircularProgressIndicator(color: Colors.white)
+                            : const Text(
+                                "Time Out",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                      ),
+                      SizedBox(height: 15),
+                      Text(
+                        "Time Out: ${_formatTime(attendanceModel.timeOut)}",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                      Text(
+                        "Location: $timeOutLocation",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 10),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(height: 20),
+
                 if (attendanceModel.timeIn == null ||
                     attendanceModel.timeOut == null ||
                     _formatTime(attendanceModel.timeIn) == null ||
@@ -886,7 +925,7 @@ class _InventoryState extends State<Inventory> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(
                       child: CircularProgressIndicator(
-                        color: Colors.grey,
+                        color: Color.fromARGB(255, 26, 20, 71),
                         backgroundColor: Colors.transparent,
                       ),
                     );
@@ -992,7 +1031,16 @@ class _InventoryState extends State<Inventory> {
                                           children: [
                                             Text(item.week),
                                             IconButton(
-                                              icon: Icon(Icons.edit),
+                                              icon: Icon(
+                                                Icons.edit_document,
+                                                color: item.status ==
+                                                            'Carried' &&
+                                                        !isEditing
+                                                    ? Color.fromARGB(255, 26,
+                                                        20, 71) // Enabled color
+                                                    : Colors
+                                                        .grey, // Disabled color (grey)
+                                              ),
                                               onPressed: item.status ==
                                                           'Carried' &&
                                                       !isEditing
@@ -1002,7 +1050,7 @@ class _InventoryState extends State<Inventory> {
                                                           widget.userEmail,
                                                           false); // Start editing
                                                       bool hasSavedChanges =
-                                                          false; // Track if changes are saved
+                                                          true; // Track if changes are saved
 
                                                       await Navigator.push(
                                                         context,
@@ -1697,7 +1745,7 @@ class _InventoryState extends State<Inventory> {
               Icons.assignment_add,
               color: Colors.white,
             ),
-            backgroundColor: Color.fromARGB(210, 46, 0, 77)!,
+            backgroundColor: Color.fromARGB(255, 26, 20, 71),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         ));
@@ -1753,13 +1801,19 @@ class _RTVState extends State<RTV> {
       List<ReturnToVendor> rtvItems =
           results.map((data) => ReturnToVendor.fromJson(data)).toList();
 
+// Inside your _fetchRTVData method:
       rtvItems.sort((a, b) {
-        if (_sortByLatest) {
-          return b.date.compareTo(a.date); // Sort by latest to oldest
+        int dateComparison = b.date.compareTo(a.date);
+
+        if (dateComparison != 0) {
+          return dateComparison; // Sort by latest to oldest date
         } else {
-          return a.date.compareTo(b.date); // Sort by oldest to latest
+          // If dates are the same, sort by the timestamp of ObjectId
+          return b.id.dateTime.compareTo(a.id
+              .dateTime); // Extracts DateTime from ObjectId for secondary sorting
         }
       });
+
       return rtvItems;
     } catch (e) {
       print('Error fetching RTV data: $e');
@@ -1784,7 +1838,7 @@ class _RTVState extends State<RTV> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(
                           child: CircularProgressIndicator(
-                        color: Colors.grey,
+                        color: Color.fromARGB(255, 26, 20, 71),
                         backgroundColor: Colors.transparent,
                       ));
                     } else if (snapshot.hasError) {
@@ -1808,10 +1862,6 @@ class _RTVState extends State<RTV> {
                             itemCount: rtvItems.length,
                             itemBuilder: (context, index) {
                               ReturnToVendor item = rtvItems[index];
-                              bool isEditable = item.quantity == "Pending" &&
-                                  item.driverName == "Pending" &&
-                                  item.plateNumber == "Pending" &&
-                                  item.pullOutReason == "Pending";
 
                               return ListTile(
                                   title: Row(
@@ -1824,25 +1874,25 @@ class _RTVState extends State<RTV> {
                                             fontWeight: FontWeight.bold,
                                             color: Colors.black),
                                       ),
-                                      isEditable
-                                          ? IconButton(
-                                              icon: Icon(Icons.edit,
-                                                  color: Colors.black),
-                                              onPressed: () {
-                                                Navigator.of(context).push(
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        EditRTVScreen(
-                                                            item: item),
-                                                  ),
-                                                );
-                                              },
-                                            )
-                                          : IconButton(
-                                              icon: Icon(Icons.edit,
-                                                  color: Colors.grey),
-                                              onPressed: null,
-                                            ),
+                                      // isEditable
+                                      //     ? IconButton(
+                                      //         icon: Icon(Icons.edit_document,
+                                      //             color: Colors.black),
+                                      //         onPressed: () {
+                                      //           Navigator.of(context).push(
+                                      //             MaterialPageRoute(
+                                      //               builder: (context) =>
+                                      //                   EditRTVScreen(
+                                      //                       item: item),
+                                      //             ),
+                                      //           );
+                                      //         },
+                                      //       )
+                                      //     : IconButton(
+                                      //         icon: Icon(Icons.edit_document,
+                                      //             color: Colors.grey),
+                                      //         onPressed: null,
+                                      //       ),
                                     ],
                                   ),
                                   subtitle: Container(
@@ -1946,6 +1996,48 @@ class _RTVState extends State<RTV> {
                                           text: TextSpan(
                                             children: [
                                               TextSpan(
+                                                text: 'EXPIRY DATE: ',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: item.expiryDate,
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.normal,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(height: 10),
+                                        RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text: 'Amount: ',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                              TextSpan(
+                                                text: item.amount.toString(),
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.normal,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(height: 10),
+                                        RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
                                                 text: 'Quantity: ',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
@@ -1953,7 +2045,7 @@ class _RTVState extends State<RTV> {
                                                 ),
                                               ),
                                               TextSpan(
-                                                text: item.quantity,
+                                                text: item.quantity.toString(),
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.normal,
                                                   color: Colors.black,
@@ -1967,14 +2059,14 @@ class _RTVState extends State<RTV> {
                                           text: TextSpan(
                                             children: [
                                               TextSpan(
-                                                text: 'Driver\'s Name: ',
+                                                text: 'Total: ',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.black,
                                                 ),
                                               ),
                                               TextSpan(
-                                                text: item.driverName,
+                                                text: item.total.toString(),
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.normal,
                                                   color: Colors.black,
@@ -1988,14 +2080,14 @@ class _RTVState extends State<RTV> {
                                           text: TextSpan(
                                             children: [
                                               TextSpan(
-                                                text: 'Plate Number: ',
+                                                text: 'Reason: ',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.black,
                                                 ),
                                               ),
                                               TextSpan(
-                                                text: item.plateNumber,
+                                                text: item.reason,
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.normal,
                                                   color: Colors.black,
@@ -2009,14 +2101,14 @@ class _RTVState extends State<RTV> {
                                           text: TextSpan(
                                             children: [
                                               TextSpan(
-                                                text: 'Pull Out Reason: ',
+                                                text: 'Remarks: ',
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.black,
                                                 ),
                                               ),
                                               TextSpan(
-                                                text: item.pullOutReason,
+                                                text: item.remarks,
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.normal,
                                                   color: Colors.black,
@@ -2084,7 +2176,7 @@ class _RTVState extends State<RTV> {
               Icons.assignment_add,
               color: Colors.white,
             ),
-            backgroundColor: Color.fromARGB(210, 46, 0, 77),
+            backgroundColor: Color.fromARGB(255, 26, 20, 71),
           ),
           floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         ));
@@ -2196,7 +2288,7 @@ class Setting extends StatelessWidget {
                           _logout(context);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[900],
+                          backgroundColor: Color.fromARGB(255, 26, 20, 71),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(50),
                           ),
@@ -2335,8 +2427,8 @@ class _SideBarLayoutState extends State<SideBarLayout> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Color.fromARGB(210, 46, 0, 77)!,
-                        Color.fromARGB(210, 88, 12, 139)!,
+                        Color.fromARGB(255, 26, 20, 71),
+                        Color.fromARGB(255, 26, 20, 71),
                         Color.fromARGB(255, 255, 196, 0)!,
                       ],
                     ),
@@ -2370,8 +2462,8 @@ class _SideBarLayoutState extends State<SideBarLayout> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Color.fromARGB(210, 46, 0, 77)!,
-                            Color.fromARGB(210, 88, 12, 139)!,
+                            Color.fromARGB(255, 26, 20, 71),
+                            Color.fromARGB(255, 33, 26, 87),
                             Color.fromARGB(255, 255, 196, 0)!,
                           ],
                         ),
@@ -2380,7 +2472,7 @@ class _SideBarLayoutState extends State<SideBarLayout> {
                     ListTile(
                       leading: const Icon(
                         Icons.account_circle_outlined,
-                        color: Color.fromARGB(210, 46, 0, 77),
+                        color: Color.fromARGB(255, 26, 20, 71),
                       ),
                       title: const Text('Attendance'),
                       onTap: () {
@@ -2400,7 +2492,7 @@ class _SideBarLayoutState extends State<SideBarLayout> {
                       leading: Icon(
                         Icons.inventory_2_outlined,
                         color: Color.fromARGB(
-                            210, 46, 0, 77), // Replace with your desired color
+                            255, 26, 20, 71), // Replace with your desired color
                       ),
                       title: const Text('Inventory'),
                       onTap: () {
@@ -2419,7 +2511,7 @@ class _SideBarLayoutState extends State<SideBarLayout> {
                     ListTile(
                       leading: const Icon(
                         Icons.assignment_return_outlined,
-                        color: Color.fromARGB(210, 46, 0, 77),
+                        color: Color.fromARGB(255, 26, 20, 71),
                       ),
                       title: const Text('Return To Vendor'),
                       onTap: () {
@@ -2439,7 +2531,7 @@ class _SideBarLayoutState extends State<SideBarLayout> {
                     ListTile(
                       leading: const Icon(
                         Icons.settings_outlined,
-                        color: Color.fromARGB(210, 46, 0, 77),
+                        color: Color.fromARGB(255, 26, 20, 71),
                       ),
                       title: const Text('Settings'),
                       onTap: () {
