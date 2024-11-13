@@ -105,49 +105,49 @@ class MongoDatabase {
     }
   }
 
-  static Future<void> updateItemInDatabase(ReturnToVendor updatedItem) async {
-    if (db == null || !db!.isConnected) {
-      await connect();
-    }
+  // static Future<void> updateItemInDatabase(ReturnToVendor updatedItem) async {
+  //   if (db == null || !db!.isConnected) {
+  //     await connect();
+  //   }
 
-    final collection = db!.collection(USER_RTV);
+  //   final collection = db!.collection(USER_RTV);
 
-    final Map<String, dynamic> itemMap = updatedItem.toJson();
+  //   final Map<String, dynamic> itemMap = updatedItem.toJson();
 
-    try {
-      // Use the ObjectId to identify the document to update
-      final result = await collection.updateOne(
-        where.eq('_id', updatedItem.id),
-        modify
-            .set('inputId', updatedItem.inputId)
-            .set('userEmail', updatedItem.userEmail)
-            .set('date', updatedItem.date)
-            .set('merchandiserName', updatedItem.merchandiserName)
-            .set('outlet', updatedItem.outlet)
-            //.set('category', updatedItem.category)
-            .set('item', updatedItem.item)
-            .set('quantity', updatedItem.quantity)
-            .set('driverName', updatedItem.driverName)
-            .set('plateNumber', updatedItem.plateNumber)
-            .set('pullOutReason', updatedItem.pullOutReason),
-      );
+  //   try {
+  //     // Use the ObjectId to identify the document to update
+  //     final result = await collection.updateOne(
+  //       where.eq('_id', updatedItem.id),
+  //       modify
+  //           .set('inputId', updatedItem.inputId)
+  //           .set('userEmail', updatedItem.userEmail)
+  //           .set('date', updatedItem.date)
+  //           .set('merchandiserName', updatedItem.merchandiserName)
+  //           .set('outlet', updatedItem.outlet)
+  //           //.set('category', updatedItem.category)
+  //           .set('item', updatedItem.item)
+  //           .set('quantity', updatedItem.quantity)
+  //           .set('driverName', updatedItem.driverName)
+  //           .set('plateNumber', updatedItem.plateNumber)
+  //           .set('pullOutReason', updatedItem.pullOutReason),
+  //     );
 
-      // Check if the update was acknowledged and if any documents were matched or modified
-      if (result.isAcknowledged) {
-        if (result.writeErrors.isEmpty) {
-          print('Return to vendor updated in database');
-        } else {
-          print('Errors occurred during update: ${result.writeErrors}');
-        }
-      } else {
-        print('Update not acknowledged');
-      }
-    } catch (e) {
-      print('Error updating return to vendor: $e');
-    } finally {
-      await close();
-    }
-  }
+  //     // Check if the update was acknowledged and if any documents were matched or modified
+  //     if (result.isAcknowledged) {
+  //       if (result.writeErrors.isEmpty) {
+  //         print('Return to vendor updated in database');
+  //       } else {
+  //         print('Errors occurred during update: ${result.writeErrors}');
+  //       }
+  //     } else {
+  //       print('Update not acknowledged');
+  //     }
+  //   } catch (e) {
+  //     print('Error updating return to vendor: $e');
+  //   } finally {
+  //     await close();
+  //   }
+  // }
 
   Future<void> updateInventoryItem(InventoryItem item) async {
     try {
@@ -203,52 +203,35 @@ class MongoDatabase {
       var todayDate =
           DateTime.now().toLocal().toIso8601String().substring(0, 10);
 
-      // Check if a record already exists for today
+      // Check if there is an open timeLog entry for today in the selected branch
       var existingRecord = await timeLogCollection.findOne(
-        where.eq('userEmail', userEmail).and(where.eq('date', todayDate)),
+        where
+            .eq('userEmail', userEmail)
+            .and(where.eq('date', todayDate))
+            .and(where.eq('accountNameBranchManning', accountNameBranchManning))
+            .and(where.eq('timeLogs.timeOut', null)),
       );
 
       if (existingRecord == null) {
-        // No record exists, create a new one with a timeLogs array
+        // No open log exists for this branch today; create a new entry
         var newLog = {
           '_id': ObjectId(),
           'userEmail': userEmail,
-          'date': todayDate, // Store the date for easy retrieval
+          'date': todayDate,
+          'accountNameBranchManning': accountNameBranchManning,
           'timeLogs': [
             {
               'timeIn': DateTime.now().toIso8601String(),
               'timeOut': null,
               'timeInLocation': timeInLocation,
               'timeOutLocation': null,
-              'accountNameBranchManning':
-                  accountNameBranchManning, // Add branch inside timeLogs
             }
           ]
         };
         await timeLogCollection.insert(newLog);
         return "Success";
       } else {
-        // Record exists, check if the last log is open (timeOut is null)
-        var lastLog = existingRecord['timeLogs'].last;
-        if (lastLog['timeOut'] == null) {
-          return "Already checked in, no time out logged";
-        }
-
-        // Append a new time-in log for today, branch info inside timeLogs
-        var updates = modify.push('timeLogs', {
-          'timeIn': DateTime.now().toIso8601String(),
-          'timeOut': null,
-          'timeInLocation': timeInLocation,
-          'timeOutLocation': null,
-          'accountNameBranchManning':
-              accountNameBranchManning, // Add branch inside timeLogs
-        });
-
-        await timeLogCollection.updateOne(
-          where.eq('userEmail', userEmail).and(where.eq('date', todayDate)),
-          updates,
-        );
-        return "Success";
+        return "Already checked in today for this branch";
       }
     } catch (e) {
       print('Error logging time in: $e');
@@ -267,31 +250,28 @@ class MongoDatabase {
           DateTime.now().toLocal().toIso8601String().substring(0, 10);
       var currentTime = DateTime.now().toIso8601String();
 
-      // Perform the update for the last open time-log (timeOut is null) for today
+      // Update only the latest open time-log for the user and branch on today's date
       var updates = modify
           .set('timeLogs.\$.timeOut', currentTime)
-          .set('timeLogs.\$.timeOutLocation', timeOutLocation)
-          .set('timeLogs.\$.accountNameBranchManning',
-              accountNameBranchManning); // Add branch inside timeLogs
+          .set('timeLogs.\$.timeOutLocation', timeOutLocation);
 
       var result = await timeLogCollection.updateOne(
         where
             .eq('userEmail', userEmail)
             .and(where.eq('date', todayDate))
+            .and(where.eq('accountNameBranchManning', accountNameBranchManning))
             .and(where.eq('timeLogs.timeOut', null)),
         updates,
       );
 
       print('Update Result: $result');
 
-      if (result.isAcknowledged) {
-        if (result.nModified != null && result.nModified > 0) {
-          return "Success";
-        } else {
-          return "No open time found for today";
-        }
+      if (result.isAcknowledged &&
+          result.nModified != null &&
+          result.nModified > 0) {
+        return "Success";
       } else {
-        return "Update not acknowledged";
+        return "No open time-in found for today in this branch";
       }
     } catch (e) {
       print('Error logging time out: $e');
@@ -302,19 +282,18 @@ class MongoDatabase {
   }
 
   static Future<Map<String, dynamic>?> getAttendanceStatus(
-      String userEmail, String s) async {
+      String userEmail, String accountNameBranchManning) async {
     try {
       await connect();
       var timeLogCollection = db.collection(USER_ATTENDANCE);
       var todayDate =
           DateTime.now().toLocal().toIso8601String().substring(0, 10);
 
-      // Fetch the record for today
       var record = await timeLogCollection.findOne(
-        where.eq('userEmail', userEmail).and(where.eq('date', todayDate)),
+        where.eq('userEmail', userEmail).and(where.eq('date', todayDate)).and(
+            where.eq('accountNameBranchManning', accountNameBranchManning)),
       );
 
-      // You can manually extract the fields you need from the record
       if (record != null) {
         var attendanceInfo = {
           'accountNameBranchManning': record['accountNameBranchManning'],
@@ -323,7 +302,7 @@ class MongoDatabase {
         return attendanceInfo;
       }
 
-      return record;
+      return null;
     } catch (e) {
       print('Error fetching attendance status: $e');
       return null;

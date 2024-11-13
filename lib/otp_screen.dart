@@ -32,13 +32,16 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
           color: Colors.white,
           fontSize: 24,
         ),
+        iconTheme: IconThemeData(
+          color: Colors.white, // Set your desired color here
+        ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.grey[600]!,
-                Colors.grey[800]!,
-                Colors.grey[900]!,
+                Color.fromARGB(255, 26, 20, 71),
+                Color.fromARGB(255, 26, 20, 71),
+                Color.fromARGB(255, 255, 196, 0)!,
               ],
             ),
           ),
@@ -53,9 +56,9 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
             borderRadius: BorderRadius.circular(20.0),
             gradient: LinearGradient(
               colors: [
-                Colors.grey[600]!,
-                Colors.grey[800]!,
-                Colors.grey[900]!,
+                Color.fromARGB(255, 26, 20, 71),
+                Color.fromARGB(255, 26, 20, 71),
+                Color.fromARGB(255, 255, 196, 0)!,
               ],
             ),
           ),
@@ -74,18 +77,20 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
               TextField(
                 controller: otpController,
                 keyboardType: TextInputType.number,
-                style: TextStyle(color: Colors.grey, fontSize: 18.0),
+                style: TextStyle(
+                    color: Color.fromARGB(255, 26, 20, 71), fontSize: 18.0),
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
                   hintText: 'Enter OTP',
-                  hintStyle: TextStyle(color: Colors.grey),
+                  hintStyle: TextStyle(color: Color.fromARGB(255, 26, 20, 71)),
                   border: OutlineInputBorder(
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
+                    borderSide:
+                        BorderSide(color: Color.fromARGB(255, 26, 20, 71)),
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
@@ -101,7 +106,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                 ),
                 child: Text(
                   'Verify OTP',
-                  style: TextStyle(fontSize: 18.0, color: Colors.grey),
+                  style: TextStyle(
+                      fontSize: 18.0, color: Color.fromARGB(255, 26, 20, 71)),
                 ),
               ),
             ],

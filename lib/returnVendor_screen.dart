@@ -29,12 +29,36 @@ class ReturnVendor extends StatefulWidget {
 class _ReturnVendorState extends State<ReturnVendor> {
   late String selectedOutlet = ''; // Initialize with an empty string
   late String selectedItem = ''; // Initialize with an empty string
-  late String quantity = '';
+  DateTime? selectedExpiryDate;
   late DateTime selectedDate = DateTime.now(); // Initialize with current date
   String merchandiserName = '';
-  String driverName = '';
-  String plateNumber = '';
-  String pullOutReason = '';
+
+  double? amount;
+  double? quantity;
+  String total = '';
+
+  List<String> reasonOptions = [
+    'Expired',
+    'Damaged Carrier',
+    'Missing Bottle',
+    'Sampling',
+    'Near Expiry',
+    'Others'
+  ];
+  List<String> remarkOptions = [
+    'Disposed',
+    'Still In Store',
+    'Depleted',
+    'Pulled Out',
+    'Others'
+  ];
+
+  String selectedReason = '';
+  String selectedRemark = '';
+  bool isOtherReasonSelected = false;
+  bool isOtherRemarkSelected = false;
+  String customReason = '';
+  String customRemark = '';
   String selectedCategory = '';
   String inputId = '';
   List<String> outletOptions = [];
@@ -102,9 +126,48 @@ class _ReturnVendorState extends State<ReturnVendor> {
     ],
   };
 
+  void _selectDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: selectedDate!,
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        selectedDate = pickedDate;
+        // Set expiry date based on business logic (e.g., one year from selection)
+        selectedExpiryDate =
+            DateTime(pickedDate.year, pickedDate.month, pickedDate.day);
+      });
+    }
+  }
+
+  String formatDate(DateTime date) {
+    String formattedDate = DateFormat('ddMMMyy').format(date);
+    return formattedDate;
+  }
+
+  void _calculateTotal() {
+    if (amount != null && quantity != null) {
+      double calculatedTotal = amount! * quantity!;
+      total = calculatedTotal.toStringAsFixed(2); // Format to 2 decimal places
+    } else {
+      total = '';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+
+    amount = null;
+    quantity = null;
+
+    selectedReason = reasonOptions[0];
+    selectedRemark = remarkOptions[0];
+
+    // _addExpiryField();
     fetchDataFromDatabase(widget.userEmail);
     if (_categoryToSkuDescriptions.isNotEmpty) {
       selectedCategory = _categoryToSkuDescriptions.keys.first;
@@ -151,10 +214,10 @@ class _ReturnVendorState extends State<ReturnVendor> {
           debugShowCheckedModeBanner: false,
           home: Scaffold(
             appBar: AppBar(
-              backgroundColor: Color.fromARGB(210, 46, 0, 77),
+              backgroundColor: Color.fromARGB(255, 26, 20, 71),
               elevation: 0,
               title: Text(
-                'Return to Vendor Input',
+                'Return to Vendor',
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
@@ -167,7 +230,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
                   children: [
                     SizedBox(height: 16),
                     Text(
-                      'Input ID',
+                      'RTV No.',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
@@ -182,7 +245,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
                       ),
                     ),
                     Text(
-                      'Date',
+                      'DATE',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
@@ -207,7 +270,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Merchandiser',
+                      'MERCHANDISER',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
@@ -222,7 +285,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Outlet',
+                      'OUTLET',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
@@ -251,39 +314,6 @@ class _ReturnVendorState extends State<ReturnVendor> {
                             },
                     ),
                     SizedBox(height: 16),
-                    Text(
-                      'Pending or Not Pending',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    SizedBox(height: 10),
-                    DropdownButtonFormField<String>(
-                      value: isPending ? 'Pending' : 'Not Pending',
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                      ),
-                      items: ['Pending', 'Not Pending'].map((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            isPending = newValue == 'Pending';
-                          });
-                        }
-                      },
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Category',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: _categoryToSkuDescriptions.keys
@@ -294,7 +324,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
                             side: BorderSide(
                               width: 2.0,
                               color: selectedCategory == category
-                                  ? Color.fromARGB(210, 46, 0, 77)
+                                  ? Color.fromARGB(255, 26, 20, 71)
                                   : Colors.blueGrey.shade200,
                             ),
                             shape: RoundedRectangleBorder(
@@ -310,7 +340,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'SKU Description',
+                      'MATERIAL DESCRIPTION',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
@@ -347,92 +377,214 @@ class _ReturnVendorState extends State<ReturnVendor> {
                         }
                       },
                     ),
-                    if (!isPending)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    SizedBox(height: 10),
+                    Text(
+                      'EXPIRY DATE'.toUpperCase(),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                            color: Colors.grey), // Border around the box
+                        borderRadius:
+                            BorderRadius.circular(5.0), // Rounded corners
+                      ),
+                      padding: EdgeInsets.symmetric(
+                          vertical: 1, horizontal: 8), // Padding inside the box
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment
+                            .center, // Align the content centrally
                         children: [
-                          SizedBox(height: 16),
-                          Text(
-                            'Quantity',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          TextFormField(
-                            decoration: InputDecoration(
-                              hintText: 'Input Quantity',
-                              border: OutlineInputBorder(),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 12),
+                          ElevatedButton(
+                            onPressed: () => _selectDate(
+                                context), // Call the function to select a date
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white, // Button color
+                              elevation: 0, // Remove button elevation
                             ),
-                            onChanged: (value) {
-                              setState(() {
-                                quantity = value;
-                                checkSaveEnabled();
-                              });
-                            },
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            'Driver\'s Name',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          TextFormField(
-                            decoration: InputDecoration(
-                              hintText: 'Input Driver\'s Name',
-                              border: OutlineInputBorder(),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 12),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                selectedExpiryDate == null
+                                    ? Text(
+                                        'SELECT DATE', // Placeholder text if no date is selected
+                                        style: TextStyle(
+                                            color: Color.fromARGB(
+                                                255, 26, 20, 71)),
+                                      )
+                                    : Text(
+                                        formatDate(selectedDate)
+                                            .toUpperCase(), // Display the selected date
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                              ],
                             ),
-                            onChanged: (value) {
-                              setState(() {
-                                driverName = value;
-                                checkSaveEnabled();
-                              });
-                            },
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            'Plate Number',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          TextFormField(
-                            decoration: InputDecoration(
-                              hintText: 'Input Plate Number',
-                              border: OutlineInputBorder(),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 12),
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                plateNumber = value;
-                                checkSaveEnabled();
-                              });
-                            },
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            'Pull Out Reason',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          TextFormField(
-                            decoration: InputDecoration(
-                              hintText: 'Input Pull Out Reason',
-                              border: OutlineInputBorder(),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 12),
-                            ),
-                            onChanged: (value) {
-                              setState(() {
-                                pullOutReason = value;
-                                checkSaveEnabled();
-                              });
-                            },
                           ),
                         ],
                       ),
+                    ),
+                    SizedBox(height: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 16),
+                        Text(
+                          'AMOUNT',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        TextFormField(
+                          decoration: InputDecoration(
+                            hintText: 'Enter Amount',
+                            border: OutlineInputBorder(),
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 12),
+                          ),
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
+                          onChanged: (value) {
+                            setState(() {
+                              amount =
+                                  double.tryParse(value.replaceAll(',', '.'));
+                              _calculateTotal();
+                              checkSaveEnabled();
+                            });
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'Quantity',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        TextFormField(
+                          decoration: InputDecoration(
+                            hintText: 'Enter Quantity',
+                            border: OutlineInputBorder(),
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 12),
+                          ),
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            setState(() {
+                              quantity = double.tryParse(value);
+                              _calculateTotal();
+                              checkSaveEnabled();
+                            });
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'TOTAL',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        TextFormField(
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 12),
+                          ),
+                          readOnly: true,
+                          controller: TextEditingController(text: total),
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          'REASON',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        DropdownButtonFormField<String>(
+                          value: selectedReason,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 12),
+                          ),
+                          items: reasonOptions.map((String option) {
+                            return DropdownMenuItem<String>(
+                              value: option,
+                              child: Text(option),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              setState(() {
+                                selectedReason = newValue;
+                                isOtherReasonSelected = newValue == 'Others';
+                                checkSaveEnabled();
+                              });
+                            }
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        if (isOtherReasonSelected)
+                          TextFormField(
+                            initialValue: customReason,
+                            decoration: InputDecoration(
+                              hintText: 'Enter custom reason',
+                              border: OutlineInputBorder(),
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 12),
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                customReason = value;
+                                checkSaveEnabled();
+                              });
+                            },
+                          ),
+                        SizedBox(height: 16),
+                        Text(
+                          'REMARKS',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        DropdownButtonFormField<String>(
+                          value: selectedRemark,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 12),
+                          ),
+                          items: remarkOptions.map((String option) {
+                            return DropdownMenuItem<String>(
+                              value: option,
+                              child: Text(option),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              setState(() {
+                                selectedRemark = newValue;
+                                isOtherRemarkSelected = newValue == 'Others';
+                                checkSaveEnabled();
+                              });
+                            }
+                          },
+                        ),
+                        SizedBox(height: 16),
+                        if (isOtherRemarkSelected)
+                          TextFormField(
+                            initialValue: customRemark,
+                            decoration: InputDecoration(
+                              hintText: 'Enter custom remarks',
+                              border: OutlineInputBorder(),
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 12),
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                customRemark = value;
+                                checkSaveEnabled();
+                              });
+                            },
+                          ),
+                      ],
+                    ),
                     SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -453,7 +605,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
                           },
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.symmetric(vertical: 15),
-                            backgroundColor: Color.fromARGB(210, 46, 0, 77),
+                            backgroundColor: Color.fromARGB(255, 26, 20, 71),
                             minimumSize: Size(150, 50),
                           ),
                           child: Text(
@@ -473,7 +625,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.symmetric(vertical: 15),
                             backgroundColor: (isSaveEnabled || isPending)
-                                ? Color.fromARGB(210, 46, 0, 77)
+                                ? Color.fromARGB(255, 26, 20, 71)
                                 : Colors.grey,
                             minimumSize: Size(150, 50),
                           ),
@@ -495,19 +647,42 @@ class _ReturnVendorState extends State<ReturnVendor> {
         ));
   }
 
+  void updateDropdownValue(String newValue, bool isOther) {
+    setState(() {
+      if (newValue == 'Others') {
+        if (isOther) {
+          customReason = '';
+          customRemark = '';
+        }
+        selectedReason = '';
+        selectedRemark = '';
+        isOtherReasonSelected = true;
+        isOtherRemarkSelected = true;
+      } else {
+        selectedReason = newValue;
+        selectedRemark = newValue;
+        isOtherReasonSelected = false;
+        isOtherRemarkSelected = false;
+      }
+      checkSaveEnabled();
+    });
+  }
+
   void _toggleDropdown(String value) {
     setState(() {
       selectedCategory = value;
       updateItemOptions(selectedCategory);
+      //updateDropdownValue(value, isOther);
     });
   }
 
   void checkSaveEnabled() {
     setState(() {
-      isSaveEnabled = quantity.isNotEmpty &&
-          driverName.isNotEmpty &&
-          plateNumber.isNotEmpty &&
-          pullOutReason.isNotEmpty;
+      isSaveEnabled = amount != null &&
+          quantity != null &&
+          total.isNotEmpty &&
+          (selectedReason.isNotEmpty || customReason.isNotEmpty) &&
+          (selectedRemark.isNotEmpty || customRemark.isNotEmpty);
     });
   }
 
@@ -545,42 +720,51 @@ class _ReturnVendorState extends State<ReturnVendor> {
 
   void _saveReturnToVendor() async {
     try {
-      // Connect to the MongoDB database
       final db = await mongo.Db.create(INVENTORY_CONN_URL);
       await db.open();
 
-      // Get the collection for return to vendor data
       final collection = db.collection(USER_RTV);
 
-      // Generate a new ObjectId
       final objectId = ObjectId();
+
+      String reasonValue =
+          isOtherReasonSelected ? customReason : selectedReason;
+      String remarkValue =
+          isOtherRemarkSelected ? customRemark : selectedRemark;
+
+      // Format the expiry date as requested: ddMMMyy
+      String formattedExpiryDate = selectedExpiryDate != null
+          ? '${DateFormat('ddMMMyy').format(selectedExpiryDate!)}'.toUpperCase()
+          : '';
+
+      print("Formatted expiry date: $formattedExpiryDate"); // Debug print
 
       // Construct the document to be inserted
       final document = {
         '_id': objectId,
-        'userEmail': widget.userEmail,
         'inputId': inputId,
+        'userEmail': widget.userEmail,
         'date': DateFormat('yyyy-MM-dd').format(selectedDate),
         'merchandiserName': '${widget.userName} ${widget.userLastName}',
         'outlet': selectedOutlet,
         'category': selectedCategory,
         'item': selectedItem,
-        'quantity': isPending ? 'Pending' : quantity,
-        'driverName': isPending ? 'Pending' : driverName.toString(),
-        'plateNumber': isPending ? 'Pending' : plateNumber.toString(),
-        'pullOutReason': isPending ? 'Pending' : pullOutReason.toString(),
+        'expiryDate': formattedExpiryDate,
+        'amount': amount,
+        'quantity': quantity,
+        'total': total,
+        'remarks': remarkValue,
+        'reason': reasonValue
       };
 
       // Insert the document into the collection
       await collection.insert(document);
 
-      // Close the database connection
       await db.close();
 
       print('Return to Vendor data saved successfully!');
     } catch (e) {
       print('Error saving Return to Vendor data: $e');
-      // Handle errors here
     }
   }
 }

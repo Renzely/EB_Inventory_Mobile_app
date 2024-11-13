@@ -592,10 +592,10 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
         child: Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: false,
-              backgroundColor: Color.fromARGB(210, 46, 0, 77),
+              backgroundColor: Color.fromARGB(255, 26, 20, 71),
               elevation: 0,
               title: Text(
-                'Next Week Inventory',
+                'NEXT WEEK INVENTORY',
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
@@ -607,7 +607,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Date',
+                      'DATE',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -623,7 +623,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Input ID',
+                      'INVENTORY NUMBER',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -639,7 +639,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Merchandiser',
+                      'MERCHANDISER',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -656,7 +656,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Branch/Outlet',
+                      'OUTLET',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -672,7 +672,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Weeks Covered',
+                      'WEEKS COVERED',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -783,7 +783,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     ),
                     SizedBox(height: 16), // Adjust spacing as needed
                     Text(
-                      'Month',
+                      'MONTH',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -801,7 +801,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     ),
                     SizedBox(height: 16), // Adjust spacing as needed
                     Text(
-                      'Week',
+                      'WEEK',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -835,7 +835,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     // ),
                     SizedBox(height: 16),
                     Text(
-                      'SKU Description',
+                      'SKUs',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -867,7 +867,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     // ),
                     SizedBox(height: 16),
                     Text(
-                      'SKU Code',
+                      '4-PACK BARCODE',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -883,7 +883,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Status',
+                      'STATUS',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -916,7 +916,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
 
                     SizedBox(height: 16),
                     Text(
-                      'Beginning',
+                      'BEGINNING',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -933,7 +933,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Delivery',
+                      'DELIVERY',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -951,7 +951,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Ending (Selling Area)',
+                      'ENDING (Selling Area)',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -971,7 +971,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Ending (Warehouse Area)',
+                      'ENDING (Warehouse Area)',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -991,7 +991,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Ending',
+                      'TOTAL ENDING',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -1010,7 +1010,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     SizedBox(height: 20),
                     SizedBox(height: 20),
                     Text(
-                      'Expiration',
+                      'EXPIRATION',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -1036,7 +1036,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                           side: BorderSide(
                               width: 2.0,
                               color: _isFieldsEnabled()
-                                  ? Color.fromARGB(210, 46, 0, 77)
+                                  ? Color.fromARGB(255, 26, 20, 71)
                                   : Colors.grey),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
@@ -1056,7 +1056,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
 
                     SizedBox(height: 16),
                     Text(
-                      'Offtake',
+                      'OFFTAKE',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -1075,7 +1075,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Inventory Days Level',
+                      'INVENTORY DAYS LEVEL',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -1140,7 +1140,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                       if (_selectedNumberOfDaysOOS != null &&
                           _selectedNumberOfDaysOOS! > 0) ...[
                         Text(
-                          'Remarks',
+                          'REMARKS',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -1201,7 +1201,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                               const Size(150, 50),
                             ),
                             backgroundColor: MaterialStateProperty.all<Color>(
-                                Color.fromARGB(210, 46, 0, 77)),
+                                Color.fromARGB(255, 26, 20, 71)),
                           ),
                           child: const Text(
                             'Cancel',
@@ -1274,7 +1274,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                                 backgroundColor:
                                     MaterialStateProperty.all<Color>(
                                   _isSaveEnabled
-                                      ? Color.fromARGB(210, 46, 0, 77)
+                                      ? Color.fromARGB(255, 26, 20, 71)
                                       : Colors.grey,
                                 ),
                               ),

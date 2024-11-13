@@ -72,8 +72,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Color.fromARGB(210, 46, 0, 77)!,
-                  Color.fromARGB(210, 88, 12, 139)!,
+                  Color.fromARGB(255, 26, 20, 71),
+                  Color.fromARGB(255, 26, 20, 71),
                   Color.fromARGB(255, 255, 196, 0)!,
                 ],
               ),
@@ -126,14 +126,16 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                             decoration: InputDecoration(
                               hintText: 'Enter your email',
                               prefixIcon: Icon(Icons.email),
-                              prefixIconColor: Color.fromARGB(210, 46, 0, 77)!,
+                              prefixIconColor: Color.fromARGB(255, 26, 20, 71),
                             ),
                           ),
                           if (otpMessage != null) ...[
                             SizedBox(height: 10),
                             Text(
                               otpMessage!,
-                              style: TextStyle(color: Colors.grey),
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ],
                           SizedBox(height: 20),
@@ -149,8 +151,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: _isLoading || _isCooldown
                                   ? Colors.grey
-                                  : Color.fromARGB(210, 46, 0,
-                                      77)!, // Grey if loading or cooldown
+                                  : Color.fromARGB(255, 26, 20,
+                                      71), // Grey if loading or cooldown
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
                               ),
@@ -187,6 +189,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               decoration: InputDecoration(
                                 hintText: 'Enter OTP code',
                                 prefixIcon: Icon(Icons.lock),
+                                prefixIconColor:
+                                    Color.fromARGB(255, 26, 20, 71),
                               ),
                             ),
                             if (otpErrorMessage != null) ...[
@@ -203,7 +207,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                 _verifyOtp();
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[900],
+                                backgroundColor:
+                                    Color.fromARGB(255, 26, 20, 71),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(50),
                                 ),
@@ -213,7 +218,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                 height: 50,
                                 child: Center(
                                   child: Text(
-                                    "Verify OTP",
+                                    "VERIFY OTP",
                                     style: GoogleFonts.roboto(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -225,20 +230,36 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                           ],
                           SizedBox(height: 30),
                           // Return to Login Text
-                          GestureDetector(
-                            onTap: () {
+                          ElevatedButton(
+                            onPressed: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => LoginPage()),
                               );
                             },
-                            child: Text(
-                              'Return to Login',
-                              style: GoogleFonts.roboto(
-                                  color: Colors.blue[400],
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color.fromARGB(255, 26, 20,
+                                  71), // Match the original text color
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                    50), // Slightly rounded corners
+                              ),
+                            ),
+                            child: SizedBox(
+                              width: 110, // Adjusted width to fit the text
+                              height: 30,
+                              child: Center(
+                                child: Text(
+                                  'BACK TO LOGIN',
+                                  style: GoogleFonts.roboto(
+                                    color: Colors
+                                        .white, // Changed to white for better contrast
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13, // Reduced font size slightly
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ],

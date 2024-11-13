@@ -60,8 +60,8 @@ class _SignUpState extends State<SignUp> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      Color.fromARGB(210, 46, 0, 77)!,
-                      Color.fromARGB(210, 88, 12, 139)!,
+                      Color.fromARGB(255, 26, 20, 71),
+                      Color.fromARGB(255, 36, 29, 88),
                       Color.fromARGB(255, 255, 196, 0)!,
                     ],
                   ),
@@ -327,7 +327,7 @@ class _SignUpState extends State<SignUp> {
                           : Text(
                               'SUBMIT',
                               style: GoogleFonts.roboto(
-                                color: Colors.grey,
+                                color: Colors.black,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -340,21 +340,36 @@ class _SignUpState extends State<SignUp> {
                       style: GoogleFonts.roboto(color: Colors.white),
                     ),
                     const SizedBox(height: 15),
-                    GestureDetector(
-                      onTap: () {
+                    ElevatedButton(
+                      onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => LoginPage(),
-                          ),
+                          MaterialPageRoute(builder: (context) => LoginPage()),
                         );
                       },
-                      child: Text(
-                        'SIGN IN',
-                        style: GoogleFonts.roboto(
-                            color: Colors.blue[400],
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Colors.white, // Match the original text color
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                              50), // Slightly rounded corners
+                        ),
+                      ),
+                      child: SizedBox(
+                        width: 120, // Adjusted width to fit the text
+                        height:
+                            40, // Adjusted height to match the default button size
+                        child: Center(
+                          child: Text(
+                            'SIGN IN',
+                            style: GoogleFonts.roboto(
+                              color: Colors
+                                  .black, // Changed to white for better contrast
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18, // Slightly reduced font size
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],

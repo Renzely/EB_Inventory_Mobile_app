@@ -292,12 +292,14 @@ class ReturnToVendor {
   String date;
   String merchandiserName;
   String outlet;
-  //String category;
   String item;
-  String quantity;
-  String driverName;
+  dynamic amount;
+  dynamic quantity;
+  String total;
   String plateNumber;
-  String pullOutReason;
+  String reason;
+  String remarks;
+  String expiryDate;
 
   ReturnToVendor({
     required this.inputId,
@@ -306,12 +308,14 @@ class ReturnToVendor {
     required this.date,
     required this.merchandiserName,
     required this.outlet,
-    //required this.category,
     required this.item,
+    required this.amount,
     required this.quantity,
-    required this.driverName,
+    required this.reason,
+    required this.total,
     required this.plateNumber,
-    required this.pullOutReason,
+    required this.remarks,
+    required this.expiryDate,
   });
 
   factory ReturnToVendor.fromJson(Map<String, dynamic> json) => ReturnToVendor(
@@ -321,12 +325,14 @@ class ReturnToVendor {
         date: json['date'] ?? '',
         merchandiserName: json['merchandiserName'] ?? '',
         outlet: json['outlet'] ?? '',
-        //category: json['category'] ?? '',
         item: json['item'] ?? '',
-        quantity: json['quantity'] ?? '',
-        driverName: json['driverName'] ?? '',
+        amount: json['amount'] ?? 0,
+        quantity: json['quantity'] ?? 0,
+        total: json['total'] ?? '',
+        reason: json['reason'] ?? '',
         plateNumber: json['plateNumber'] ?? '',
-        pullOutReason: json['pullOutReason'] ?? '',
+        remarks: json['remarks'] ?? '',
+        expiryDate: json['expiryDate'] ?? '', // Add this line
       );
 
   Map<String, dynamic> toJson() => {
@@ -336,12 +342,14 @@ class ReturnToVendor {
         'date': date,
         'merchandiserName': merchandiserName,
         'outlet': outlet,
-        //'category': category,
-        'Item': item,
+        'amount': amount,
+        'item': item,
         'quantity': quantity,
-        'driverName': driverName,
+        'total': total,
         'plateNumber': plateNumber,
-        'pullOutReason': pullOutReason,
+        'reason': reason,
+        'remarks': remarks,
+        'expiryDate': expiryDate, // Add this line
       };
 
   void saveToDatabase(ReturnToVendor newItem) async {

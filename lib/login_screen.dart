@@ -206,8 +206,8 @@ class _LoginPageState extends State<LoginPage> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color.fromARGB(210, 46, 0, 77)!,
-              Color.fromARGB(210, 88, 12, 139)!,
+              Color.fromARGB(255, 26, 20, 71),
+              Color.fromARGB(255, 30, 24, 75),
               Color.fromARGB(255, 255, 196, 0)!,
             ],
           ),
@@ -230,7 +230,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        "WELCOME TO EB INVENTORY",
+                        "ENGKANTO INVENTORY",
                         style: GoogleFonts.roboto(
                             color: Colors.white, fontSize: 18),
                       ),
@@ -260,7 +260,7 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
-                                color: Color.fromARGB(210, 46, 0, 77)
+                                color: Color.fromARGB(255, 26, 20, 71)
                                     .withOpacity(
                                         0.8), // Adjust the opacity if needed
                                 blurRadius: 20,
@@ -292,7 +292,7 @@ class _LoginPageState extends State<LoginPage> {
                                       border: InputBorder.none,
                                       prefixIcon: Icon(Icons.account_box),
                                       prefixIconColor:
-                                          Color.fromARGB(210, 46, 0, 77),
+                                          Color.fromARGB(255, 26, 20, 71),
                                       errorText: usernameErrorText.isNotEmpty
                                           ? usernameErrorText
                                           : null,
@@ -323,7 +323,7 @@ class _LoginPageState extends State<LoginPage> {
                                       hintText: 'Enter your password',
                                       prefixIcon: Icon(Icons.lock),
                                       prefixIconColor:
-                                          Color.fromARGB(210, 46, 0, 77),
+                                          Color.fromARGB(255, 26, 20, 71),
                                       border: InputBorder.none,
                                       errorText: passwordErrorText.isNotEmpty
                                           ? passwordErrorText
@@ -360,7 +360,7 @@ class _LoginPageState extends State<LoginPage> {
                             backgroundColor: _isLoading
                                 ? Colors.grey
                                 : Color.fromARGB(
-                                    210, 46, 0, 77), // Grey if loading
+                                    255, 26, 20, 71), // Grey if loading
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(50),
                             ),
@@ -396,7 +396,7 @@ class _LoginPageState extends State<LoginPage> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
-                                Color.fromARGB(210, 46, 0, 77), // Button color
+                                Color.fromARGB(255, 26, 20, 71), // Button color
                             shape: RoundedRectangleBorder(
                               borderRadius:
                                   BorderRadius.circular(50), // Rounded corners
@@ -432,7 +432,7 @@ class _LoginPageState extends State<LoginPage> {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
-                                Color.fromARGB(210, 46, 0, 77), // Button color
+                                Color.fromARGB(255, 26, 20, 71), // Button color
                             shape: RoundedRectangleBorder(
                               borderRadius:
                                   BorderRadius.circular(50), // Rounded corners
