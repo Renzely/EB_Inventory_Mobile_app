@@ -50,6 +50,8 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
   late TextEditingController _skuCodeController;
   late TextEditingController _statusController;
   late TextEditingController _beginningController;
+  late TextEditingController _beginningSAController;
+  late TextEditingController _beginningWAController;
   late TextEditingController _deliveryController;
   late TextEditingController _endingController;
   late TextEditingController _endingSAController;
@@ -62,14 +64,14 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
 
   final List<Widget> _expiryFields = [];
   final List<Map<String, dynamic>> _expiryFieldsValues = [];
-  final List<String?> _selectedMonths = [];
-  final List<TextEditingController> _pcsControllers = [];
+  List<TextEditingController> _dateControllers = [];
+  List<TextEditingController> _pcsControllers = [];
+  List<String?> _selectedMonths = [];
   String? _selectedPeriod;
   bool _isSaveEnabled = false;
   int? _selectedNumberOfDaysOOS;
   String? _remarksOOS;
-  bool _showNoDeliveryDropdown = false;
-  String? _selectedNoDeliveryOption;
+
   String? selectedMonth;
   String currentStatus = ''; // Variable to hold the current status
   bool editing = false;
@@ -119,6 +121,10 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
     // Initialize with beginning value and attach listeners for calculations
     _beginningController = TextEditingController(
         text: widget.inventoryItem.ending?.toString() ?? '');
+    _beginningSAController = TextEditingController(
+        text: widget.inventoryItem.endingSA?.toString() ?? '');
+    _beginningWAController = TextEditingController(
+        text: widget.inventoryItem.endingWA?.toString() ?? '');
     _deliveryController = TextEditingController(text: '');
     _endingController = TextEditingController(text: '');
     _offtakeController = TextEditingController(text: '');
@@ -151,8 +157,6 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
     // Set initial values for the new fields
     _selectedNumberOfDaysOOS = null; // Initially set to null
     _remarksOOS = null; // Initially set to null
-    _selectedNoDeliveryOption = null; // Initially set to null
-    _showNoDeliveryDropdown = false; // Hide dropdown initially
 
     checkSaveEnabled();
   }
@@ -190,6 +194,8 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
     _skuCodeController.dispose();
     _statusController.dispose();
     _beginningController.dispose();
+    _beginningSAController.dispose();
+    _beginningWAController.dispose();
     _deliveryController.dispose();
     _endingController.dispose();
     _endingSAController.dispose();
@@ -238,31 +244,31 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
       ], // Actual range: Nov 2 - Nov 10 (labeled as Nov 2 - Nov 8)
       [
         DateTime(2024, 11, 9),
-        DateTime(2024, 11, 17)
+        DateTime(2024, 11, 15)
       ], // Actual range: Nov 9 - Nov 17 (labeled as Nov 9 - Nov 15)
       [
         DateTime(2024, 11, 16),
-        DateTime(2024, 11, 24)
+        DateTime(2024, 11, 22)
       ], // Actual range: Nov 16 - Nov 24 (labeled as Nov 16 - Nov 22)
       [
         DateTime(2024, 11, 23),
-        DateTime(2024, 12, 1)
+        DateTime(2024, 11, 29)
       ], // Actual range: Nov 23 - Dec 1 (labeled as Nov 23 - Nov 29)
       [
         DateTime(2024, 11, 30),
-        DateTime(2024, 12, 8)
+        DateTime(2024, 12, 6)
       ], // Actual range: Nov 30 - Dec 8 (labeled as Nov 30 - Dec 6)
       [
         DateTime(2024, 12, 7),
-        DateTime(2024, 12, 15)
+        DateTime(2024, 12, 13)
       ], // Actual range: Dec 7 - Dec 15 (labeled as Dec 7 - Dec 13)
       [
         DateTime(2024, 12, 14),
-        DateTime(2024, 12, 22)
+        DateTime(2024, 12, 20)
       ], // Actual range: Dec 14 - Dec 22 (labeled as Dec 14 - Dec 20)
       [
         DateTime(2024, 12, 21),
-        DateTime(2024, 12, 29)
+        DateTime(2024, 12, 27)
       ], // Actual range: Dec 21 - Dec 29 (labeled as Dec 21 - Dec 27)
     ];
     List<DateTime> currentPeriod = periods.firstWhere(
@@ -275,7 +281,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
     if (currentPeriod.isNotEmpty) {
       // Proceed with currentPeriod logic
       String periodString =
-          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1].subtract(Duration(days: 2)))}';
+          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1].subtract(Duration(days: 0)))}';
       items.add(
           DropdownMenuItem(child: Text(periodString), value: periodString));
       print("Selected period: ${currentPeriod[0]} - ${currentPeriod[1]}");
@@ -362,11 +368,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
               _endingSAController.text.isNotEmpty &&
               _endingWAController.text.isNotEmpty &&
               _selectedPeriod != null && // Ensure _selectedPeriod is not null
-              _remarksOOS != null && // Ensure remarksOOS is not null
-              (_remarksOOS == "No P.O" ||
-                  _remarksOOS == "Unserved" ||
-                  (_remarksOOS == "No Delivery" &&
-                      _selectedNoDeliveryOption != null));
+              _remarksOOS != null;
         }
       } else if (_statusController.text == 'Delisted') {
         // If status is 'Delisted', set beginning to 'Delisted'
@@ -395,7 +397,11 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
       String accountManning = _branchController.text;
       String status = _statusController.text;
       int beginning = int.tryParse(_beginningController.text) ?? 0;
+      int beginningSA = int.tryParse(_beginningSAController.text) ?? 0;
+      int beginningWA = int.tryParse(_beginningWAController.text) ?? 0;
       String beginningvalue = _beginningController.text;
+      String beginningSAvalue = _beginningSAController.text;
+      String beginningWAvalue = _beginningWAController.text;
       String deliveryValue;
       String endingValue;
       String offtakevalue = '0.00';
@@ -406,6 +412,8 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
 
       if (status == 'Delisted') {
         beginningvalue = 'Delisted';
+        beginningWAvalue = 'Delisted';
+        beginningSAvalue = 'Delisted';
         deliveryValue = 'Delisted';
         endingValue = 'Delisted';
         endingWA = 'Delisted';
@@ -467,16 +475,18 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
         'skuCode': _skuCodeController.text,
         'status': status,
         'beginning': beginningValue.toString(),
+        'beginningSA': beginningSAvalue.toString(),
+        'beginningWA': beginningWAvalue.toString(),
         'delivery': deliveryValue,
         'ending': endingValue,
         'endingSA': endingSA,
         'endingWA': endingWA,
         'offtake': offtake.toString(),
         'inventoryDaysLevel': inventoryDaysLevel,
-        'noOfDaysOOS': noOfDaysOOSValue,
+        'noOfDaysOOS': _selectedNumberOfDaysOOS,
         'expiryFields': expiryFieldsData,
-        'remarksOOS': remarksOOSValue,
-        'reasonOOS': reasonOOSValue,
+        'remarksOOS': _remarksOOS,
+        //'reasonOOS': reasonOOSValue,
         'isEditing': false, // Add the editing status here
       };
 
@@ -525,49 +535,46 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
     _selectedMonths.clear();
     _selectedNumberOfDaysOOS = null;
     _remarksOOS = null;
-    _selectedNoDeliveryOption = null;
-    _showNoDeliveryDropdown = false;
   }
 
   void _addExpiryField() {
     if (currentStatus != 'Delisted') {
       setState(() {
-        if (_expiryFields.length < 6) {
-          int index = _expiryFields.length;
-          _pcsControllers.add(TextEditingController()); // Add a new controller
-          _selectedMonths.add(null); // Add a null entry for the new field
-          _expiryFields.add(_buildExpiryField(index));
-          _expiryFieldsValues.add({'expiryMonth': '', 'expiryPcs': ''});
+        if (_dateControllers.length < 6) {
+          _pcsControllers.add(TextEditingController());
+          _dateControllers.add(TextEditingController());
+          _selectedMonths.add(null);
+          _expiryFieldsValues.add({
+            'expiryMonth': '', // Initialize with default values
+            'expiryPcs': '',
+          });
         }
       });
     } else {
-      // Optionally, show a message to the user that expiry fields cannot be added for delisted or not carried items
       print('Cannot add expiry fields for delisted or not carried items');
     }
   }
 
   void _removeExpiryField(int index) {
     setState(() {
-      _expiryFields.removeAt(index);
-      _expiryFieldsValues.removeAt(index);
-      _selectedMonths
-          .removeAt(index); // Remove the corresponding selected month
-      _pcsControllers.removeAt(index); // Remove the corresponding controller
-
-      // Update the index of remaining fields
-      for (int i = 0; i < _expiryFields.length; i++) {
-        _expiryFields[i] = _buildExpiryField(i);
-      }
+      if (index < _pcsControllers.length) _pcsControllers.removeAt(index);
+      if (index < _dateControllers.length) _dateControllers.removeAt(index);
+      if (index < _selectedMonths.length) _selectedMonths.removeAt(index);
     });
   }
 
   void _updateExpiryField(int index, String expiryMonth, String expiryPcs) {
-    setState(() {
-      _expiryFieldsValues[index] = {
-        'expiryMonth': expiryMonth,
-        'expiryPcs': expiryPcs,
-      };
-    });
+    // Ensure the list has been initialized with enough elements
+    if (index < _expiryFieldsValues.length) {
+      setState(() {
+        _expiryFieldsValues[index] = {
+          'expiryMonth': expiryMonth,
+          'expiryPcs': expiryPcs,
+        };
+      });
+    } else {
+      print("Index out of bounds: Unable to update expiry field.");
+    }
   }
 
   void _resetExpiryFields() {
@@ -913,7 +920,40 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                         });
                       },
                     ),
-
+                    SizedBox(height: 16),
+                    Text(
+                      'BEGINNING (SELLING AREA)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    TextField(
+                      controller: _beginningSAController,
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
+                      keyboardType: TextInputType.number,
+                      readOnly: true,
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      'BEGINNING (BACK ROOMS)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    TextField(
+                      controller: _beginningWAController,
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
+                      keyboardType: TextInputType.number,
+                      readOnly: true,
+                    ),
                     SizedBox(height: 16),
                     Text(
                       'BEGINNING',
@@ -1009,49 +1049,67 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                     ),
                     SizedBox(height: 20),
                     SizedBox(height: 20),
-                    Text(
-                      'EXPIRATION',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
                     Column(
-                      children: _expiryFields
-                          .map((field) => Padding(
-                                padding: const EdgeInsets.only(
-                                    bottom: 30.0), // Adds space between fields
-                                child: field,
-                              ))
-                          .toList(),
-                    ),
-                    SizedBox(height: 16),
-                    Center(
-                      child: OutlinedButton(
-                        onPressed: _isFieldsEnabled()
-                            ? _addExpiryField
-                            : null, // Enable button if _isFieldsEnabled() is true, otherwise disable
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(
-                              width: 2.0,
-                              color: _isFieldsEnabled()
-                                  ? Color.fromARGB(255, 26, 20, 71)
-                                  : Colors.grey),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        child: Text(
-                          'Add Expiry',
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'EXPIRATION',
                           style: TextStyle(
-                            color: _isFieldsEnabled()
-                                ? Colors.black
-                                : Color.fromARGB(210, 46, 0,
-                                    77), // Change text color when disabled
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
                           ),
                         ),
-                      ),
+                        SizedBox(height: 16),
+
+                        // Use ListView.builder to render fields dynamically
+                        ListView.builder(
+                          shrinkWrap:
+                              true, // Allows ListView to be inside a Column
+                          physics:
+                              NeverScrollableScrollPhysics(), // Disable scrolling for nested ListView
+                          itemCount: _dateControllers.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                  bottom: 30.0), // Adds space between fields
+                              child: _buildExpiryField(index),
+                            );
+                          },
+                        ),
+                        SizedBox(height: 16),
+
+                        // Add Expiry Button
+                        Center(
+                          child: OutlinedButton(
+                            onPressed: _isFieldsEnabled() &&
+                                    _dateControllers.length < 6
+                                ? _addExpiryField
+                                : null, // Enable button if _isFieldsEnabled() and under limit
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                width: 2.0,
+                                color: _isFieldsEnabled() &&
+                                        _dateControllers.length < 6
+                                    ? Color.fromARGB(255, 26, 20, 71)
+                                    : Colors.grey,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                            child: Text(
+                              'Add Expiry',
+                              style: TextStyle(
+                                color: _isFieldsEnabled() &&
+                                        _dateControllers.length < 6
+                                    ? Colors.black
+                                    : Color.fromARGB(210, 46, 0,
+                                        77), // Change text color when disabled
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
 
                     SizedBox(height: 16),
@@ -1118,9 +1176,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                               setState(() {
                                 _selectedNumberOfDaysOOS = newValue;
                                 _remarksOOS = null; // Reset remarks and reason
-                                _selectedNoDeliveryOption = null;
-                                _showNoDeliveryDropdown =
-                                    false; // Hide Reason dropdown initially
+
                                 checkSaveEnabled(); // Check if Save button should be enabled
                               });
                             }
@@ -1152,8 +1208,6 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                             border: OutlineInputBorder(),
                             contentPadding:
                                 EdgeInsets.symmetric(horizontal: 12),
-                            labelText:
-                                'Enter Remarks', // You can customize the label if needed
                             labelStyle: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -1163,15 +1217,6 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                             setState(() {
                               _remarksOOS = value;
 
-                              // Show or hide the Select Reason dropdown based on the Remarks input
-                              if (_remarksOOS == 'No Delivery' &&
-                                  _selectedNumberOfDaysOOS! > 0) {
-                                _showNoDeliveryDropdown = true;
-                              } else {
-                                _showNoDeliveryDropdown = false;
-                                _selectedNoDeliveryOption = null;
-                              }
-
                               // Check if Save button should be enabled
                               checkSaveEnabled();
                             });
@@ -1179,8 +1224,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                         ),
                       ],
                     ],
-                    SizedBox(height: 16),
-                    if (_showNoDeliveryDropdown && _isFieldsEnabled()) ...[],
+
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1295,13 +1339,13 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
   }
 
   Widget _buildExpiryField(int index) {
-    if (index >= _pcsControllers.length || index >= _selectedMonths.length) {
-      return SizedBox
-          .shrink(); // Return an empty widget if the index is out of bounds
-    }
-
     TextEditingController pcsController = _pcsControllers[index];
-    String? selectedMonth = _selectedMonths[index];
+    TextEditingController dateController = _dateControllers[index];
+    String? selectedDate = _selectedMonths[index];
+
+    if (selectedDate != null && dateController.text.isEmpty) {
+      dateController.text = selectedDate;
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1309,63 +1353,52 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
         Row(
           children: [
             Expanded(
-              child: DropdownButtonFormField<String>(
-                value: selectedMonth,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    selectedMonth = newValue;
-                    _selectedMonths[index] = selectedMonth!;
-                    pcsController
-                        .clear(); // Clear TextField when a new month is selected
+              child: GestureDetector(
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(Duration(days: 365 * 2)),
+                  );
 
-                    // Only update if a month is selected
-                    if (selectedMonth != null) {
+                  if (pickedDate != null) {
+                    setState(() {
+                      String formattedDate = DateFormat("ddMMMyy")
+                          .format(pickedDate)
+                          .toUpperCase();
+                      _selectedMonths[index] = formattedDate;
+                      dateController.text = formattedDate;
+                      pcsController.clear();
                       _updateExpiryField(
-                          index, selectedMonth!, pcsController.text);
-                    }
-                  });
+                          index, formattedDate, pcsController.text);
+                    });
+                  }
                 },
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8.0),
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  child: Text(
+                    dateController.text.isNotEmpty
+                        ? dateController.text
+                        : 'Select Date',
+                    style: TextStyle(
+                      color: dateController.text.isEmpty
+                          ? Colors.grey
+                          : Colors.black,
+                    ),
                   ),
                 ),
-                hint: Text('Select Month'),
-                items: [
-                  DropdownMenuItem<String>(
-                    value: '1 Month',
-                    child: Text('1 month'),
-                  ),
-                  DropdownMenuItem<String>(
-                    value: '2 Months',
-                    child: Text('2 months'),
-                  ),
-                  DropdownMenuItem<String>(
-                    value: '3 Months',
-                    child: Text('3 months'),
-                  ),
-                  DropdownMenuItem<String>(
-                    value: '4 Months',
-                    child: Text('4 months'),
-                  ),
-                  DropdownMenuItem<String>(
-                    value: '5 Months',
-                    child: Text('5 months'),
-                  ),
-                  DropdownMenuItem<String>(
-                    value: '6 Months',
-                    child: Text('6 months'),
-                  ),
-                ],
               ),
             ),
             IconButton(
               icon: Icon(Icons.delete),
-              onPressed: () {
-                _removeExpiryField(index);
-              },
+              onPressed: () => _removeExpiryField(index),
             ),
           ],
         ),
@@ -1379,12 +1412,11 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
           ),
           keyboardType: TextInputType.number,
           onChanged: (value) {
-            // Only call _updateExpiryField if selectedMonth is not null
-            if (selectedMonth != null) {
-              _updateExpiryField(index, selectedMonth!, pcsController.text);
+            if (dateController.text.isNotEmpty) {
+              _updateExpiryField(
+                  index, dateController.text, pcsController.text);
             } else {
-              // Optionally, show a message or handle the case where no month is selected
-              print('Please select a month before entering PCS.');
+              print('Please select a date before entering PCS.');
             }
           },
         ),

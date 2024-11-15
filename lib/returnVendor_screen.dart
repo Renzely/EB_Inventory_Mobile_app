@@ -36,6 +36,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
   double? amount;
   double? quantity;
   String total = '';
+  final TextEditingController totalController = TextEditingController();
 
   List<String> reasonOptions = [
     'Expired',
@@ -53,8 +54,9 @@ class _ReturnVendorState extends State<ReturnVendor> {
     'Others'
   ];
 
-  String selectedReason = '';
-  String selectedRemark = '';
+  String? selectedReason;
+  String? selectedRemark;
+
   bool isOtherReasonSelected = false;
   bool isOtherRemarkSelected = false;
   String customReason = '';
@@ -63,7 +65,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
   String inputId = '';
   List<String> outletOptions = [];
   List<String> itemOptions = [];
-  bool isPending = true;
+
   bool isSaveEnabled = false; // Ensure this is initialized properly
 
   // Add fetchOutlets method to fetch outlets from the database
@@ -143,17 +145,43 @@ class _ReturnVendorState extends State<ReturnVendor> {
     }
   }
 
-  String formatDate(DateTime date) {
-    String formattedDate = DateFormat('ddMMMyy').format(date);
-    return formattedDate;
+  void _selectExpiryDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: selectedExpiryDate ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        selectedExpiryDate = pickedDate;
+        checkSaveEnabled();
+      });
+    }
+  }
+
+  String formatDate(DateTime? date) {
+    return date != null ? DateFormat('ddMMMyy').format(date) : 'SELECT DATE';
+  }
+
+  @override
+  void dispose() {
+    totalController.dispose();
+    super.dispose();
   }
 
   void _calculateTotal() {
     if (amount != null && quantity != null) {
       double calculatedTotal = amount! * quantity!;
-      total = calculatedTotal.toStringAsFixed(2); // Format to 2 decimal places
+      if (calculatedTotal % 1 == 0) {
+        total = calculatedTotal.toStringAsFixed(0);
+      } else {
+        total = calculatedTotal.toStringAsFixed(2);
+      }
+      totalController.text = total; // Update controller text
     } else {
       total = '';
+      totalController.text = total;
     }
   }
 
@@ -164,8 +192,8 @@ class _ReturnVendorState extends State<ReturnVendor> {
     amount = null;
     quantity = null;
 
-    selectedReason = reasonOptions[0];
-    selectedRemark = remarkOptions[0];
+    selectedReason = null;
+    selectedRemark = null;
 
     // _addExpiryField();
     fetchDataFromDatabase(widget.userEmail);
@@ -360,10 +388,8 @@ class _ReturnVendorState extends State<ReturnVendor> {
                               message: item,
                               child: Text(
                                 item,
-                                overflow: TextOverflow
-                                    .ellipsis, // Handle long text with ellipsis
-                                softWrap:
-                                    false, // Prevent wrapping of long text
+                                overflow: TextOverflow.ellipsis,
+                                softWrap: false,
                               ),
                             ),
                           ),
@@ -373,6 +399,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
                         if (newValue != null) {
                           setState(() {
                             selectedItem = newValue;
+                            checkSaveEnabled();
                           });
                         }
                       },
@@ -398,8 +425,8 @@ class _ReturnVendorState extends State<ReturnVendor> {
                             .center, // Align the content centrally
                         children: [
                           ElevatedButton(
-                            onPressed: () => _selectDate(
-                                context), // Call the function to select a date
+                            onPressed: () => _selectExpiryDate(
+                                context), // Call the expiry date picker
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white, // Button color
                               elevation: 0, // Remove button elevation
@@ -408,18 +435,11 @@ class _ReturnVendorState extends State<ReturnVendor> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                selectedExpiryDate == null
-                                    ? Text(
-                                        'SELECT DATE', // Placeholder text if no date is selected
-                                        style: TextStyle(
-                                            color: Color.fromARGB(
-                                                255, 26, 20, 71)),
-                                      )
-                                    : Text(
-                                        formatDate(selectedDate)
-                                            .toUpperCase(), // Display the selected date
-                                        style: TextStyle(color: Colors.black),
-                                      ),
+                                Text(
+                                  formatDate(selectedExpiryDate)
+                                      .toUpperCase(), // Display the selected expiry date
+                                  style: TextStyle(color: Colors.black),
+                                ),
                               ],
                             ),
                           ),
@@ -467,10 +487,12 @@ class _ReturnVendorState extends State<ReturnVendor> {
                             contentPadding:
                                 EdgeInsets.symmetric(horizontal: 12),
                           ),
-                          keyboardType: TextInputType.number,
+                          keyboardType:
+                              TextInputType.numberWithOptions(decimal: true),
                           onChanged: (value) {
                             setState(() {
-                              quantity = double.tryParse(value);
+                              quantity =
+                                  double.tryParse(value.replaceAll(',', '.'));
                               _calculateTotal();
                               checkSaveEnabled();
                             });
@@ -489,7 +511,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
                                 EdgeInsets.symmetric(horizontal: 12),
                           ),
                           readOnly: true,
-                          controller: TextEditingController(text: total),
+                          controller: totalController,
                         ),
                         SizedBox(height: 16),
                         Text(
@@ -504,6 +526,8 @@ class _ReturnVendorState extends State<ReturnVendor> {
                             contentPadding:
                                 EdgeInsets.symmetric(horizontal: 12),
                           ),
+                          hint: Text(
+                              'Please select a reason'), // Show hint text initially
                           items: reasonOptions.map((String option) {
                             return DropdownMenuItem<String>(
                               value: option,
@@ -515,12 +539,12 @@ class _ReturnVendorState extends State<ReturnVendor> {
                               setState(() {
                                 selectedReason = newValue;
                                 isOtherReasonSelected = newValue == 'Others';
+                                if (isOtherReasonSelected) customReason = '';
                                 checkSaveEnabled();
                               });
                             }
                           },
                         ),
-                        SizedBox(height: 16),
                         if (isOtherReasonSelected)
                           TextFormField(
                             initialValue: customReason,
@@ -550,6 +574,8 @@ class _ReturnVendorState extends State<ReturnVendor> {
                             contentPadding:
                                 EdgeInsets.symmetric(horizontal: 12),
                           ),
+                          hint: Text(
+                              'Please select a remark'), // Show hint text initially
                           items: remarkOptions.map((String option) {
                             return DropdownMenuItem<String>(
                               value: option,
@@ -561,12 +587,12 @@ class _ReturnVendorState extends State<ReturnVendor> {
                               setState(() {
                                 selectedRemark = newValue;
                                 isOtherRemarkSelected = newValue == 'Others';
+                                if (isOtherRemarkSelected) customRemark = '';
                                 checkSaveEnabled();
                               });
                             }
                           },
                         ),
-                        SizedBox(height: 16),
                         if (isOtherRemarkSelected)
                           TextFormField(
                             initialValue: customRemark,
@@ -617,14 +643,11 @@ class _ReturnVendorState extends State<ReturnVendor> {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: isPending
-                              ? _confirmSaveReturnToVendor
-                              : (isSaveEnabled
-                                  ? _confirmSaveReturnToVendor
-                                  : null),
+                          onPressed:
+                              isSaveEnabled ? _confirmSaveReturnToVendor : null,
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.symmetric(vertical: 15),
-                            backgroundColor: (isSaveEnabled || isPending)
+                            backgroundColor: isSaveEnabled
                                 ? Color.fromARGB(255, 26, 20, 71)
                                 : Colors.grey,
                             minimumSize: Size(150, 50),
@@ -654,15 +677,16 @@ class _ReturnVendorState extends State<ReturnVendor> {
           customReason = '';
           customRemark = '';
         }
-        selectedReason = '';
-        selectedRemark = '';
         isOtherReasonSelected = true;
         isOtherRemarkSelected = true;
       } else {
-        selectedReason = newValue;
-        selectedRemark = newValue;
-        isOtherReasonSelected = false;
-        isOtherRemarkSelected = false;
+        if (isOther) {
+          selectedReason = newValue;
+          isOtherReasonSelected = false;
+        } else {
+          selectedRemark = newValue;
+          isOtherRemarkSelected = false;
+        }
       }
       checkSaveEnabled();
     });
@@ -681,8 +705,12 @@ class _ReturnVendorState extends State<ReturnVendor> {
       isSaveEnabled = amount != null &&
           quantity != null &&
           total.isNotEmpty &&
-          (selectedReason.isNotEmpty || customReason.isNotEmpty) &&
-          (selectedRemark.isNotEmpty || customRemark.isNotEmpty);
+          selectedItem != null && // Check if a material description is selected
+          selectedExpiryDate != null && // Check if an expiry date is selected
+          (selectedReason != null &&
+              (selectedReason != 'Others' || customReason.isNotEmpty)) &&
+          (selectedRemark != null &&
+              (selectedRemark != 'Others' || customRemark.isNotEmpty));
     });
   }
 
@@ -728,9 +756,9 @@ class _ReturnVendorState extends State<ReturnVendor> {
       final objectId = ObjectId();
 
       String reasonValue =
-          isOtherReasonSelected ? customReason : selectedReason;
+          isOtherReasonSelected ? customReason : selectedReason!;
       String remarkValue =
-          isOtherRemarkSelected ? customRemark : selectedRemark;
+          isOtherRemarkSelected ? customRemark : selectedRemark!;
 
       // Format the expiry date as requested: ddMMMyy
       String formattedExpiryDate = selectedExpiryDate != null
