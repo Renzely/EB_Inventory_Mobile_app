@@ -580,14 +580,14 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
 
                 // Time In Container
                 Container(
-                  padding: EdgeInsets.all(25),
+                  padding: EdgeInsets.all(15),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(35),
                         topRight: Radius.circular(35),
-                        bottomLeft: Radius.circular(35),
-                        bottomRight: Radius.circular(35)),
+                        bottomLeft: Radius.circular(25),
+                        bottomRight: Radius.circular(25)),
                     boxShadow: [
                       BoxShadow(
                         color: Color.fromARGB(255, 26, 20, 71)
@@ -659,14 +659,14 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
 
                 // Time Out Container
                 Container(
-                  padding: EdgeInsets.all(25),
+                  padding: EdgeInsets.all(15),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(35),
                         topRight: Radius.circular(35),
-                        bottomLeft: Radius.circular(35),
-                        bottomRight: Radius.circular(35)),
+                        bottomLeft: Radius.circular(25),
+                        bottomRight: Radius.circular(25)),
                     boxShadow: [
                       BoxShadow(
                         color: Color.fromARGB(255, 26, 20, 71)
@@ -914,7 +914,7 @@ class _InventoryState extends State<Inventory> {
         onWillPop: () async => false,
         child: Scaffold(
           body: SideBarLayout(
-            title: "Inventory",
+            title: "INVENTORY",
             mainContent: RefreshIndicator(
               onRefresh: () async {
                 _fetchData();
@@ -2024,7 +2024,11 @@ class _RTVState extends State<RTV> {
                                                 ),
                                               ),
                                               TextSpan(
-                                                text: item.amount.toString(),
+                                                text: item.amount % 1 == 0
+                                                    ? item.amount.toStringAsFixed(
+                                                        0) // No decimal if whole number
+                                                    : item.amount.toStringAsFixed(
+                                                        2), // Show 2 decimals otherwise
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.normal,
                                                   color: Colors.black,
@@ -2045,7 +2049,11 @@ class _RTVState extends State<RTV> {
                                                 ),
                                               ),
                                               TextSpan(
-                                                text: item.quantity.toString(),
+                                                text: item.quantity % 1 == 0
+                                                    ? item.quantity.toStringAsFixed(
+                                                        0) // No decimal if whole number
+                                                    : item.quantity.toStringAsFixed(
+                                                        2), // Show 2 decimals otherwise
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.normal,
                                                   color: Colors.black,

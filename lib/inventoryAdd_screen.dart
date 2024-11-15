@@ -1022,55 +1022,6 @@ class _SKUInventoryState extends State<SKUInventory> {
     },
   };
 
-  // List<String> getSkuDescriptions(List<String> savedSkus) {
-  //   List<String> matchedDescriptions = [];
-  //   for (String sku in savedSkus) {
-  //     _categoryToSkuDescriptions.forEach((category, SKUDescription) {
-  //       if (SKUDescription.contains(sku)) {
-  //         matchedDescriptions.add(sku);
-  //       }
-  //     });
-  //   }
-  //   return matchedDescriptions;
-  // }
-
-  // List<String> getFilteredSkuDescriptions(List<String> savedSkus) {
-  //   List<String> matchedDescriptions = [];
-  //   _categoryToSkuDescriptions.forEach((category, SKUDescription) {
-  //     matchedDescriptions.addAll(SKUDescription.where(
-  //         (SKUDescription) => savedSkus.contains(SKUDescription)));
-  //   });
-  //   return matchedDescriptions;
-  // }
-
-  // void loadSkuDescriptions(String branchName, String category) async {
-  //   List<Map<String, dynamic>> skus =
-  //       await MongoDatabase.getSkusByBranchAndCategory(branchName, category);
-
-  //   print('SKUs by Branch and Category: $skus');
-
-  //   if (skus.isNotEmpty) {
-  //     List<String> savedSkus =
-  //         skus.map((sku) => sku['SKUs'] as String).toList();
-  //     print('Saved SKUs: $savedSkus');
-
-  //     List<String> skuDescriptions = getSkuDescriptions(savedSkus);
-  //     print('SKU Descriptions: $skuDescriptions');
-
-  //     setState(() {
-  //       _availableSkuDescriptions = skuDescriptions;
-  //       _selectedDropdownValue =
-  //           skuDescriptions.isNotEmpty ? skuDescriptions.first : null;
-  //     });
-  //   } else {
-  //     setState(() {
-  //       _availableSkuDescriptions = [];
-  //       _selectedDropdownValue = null;
-  //     });
-  //     print('No SKUs found for this branch and category.');
-  //   }
-  // }
-
   void _toggleDropdown(String version) {
     setState(() {
       if (_versionSelected == version) {
@@ -2752,14 +2703,14 @@ class ExpiryField extends StatefulWidget {
   final int index;
   final Function(String, int, int) onExpiryFieldChanged;
   final VoidCallback onDeletePressed;
-  final String? initialMonth; // Initial value for the dropdown
+  final DateTime? initialDate; // Initial date value for the date picker
   final int? initialPcs; // Nullable initial value for the TextField
 
   ExpiryField({
     required this.index,
     required this.onExpiryFieldChanged,
     required this.onDeletePressed,
-    this.initialMonth,
+    this.initialDate,
     this.initialPcs, // Make this nullable to allow an empty state
   });
 
@@ -2768,15 +2719,22 @@ class ExpiryField extends StatefulWidget {
 }
 
 class _ExpiryFieldState extends State<ExpiryField> {
-  String? _selectedMonth;
+  DateTime? _selectedDate;
   final TextEditingController _expiryController = TextEditingController();
-  bool _isMonthSelected = false; // New flag to track dropdown selection
+  final DateFormat _dateFormat = DateFormat("ddMMMyy"); // Custom format
+  bool _isDateSelected = false; // Flag to track if date is selected
 
   @override
   void initState() {
     super.initState();
 
-    _selectedMonth = widget.initialMonth;
+    // Set initial date if provided
+    _selectedDate = widget.initialDate;
+    if (_selectedDate != null) {
+      _isDateSelected = true;
+    }
+
+    // Set initial pcs value if provided
     if (widget.initialPcs != null) {
       _expiryController.text = widget.initialPcs.toString();
     }
@@ -2791,12 +2749,31 @@ class _ExpiryFieldState extends State<ExpiryField> {
   }
 
   void _onExpiryFieldChanged() {
-    if (_isMonthSelected) {
+    if (_isDateSelected) {
       widget.onExpiryFieldChanged(
-        _selectedMonth!,
+        _dateFormat
+            .format(_selectedDate!)
+            .toUpperCase(), // Convert to uppercase
         int.tryParse(_expiryController.text) ?? 0,
         widget.index,
       );
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _selectedDate = pickedDate;
+        _isDateSelected = true;
+      });
+      _onExpiryFieldChanged();
     }
   }
 
@@ -2807,53 +2784,33 @@ class _ExpiryFieldState extends State<ExpiryField> {
       children: [
         SizedBox(height: 10),
         Text(
-          'Month of Expiry',
+          'Date of Expiry',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         SizedBox(height: 10),
-        DropdownButtonFormField<String>(
-          value: _selectedMonth,
-          onChanged: (String? newValue) {
-            setState(() {
-              _selectedMonth = newValue;
-              _isMonthSelected = newValue != null && newValue.isNotEmpty;
-            });
-            _onExpiryFieldChanged();
-          },
-          decoration: InputDecoration(
-            contentPadding: EdgeInsets.symmetric(horizontal: 12),
-            border: OutlineInputBorder(
-              borderSide: BorderSide(color: Color.fromARGB(210, 46, 0, 77)!),
+        GestureDetector(
+          onTap: () => _selectDate(context),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: Color.fromARGB(210, 46, 0, 77),
+                width: 1.5,
+              ),
               borderRadius: BorderRadius.circular(8.0),
             ),
+            child: Text(
+              _selectedDate != null
+                  ? _dateFormat
+                      .format(_selectedDate!)
+                      .toUpperCase() // Display formatted date in uppercase
+                  : 'Select Expiry Date',
+              style: TextStyle(
+                color: _selectedDate != null ? Colors.black : Colors.grey,
+                fontSize: 16,
+              ),
+            ),
           ),
-          hint: Text('Select Month'),
-          items: [
-            DropdownMenuItem<String>(
-              value: '1 Month',
-              child: Text('1 month'),
-            ),
-            DropdownMenuItem<String>(
-              value: '2 Months',
-              child: Text('2 months'),
-            ),
-            DropdownMenuItem<String>(
-              value: '3 Months',
-              child: Text('3 months'),
-            ),
-            DropdownMenuItem<String>(
-              value: '4 Months',
-              child: Text('4 months'),
-            ),
-            DropdownMenuItem<String>(
-              value: '5 Months',
-              child: Text('5 months'),
-            ),
-            DropdownMenuItem<String>(
-              value: '6 Months',
-              child: Text('6 months'),
-            ),
-          ],
         ),
         SizedBox(height: 16),
         Text(
@@ -2863,8 +2820,7 @@ class _ExpiryFieldState extends State<ExpiryField> {
         SizedBox(height: 8),
         TextField(
           controller: _expiryController,
-          enabled:
-              _isMonthSelected, // Enable TextField only when a month is selected
+          enabled: _isDateSelected, // Enable only when a date is selected
           decoration: InputDecoration(
             hintText: 'Enter PCS of expiry',
             border: OutlineInputBorder(),
