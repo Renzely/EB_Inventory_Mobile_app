@@ -97,6 +97,12 @@ class TimeLog {
   String? timeOutLocation; // Nullable location for time out
   String accountNameBranchManning;
 
+  // New fields for coordinates
+  Map<String, double>?
+      timeInCoordinates; // Nullable map for time in coordinates
+  Map<String, double>?
+      timeOutCoordinates; // Nullable map for time out coordinates
+
   TimeLog({
     required this.id,
     required this.userEmail,
@@ -106,6 +112,8 @@ class TimeLog {
     required String date,
     this.timeInLocation,
     this.timeOutLocation,
+    this.timeInCoordinates,
+    this.timeOutCoordinates,
   });
 
   factory TimeLog.fromJson(Map<String, dynamic> json) => TimeLog(
@@ -118,6 +126,12 @@ class TimeLog {
         date: '',
         timeInLocation: json['timeInLocation'],
         timeOutLocation: json['timeOutLocation'],
+        timeInCoordinates: json['timeInCoordinates'] != null
+            ? Map<String, double>.from(json['timeInCoordinates'])
+            : null,
+        timeOutCoordinates: json['timeOutCoordinates'] != null
+            ? Map<String, double>.from(json['timeOutCoordinates'])
+            : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -125,9 +139,11 @@ class TimeLog {
         'userEmail': userEmail,
         'accountNameBranchManning': accountNameBranchManning,
         'timeIn': timeIn.toIso8601String(),
-        'timeOut': timeOut?.toIso8601String(), // Convert to string if not null
+        'timeOut': timeOut?.toIso8601String(),
         'timeInLocation': timeInLocation,
         'timeOutLocation': timeOutLocation,
+        'timeInCoordinates': timeInCoordinates,
+        'timeOutCoordinates': timeOutCoordinates,
       };
 }
 

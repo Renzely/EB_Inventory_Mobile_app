@@ -432,18 +432,26 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
     final attendanceModel =
         Provider.of<AttendanceModel>(context, listen: false);
     String currentTimeIn =
-        DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
+        DateFormat('dd-MM-yyyy HH:mm').format(DateTime.now());
 
     Position? position = await _getCurrentLocation();
     String location = 'No location';
+    double? latitude;
+    double? longitude;
+
     if (position != null) {
       location = await _getAddressFromLatLong(position);
+      latitude = position.latitude;
+      longitude = position.longitude;
+
       setState(() {
         timeInLocation = location;
       });
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('timeInLocation', location);
+      await prefs.setDouble('timeInLatitude', latitude);
+      await prefs.setDouble('timeInLongitude', longitude);
       await prefs.setString('timeIn', currentTimeIn); // Save Time In
       await prefs.setBool('isTimeInRecorded', true); // Save Time In status
     }
@@ -453,6 +461,8 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
         widget.userEmail,
         location,
         _selectedAccount ?? '',
+        latitude ?? 0.0, // Default to 0.0 if position is null
+        longitude ?? 0.0, // Default to 0.0 if position is null
       );
       if (result == "Success") {
         attendanceModel.updateTimeIn(currentTimeIn);
@@ -470,18 +480,26 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
     final attendanceModel =
         Provider.of<AttendanceModel>(context, listen: false);
     String currentTimeOut =
-        DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
+        DateFormat('dd-MM-yyyy HH:mm').format(DateTime.now());
 
     Position? position = await _getCurrentLocation();
     String location = 'No location';
+    double? latitude;
+    double? longitude;
+
     if (position != null) {
       location = await _getAddressFromLatLong(position);
+      latitude = position.latitude;
+      longitude = position.longitude;
+
       setState(() {
         timeOutLocation = location;
       });
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('timeOutLocation', location);
+      await prefs.setDouble('timeOutLatitude', latitude);
+      await prefs.setDouble('timeOutLongitude', longitude);
     }
 
     setState(() {
@@ -493,6 +511,8 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
         widget.userEmail,
         location,
         _selectedAccount ?? '', // Pass the selected branch
+        latitude ?? 0.0, // Default to 0.0 if position is null
+        longitude ?? 0.0, // Default to 0.0 if position is null
       );
       if (result == "Success") {
         attendanceModel.updateTimeOut(currentTimeOut);
@@ -739,9 +759,7 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
                 SizedBox(height: 20),
 
                 if (attendanceModel.timeIn == null ||
-                    attendanceModel.timeOut == null ||
-                    _formatTime(attendanceModel.timeIn) == null ||
-                    _formatTime(attendanceModel.timeOut) == null)
+                    _formatTime(attendanceModel.timeIn) == null)
                   Text(
                     'No attendance recorded for this branch.',
                     style: TextStyle(
@@ -1020,7 +1038,7 @@ class _InventoryState extends State<Inventory> {
                                       }
 
                                       bool isEditing = snapshot.data ??
-                                          true; // Use false as default
+                                          false; // Use false as default
                                       print(
                                           'Item ${item.inputId} isEditing: $isEditing');
 
@@ -1321,7 +1339,7 @@ class _InventoryState extends State<Inventory> {
                                                 TextSpan(
                                                   children: [
                                                     TextSpan(
-                                                      text: 'SKU Code: ',
+                                                      text: '4-Pack BarCode: ',
                                                       style: TextStyle(
                                                           color: Colors.black),
                                                     ),

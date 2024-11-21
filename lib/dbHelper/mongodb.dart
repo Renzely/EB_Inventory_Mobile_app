@@ -195,8 +195,12 @@ class MongoDatabase {
     }
   }
 
-  static Future<String> logTimeIn(String userEmail, String timeInLocation,
-      String accountNameBranchManning) async {
+  static Future<String> logTimeIn(
+      String userEmail,
+      String timeInLocation,
+      String accountNameBranchManning,
+      double timeInLatitude,
+      double timeInLongitude) async {
     try {
       await connect();
       var timeLogCollection = db.collection(USER_ATTENDANCE);
@@ -225,6 +229,11 @@ class MongoDatabase {
               'timeOut': null,
               'timeInLocation': timeInLocation,
               'timeOutLocation': null,
+              'time_in_coordinates': {
+                'latitude': timeInLatitude,
+                'longitude': timeInLongitude,
+              },
+              'time_out_coordinates': null,
             }
           ]
         };
@@ -241,8 +250,12 @@ class MongoDatabase {
     }
   }
 
-  static Future<String> logTimeOut(String userEmail, String timeOutLocation,
-      String accountNameBranchManning) async {
+  static Future<String> logTimeOut(
+      String userEmail,
+      String timeOutLocation,
+      String accountNameBranchManning,
+      double timeOutLatitude,
+      double timeOutLongitude) async {
     try {
       await connect();
       var timeLogCollection = db.collection(USER_ATTENDANCE);
@@ -253,7 +266,11 @@ class MongoDatabase {
       // Update only the latest open time-log for the user and branch on today's date
       var updates = modify
           .set('timeLogs.\$.timeOut', currentTime)
-          .set('timeLogs.\$.timeOutLocation', timeOutLocation);
+          .set('timeLogs.\$.timeOutLocation', timeOutLocation)
+          .set('timeLogs.\$.time_out_coordinates', {
+        'latitude': timeOutLatitude,
+        'longitude': timeOutLongitude,
+      });
 
       var result = await timeLogCollection.updateOne(
         where
