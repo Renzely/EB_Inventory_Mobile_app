@@ -33,6 +33,7 @@ class _SignUpState extends State<SignUp> {
   var branchController = TextEditingController(text: 'Branch');
   bool isActivate = false;
   bool isLoading = false;
+  bool isBranchFieldVisible = false; // Control visibility
   int type = 1;
 
   String? fnameError;
@@ -47,7 +48,7 @@ class _SignUpState extends State<SignUp> {
 
   @override
   Widget build(BuildContext context) {
-    List<String> remarksChoices = ['REGULAR', 'RELIVER', 'PROBATIONARY'];
+    //List<String> remarksChoices = ['REGULAR', 'RELIVER', 'PROBATIONARY'];
     return WillPopScope(
         onWillPop: () async => false,
         child: Scaffold(
@@ -55,7 +56,7 @@ class _SignUpState extends State<SignUp> {
           body: SingleChildScrollView(
             child: Center(
               child: Container(
-                height: 1200,
+                height: 1000,
                 width: 500,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -65,7 +66,7 @@ class _SignUpState extends State<SignUp> {
                       Color.fromARGB(255, 255, 196, 0)!,
                     ],
                   ),
-                  borderRadius: BorderRadius.circular(30),
+                  // borderRadius: BorderRadius.circular(10),
                 ),
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -80,49 +81,50 @@ class _SignUpState extends State<SignUp> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 30),
-                    DropdownButtonFormField<String>(
-                      value: selectedRemarks,
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedRemarks = newValue!;
-                          remarksController.text = newValue;
-                        });
-                      },
-                      items: remarksChoices
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(
-                            value,
-                            style: TextStyle(
-                              color: Colors.black,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      decoration: InputDecoration(
-                        hintText: 'Remarks',
-                        fillColor: Colors.white,
-                        filled: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                    ),
+                    // const SizedBox(height: 30),
+                    // DropdownButtonFormField<String>(
+                    //   value: selectedRemarks,
+                    //   onChanged: (String? newValue) {
+                    //     setState(() {
+                    //       selectedRemarks = newValue!;
+                    //       remarksController.text = newValue;
+                    //     });
+                    //   },
+                    //   items: remarksChoices
+                    //       .map<DropdownMenuItem<String>>((String value) {
+                    //     return DropdownMenuItem<String>(
+                    //       value: value,
+                    //       child: Text(
+                    //         value,
+                    //         style: TextStyle(
+                    //           color: Colors.black,
+                    //         ),
+                    //       ),
+                    //     );
+                    //   }).toList(),
+                    //   decoration: InputDecoration(
+                    //     hintText: 'Remarks',
+                    //     fillColor: Colors.white,
+                    //     filled: true,
+                    //     border: OutlineInputBorder(
+                    //       borderRadius: BorderRadius.circular(20),
+                    //     ),
+                    //   ),
+                    // ),
                     const SizedBox(height: 20),
-                    TextField(
-                      enabled: false, // Disable the TextField
-                      controller: branchController,
-                      decoration: InputDecoration(
-                        hintText: 'Branch',
-                        fillColor: Colors.white,
-                        filled: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
+                    if (isBranchFieldVisible)
+                      TextField(
+                        enabled: false, // Disable the TextField
+                        controller: branchController,
+                        decoration: InputDecoration(
+                          hintText: 'Branch',
+                          fillColor: Colors.white,
+                          filled: true,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
                       ),
-                    ),
                     const SizedBox(height: 20),
                     TextField(
                       obscureText: false,

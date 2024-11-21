@@ -288,7 +288,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
                                 border: OutlineInputBorder(),
                                 contentPadding:
                                     EdgeInsets.symmetric(horizontal: 12),
-                                hintText: DateFormat('yyyy-MM-dd')
+                                hintText: DateFormat('dd-MM-yyyy')
                                     .format(selectedDate),
                               ),
                             ),
@@ -414,36 +414,32 @@ class _ReturnVendorState extends State<ReturnVendor> {
                     Container(
                       decoration: BoxDecoration(
                         border: Border.all(
-                            color: Colors.grey), // Border around the box
+                          color: Color.fromARGB(210, 46, 0, 77), // Border color
+                          width: 1.5, // Border thickness
+                        ),
                         borderRadius:
-                            BorderRadius.circular(5.0), // Rounded corners
+                            BorderRadius.circular(8.0), // Rounded corners
                       ),
                       padding: EdgeInsets.symmetric(
-                          vertical: 1, horizontal: 8), // Padding inside the box
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment
-                            .center, // Align the content centrally
-                        children: [
-                          ElevatedButton(
-                            onPressed: () => _selectExpiryDate(
-                                context), // Call the expiry date picker
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white, // Button color
-                              elevation: 0, // Remove button elevation
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  formatDate(selectedExpiryDate)
-                                      .toUpperCase(), // Display the selected expiry date
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              ],
+                          horizontal: 12, vertical: 16), // Inner padding
+                      child: GestureDetector(
+                        onTap: () =>
+                            _selectExpiryDate(context), // Trigger date picker
+                        child: Center(
+                          // Center the content
+                          child: Text(
+                            selectedExpiryDate != null
+                                ? formatDate(selectedExpiryDate)
+                                    .toUpperCase() // Display formatted date
+                                : 'Select Expiry Date', // Placeholder text
+                            style: TextStyle(
+                              color: selectedExpiryDate != null
+                                  ? Colors.black
+                                  : Colors.grey, // Text color
+                              fontSize: 16, // Font size
                             ),
                           ),
-                        ],
+                        ),
                       ),
                     ),
                     SizedBox(height: 10),
@@ -476,7 +472,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
                         ),
                         SizedBox(height: 16),
                         Text(
-                          'Quantity',
+                          'QUANTITY',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -772,7 +768,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
         '_id': objectId,
         'inputId': inputId,
         'userEmail': widget.userEmail,
-        'date': DateFormat('yyyy-MM-dd').format(selectedDate),
+        'date': DateFormat('dd-MM-yyyy').format(selectedDate),
         'merchandiserName': '${widget.userName} ${widget.userLastName}',
         'outlet': selectedOutlet,
         'category': selectedCategory,

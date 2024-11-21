@@ -102,9 +102,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.grey[600]!,
-                Colors.grey[800]!,
-                Colors.grey[900]!,
+                Color.fromARGB(255, 26, 20, 71),
+                Color.fromARGB(255, 26, 20, 71),
+                Color.fromARGB(255, 255, 196, 0)!,
               ],
             ),
           ),
@@ -124,6 +124,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 validator: validatePassword,
                 decoration: InputDecoration(
                   hintText: 'Enter new password',
+                  prefixIconColor: Color.fromARGB(255, 26, 20, 71),
                   prefixIcon: Icon(Icons.lock),
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -147,6 +148,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 decoration: InputDecoration(
                   hintText: 'Confirm new password',
                   prefixIcon: Icon(Icons.lock),
+                  prefixIconColor: Color.fromARGB(255, 26, 20, 71),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _showConfirmPassword
@@ -170,7 +172,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[900],
+                  backgroundColor: Color.fromARGB(255, 26, 20, 71),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50),
                   ),

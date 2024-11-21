@@ -58,7 +58,7 @@ class _AddInventoryState extends State<AddInventory> {
     _selectedDate =
         DateTime.now(); // Initialize _selectedDate to the current date
     _dateController = TextEditingController(
-      text: DateFormat('yyyy-MM-dd')
+      text: DateFormat('dd-MM-yyyy')
           .format(_selectedDate), // Set initial text of controller
     );
     _weekController.addListener(() {
@@ -152,64 +152,39 @@ class _AddInventoryState extends State<AddInventory> {
 
     List<List<DateTime>> periods = [
       [
-        DateTime(2024, 10, 12),
-        DateTime(2024, 10, 21)
-      ], // Actual range: Oct 12 - Oct 20 (labeled as Oct 12 - Oct 18)
-      [
-        DateTime(2024, 10, 19),
-        DateTime(2024, 10, 28)
-      ], // Actual range: Oct 19 - Oct 27 (labeled as Oct 19 - Oct 25)
-      [
-        DateTime(2024, 10, 26),
-        DateTime(2024, 11, 4)
-      ], // Actual range: Oct 26 - Nov 3 (labeled as Oct 26 - Nov 1)
-      [
-        DateTime(2024, 11, 2),
-        DateTime(2024, 11, 11)
-      ], // Actual range: Nov 2 - Nov 10 (labeled as Nov 2 - Nov 8)
-      [
-        DateTime(2024, 11, 9),
-        DateTime(2024, 11, 18)
-      ], // Actual range: Nov 9 - Nov 17 (labeled as Nov 9 - Nov 15)
-      [
-        DateTime(2024, 11, 16),
-        DateTime(2024, 11, 25)
-      ], // Actual range: Nov 16 - Nov 24 (labeled as Nov 16 - Nov 22)
-      [
-        DateTime(2024, 11, 23),
-        DateTime(2024, 12, 2)
-      ], // Actual range: Nov 23 - Dec 1 (labeled as Nov 23 - Nov 29)
-      [
-        DateTime(2024, 11, 30),
-        DateTime(2024, 12, 9)
-      ], // Actual range: Nov 30 - Dec 8 (labeled as Nov 30 - Dec 6)
-      [
-        DateTime(2024, 12, 7),
-        DateTime(2024, 12, 16)
-      ], // Actual range: Dec 7 - Dec 15 (labeled as Dec 7 - Dec 13)
-      [
-        DateTime(2024, 12, 14),
-        DateTime(2024, 12, 23)
-      ], // Actual range: Dec 14 - Dec 22 (labeled as Dec 14 - Dec 20)
-      [
-        DateTime(2024, 12, 21),
-        DateTime(2024, 12, 30)
-      ], // Actual range: Dec 21 - Dec 29 (labeled as Dec 21 - Dec 27)
+        DateTime(2024, 11, 18), // Week start
+        DateTime(2024, 11, 24) // Week end (Sunday)
+      ],
+      [DateTime(2024, 11, 25), DateTime(2024, 12, 1)],
+      [DateTime(2024, 12, 2), DateTime(2024, 12, 8)],
+      [DateTime(2024, 12, 9), DateTime(2024, 12, 15)],
+      [DateTime(2024, 12, 16), DateTime(2024, 12, 22)],
+      [DateTime(2024, 12, 23), DateTime(2024, 12, 29)],
+      [DateTime(2024, 12, 30), DateTime(2025, 1, 5)],
     ];
+
     List<DateTime> currentPeriod = periods.firstWhere(
         (period) =>
-            currentDate.isAfter(period[0]) && currentDate.isBefore(period[1]),
-        orElse: () =>
-            [DateTime(0), DateTime(0)] // return a default empty period
-        );
+            currentDate.isAfter(period[0].subtract(const Duration(days: 1))) &&
+            currentDate.isBefore(period[1].add(const Duration(days: 1))),
+        orElse: () => [DateTime(0), DateTime(0)]);
 
     if (currentPeriod.isNotEmpty) {
-      // Proceed with currentPeriod logic
-      String periodString =
-          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1].subtract(Duration(days: 3)))}';
-      items.add(
-          DropdownMenuItem(child: Text(periodString), value: periodString));
-      print("Selected period: ${currentPeriod[0]} - ${currentPeriod[1]}");
+      // Displayed workweek: Monday to Saturday
+      String displayString =
+          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1].subtract(Duration(days: 1)))}';
+
+      // Covered week: Monday to Sunday
+      String coveredString =
+          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1])}';
+
+      items.add(DropdownMenuItem(
+          child: Text(displayString),
+          value: coveredString // Store the full covered week as value
+          ));
+
+      print("Displayed week: $displayString");
+      print("Covered week: $coveredString");
     } else {
       // Handle the case where no period is found
       print("No matching period found.");
@@ -418,88 +393,69 @@ class _AddInventoryState extends State<AddInventory> {
                                                     _selectedAccount != null &&
                                                         _selectedPeriod != null;
 
-                                                // Null check before splitting
                                                 if (value != null) {
-                                                  String actualValue =
-                                                      value.split('-')[1];
+                                                  String actualValue = value
+                                                          .split('-')[
+                                                      0]; // Use the first date (start date)
                                                   print(
-                                                      'Selected period: $value');
+                                                      'Selected Period: $value');
                                                   switch (actualValue) {
-                                                    case 'Oct18':
-                                                      _monthController.text =
-                                                          'October';
-                                                      _weekController.text =
-                                                          'Week 42';
-                                                      break;
-                                                    case 'Oct25':
-                                                      _monthController.text =
-                                                          'October';
-                                                      _weekController.text =
-                                                          'Week 43';
-                                                      break;
-                                                    case 'Nov01':
-                                                      _monthController.text =
-                                                          'November';
-                                                      _weekController.text =
-                                                          'Week 44';
-                                                      break;
-                                                    case 'Nov08':
-                                                      _monthController.text =
-                                                          'November';
-                                                      _weekController.text =
-                                                          'Week 45';
-                                                      break;
-                                                    case 'Nov15':
+                                                    case 'Nov18':
                                                       _monthController.text =
                                                           'November';
                                                       _weekController.text =
                                                           'Week 46';
                                                       break;
-                                                    case 'Nov22':
+                                                    case 'Nov25':
                                                       _monthController.text =
                                                           'November';
                                                       _weekController.text =
                                                           'Week 47';
                                                       break;
-                                                    case 'Nov29':
+                                                    case 'Dec02':
                                                       _monthController.text =
                                                           'November';
                                                       _weekController.text =
                                                           'Week 48';
                                                       break;
-                                                    case 'Dec06':
+                                                    case 'Dec09':
                                                       _monthController.text =
                                                           'December';
                                                       _weekController.text =
                                                           'Week 49';
                                                       break;
-                                                    case 'Dec13':
+                                                    case 'Dec16':
                                                       _monthController.text =
                                                           'December';
                                                       _weekController.text =
                                                           'Week 50';
                                                       break;
-                                                    case 'Dec20':
+                                                    case 'Dec23':
                                                       _monthController.text =
                                                           'December';
                                                       _weekController.text =
                                                           'Week 51';
                                                       break;
-                                                    case 'Dec27':
+                                                    case 'Dec30':
                                                       _monthController.text =
                                                           'December';
                                                       _weekController.text =
                                                           'Week 52';
                                                       break;
                                                     default:
+                                                      print(
+                                                          'No match for selected period: $actualValue');
                                                       _monthController.clear();
                                                       _weekController.clear();
                                                       break;
                                                   }
+                                                  _showAdditionalInfo =
+                                                      true; // Ensure this is set to true
                                                 } else {
-                                                  // Handle null value case
                                                   _monthController.clear();
                                                   _weekController.clear();
+                                                  _showAdditionalInfo =
+                                                      false; // Reset if no period is selected
                                                 }
                                                 _showAdditionalInfo = true;
                                               });
@@ -684,7 +640,7 @@ class _AddInventoryState extends State<AddInventory> {
     if (pickedDate != null) {
       setState(() {
         _selectedDate = pickedDate;
-        _dateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+        _dateController.text = DateFormat('dd-MM-yyyy').format(pickedDate);
       });
     }
   }
@@ -871,7 +827,7 @@ class _SKUInventoryState extends State<SKUInventory> {
     InventoryItem newItem = InventoryItem(
       id: ObjectId(), // Generate this as needed
       userEmail: widget.userEmail,
-      date: DateFormat('yyyy-MM-dd').format(DateTime.now()), // Current date
+      date: DateFormat('dd-MM-yyyy').format(DateTime.now()), // Current date
       inputId: inputid,
       name: '${widget.userName} ${widget.userLastName}',
       accountNameBranchManning: widget.selectedAccount,
@@ -2152,7 +2108,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                                                         ),
                                                         TextSpan(
                                                           text: DateFormat(
-                                                                  'yyyy-MM-dd')
+                                                                  'dd-MM-yyyy')
                                                               .format(DateTime
                                                                   .now()),
                                                         ),
@@ -2784,7 +2740,7 @@ class _ExpiryFieldState extends State<ExpiryField> {
       children: [
         SizedBox(height: 10),
         Text(
-          'Date of Expiry',
+          'EXPIRY DATE',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         SizedBox(height: 10),

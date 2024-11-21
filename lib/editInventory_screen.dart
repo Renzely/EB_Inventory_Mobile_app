@@ -92,7 +92,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
     int newEnding = endingSA + endingWA;
 
     // Set the current date and generate a new Input ID
-    String todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    String todayDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
     String newInputId = generateInputID();
 
     _dateController = TextEditingController(text: todayDate);
