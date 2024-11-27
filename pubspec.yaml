@@ -24,6 +24,7 @@ dependencies:
   bson: ^5.0.4
   geocoding: ^3.0.0
   location: ^6.0.2
+  connectivity_plus: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -37,6 +38,7 @@ flutter:
   generate: true
   assets:
     - assets/images/Studio-Project-nobg.png
+    - assets/images/account.png
     - assets/images/2x2_YNSON.png
     - assets/images/bmp.png
 

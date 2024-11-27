@@ -36,8 +36,8 @@ class _LoginPageState extends State<LoginPage> {
     // Check for empty username and password
     if (username.isEmpty || password.isEmpty) {
       setState(() {
-        usernameErrorText = username.isEmpty ? 'Input username' : '';
-        passwordErrorText = password.isEmpty ? 'Input password' : '';
+        usernameErrorText = username.isEmpty ? 'Enter username' : '';
+        passwordErrorText = password.isEmpty ? 'Enter password' : '';
         _isLoading = false; // Stop loading if there's an error
       });
       return; // Exit the method if either field is empty

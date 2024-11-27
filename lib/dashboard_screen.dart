@@ -40,7 +40,7 @@ class Attendance extends StatelessWidget {
     return WillPopScope(
         onWillPop: () async => false,
         child: SideBarLayout(
-          title: "Attendance",
+          title: "ATTENDANCE",
           mainContent: SingleChildScrollView(
             // Wrap the Column with SingleChildScrollView
             child: Column(
@@ -74,13 +74,15 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
   String? timeOutLocation = 'No location';
   bool _isTimeInLoading = false; // For Time In button loading state
   bool _isTimeOutLoading = false; // For Time Out button loading state
-  String _selectedAccount = '';
+  String? _selectedAccount; // Persisted selected value
   List<String> _branchList = [];
   Map<String, Map<String, dynamic>> _attendanceData = {};
 
   @override
   void initState() {
     super.initState();
+
+    _loadSavedBranch();
 
     // Set loading states to true initially
     _isTimeInLoading = true;
@@ -124,6 +126,9 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
           .find(mongo.where.eq('emailAddress', widget.userEmail))
           .toList();
 
+      final prefs = await SharedPreferences.getInstance();
+      final savedBranch = prefs.getString('selectedBranch');
+
       setState(() {
         _branchList = branchDocs
             .map((doc) => doc['accountNameBranchManning'])
@@ -131,12 +136,17 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
             .expand((branch) => branch is List ? branch : [branch])
             .map((branch) => branch.toString())
             .toList();
-        _selectedAccount = _branchList.isNotEmpty ? _branchList.first : '';
+
+        // Use the saved branch if it exists, otherwise fallback to the first branch
+        _selectedAccount =
+            savedBranch != null && _branchList.contains(savedBranch)
+                ? savedBranch
+                : (_branchList.isNotEmpty ? _branchList.first : '');
       });
 
-      // Load attendance data for the first branch
+      // Load attendance data for the saved/selected branch
       if (_selectedAccount != null && _attendanceData.isEmpty) {
-        await _loadAttendanceLocally(_selectedAccount);
+        await _loadAttendanceLocally(_selectedAccount!);
       }
 
       await db.close();
@@ -145,11 +155,23 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
     }
   }
 
-  void _onBranchChanged(String newBranch) async {
+  Future<void> _loadSavedBranch() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedAccount = prefs.getString('selectedBranch');
+    });
+  }
+
+  Future<void> _saveSelectedBranch(String branch) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selectedBranch', branch);
+  }
+
+  Future<void> _onBranchChanged(String newBranch) async {
     setState(() {
       _selectedAccount = newBranch;
-      print('Selected branch: $newBranch');
     });
+    _saveSelectedBranch(newBranch); // Save the selected branch
 
     // Reset attendance model
     Provider.of<AttendanceModel>(context, listen: false).reset();
@@ -208,7 +230,7 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
       _updateUIFromLocalData(localData);
     } else {
       var attendanceStatus = await MongoDatabase.getAttendanceStatus(
-          widget.userEmail, _selectedAccount);
+          widget.userEmail, _selectedAccount!);
 
       if (attendanceStatus != null && attendanceStatus.isNotEmpty) {
         if (attendanceStatus['accountNameBranchManning'] == currentBranch) {
@@ -280,8 +302,9 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
         .setIsTimeOutRecorded(serverData['isTimeOutRecorded'] ?? false);
 
     if (_selectedAccount != null && serverData.isNotEmpty) {
-      _attendanceData[_selectedAccount] = serverData;
-      _saveAttendanceLocally(_selectedAccount, serverData);
+      _attendanceData[_selectedAccount!] = serverData; // Use '!' for null check
+      _saveAttendanceLocally(
+          _selectedAccount!, serverData); // Use '!' for null check
     }
   }
 
@@ -295,8 +318,8 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
     });
 
     if (_selectedAccount != null) {
-      _attendanceData[_selectedAccount] = {};
-      _saveAttendanceLocally(_selectedAccount, {});
+      _attendanceData[_selectedAccount!] = {};
+      _saveAttendanceLocally(_selectedAccount!, {}); // Use '!' for null check
     }
   }
 
@@ -1845,7 +1868,7 @@ class _RTVState extends State<RTV> {
         onWillPop: () async => false,
         child: Scaffold(
           body: SideBarLayout(
-            title: "Return To Vendor",
+            title: "RTV",
             mainContent: RefreshIndicator(
               onRefresh: () async {
                 _fetchData();
@@ -2375,6 +2398,14 @@ Future<void> _logout(BuildContext context) async {
   }
 }
 
+// Helper function to capitalize the first letter
+String _capitalizeFirstLetter(String text) {
+  if (text.isEmpty) {
+    return text;
+  }
+  return text[0].toUpperCase() + text.substring(1).toLowerCase();
+}
+
 class SideBarLayout extends StatefulWidget {
   final String title;
   final Widget mainContent;
@@ -2483,7 +2514,29 @@ class _SideBarLayoutState extends State<SideBarLayout> {
                   padding: EdgeInsets.zero,
                   children: [
                     UserAccountsDrawerHeader(
-                      accountName: null, // Remove the name
+                      currentAccountPicture: CircleAvatar(
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          Icons.account_circle, // Use the desired icon here
+                          size: 73.0, // Adjust the size of the icon
+                          color: Color.fromARGB(255, 26, 20,
+                              71), // Change the icon color if needed
+                        ),
+                        radius: 40.0, // Adjust the size of the image
+                      ),
+                      accountName: Padding(
+                        padding: const EdgeInsets.only(
+                            top:
+                                2.0), // Reduce the space between the icon and the name
+                        child: Text(
+                          '${_capitalizeFirstLetter(widget.userName)} ${_capitalizeFirstLetter(widget.userLastName)}', // Capitalize first letter of first name and last name
+                          style: TextStyle(
+                            color: Colors.white, // Text color
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18.0, // Adjust the font size as needed
+                          ),
+                        ),
+                      ),
                       accountEmail: null, // Remove the email
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -2497,7 +2550,7 @@ class _SideBarLayoutState extends State<SideBarLayout> {
                     ),
                     ListTile(
                       leading: const Icon(
-                        Icons.account_circle_outlined,
+                        Icons.account_box_outlined,
                         color: Color.fromARGB(255, 26, 20, 71),
                       ),
                       title: const Text('Attendance'),

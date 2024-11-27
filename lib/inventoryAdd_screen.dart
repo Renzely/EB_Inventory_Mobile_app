@@ -1434,7 +1434,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'WEEK NUMBER',
+                        'WEEK',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),

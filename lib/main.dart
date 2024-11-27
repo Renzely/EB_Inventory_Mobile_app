@@ -3,17 +3,24 @@
 import 'package:demo_app/dbHelper/mongodb.dart';
 import 'package:demo_app/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:demo_app/login_screen.dart'; // Import your LoginPage
+import 'package:demo_app/login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:demo_app/dashboard_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-// Import MongoDatabase
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 void main() async {
-  await MongoDatabase.connect();
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize connectivity service
+  final connectivity = Connectivity();
+  connectivity.onConnectivityChanged.listen((List<ConnectivityResult> result) {
+    print('Connection status changed ${result.join(', ')}');
+    // Handle connection changes here if needed
+  });
+
+  await MongoDatabase.connect();
   final prefs = await SharedPreferences.getInstance();
   final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
   final userName = prefs.getString('userName') ?? '';
@@ -37,21 +44,22 @@ class MyApp extends StatelessWidget {
   final String userName;
   final String userLastName;
   final String userEmail;
-  final String userMiddleName;
   final String userContactNum;
+  final String userMiddleName;
 
-  const MyApp(
-      {required this.isLoggedIn,
-      required this.userName,
-      required this.userLastName,
-      required this.userEmail,
-      required this.userContactNum,
-      required this.userMiddleName});
+  const MyApp({
+    required this.isLoggedIn,
+    required this.userName,
+    required this.userLastName,
+    required this.userEmail,
+    required this.userContactNum,
+    required this.userMiddleName,
+  });
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => AttendanceModel(), // Provide AttendanceModel here
+      create: (_) => AttendanceModel(),
       child: MaterialApp(
         theme: ThemeData(
           textTheme: GoogleFonts.robotoTextTheme(
