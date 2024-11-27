@@ -258,7 +258,7 @@ class _ReturnVendorState extends State<ReturnVendor> {
                   children: [
                     SizedBox(height: 16),
                     Text(
-                      'RTV No.',
+                      'RTV NUMBER',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
