@@ -950,6 +950,8 @@ class _SKUInventoryState extends State<SKUInventory> {
       "Engkanto Paint Me Purple - Ube Lager",
       "Engkanto Mango Nation Hazy IPA",
       "Engkanto Green Lava Double IPA",
+      "Engkanto Nutty & Nice Choco Nut Stout",
+      "S&R Sun Daze Golden Ale"
     ],
   };
 
@@ -975,6 +977,14 @@ class _SKUInventoryState extends State<SKUInventory> {
     'Engkanto Green Lava Double IPA': {
       'Product': ' ',
       '4-Pack Barcode': '4 806534 610151'
+    },
+    'Engkanto Nutty & Nice Choco Nut Stout': {
+      'Product': ' ',
+      '4-Pack Barcode': '4 806534 610502'
+    },
+    'S&R Sun Daze Golden Ale': {
+      'Product': ' ',
+      '4-Pack Barcode': '4 806534 610403'
     },
   };
 

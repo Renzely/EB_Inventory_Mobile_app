@@ -125,6 +125,8 @@ class _ReturnVendorState extends State<ReturnVendor> {
       "Engkanto Paint Me Purple - Ube Lager",
       "Engkanto Mango Nation Hazy IPA",
       "Engkanto Green Lava Double IPA",
+      "Engkanto Nutty & Nice Choco Nut Stout",
+      "S&R Golden Ale"
     ],
   };
 
@@ -215,6 +217,8 @@ class _ReturnVendorState extends State<ReturnVendor> {
             "Engkanto Paint Me Purple - Ube Lager",
             "Engkanto Mango Nation Hazy IPA",
             "Engkanto Green Lava Double IPA",
+            "Engkanto Nutty & Nice Choco Nut Stout",
+            "S&R Sun Daze Golden Ale"
           ];
           break;
 

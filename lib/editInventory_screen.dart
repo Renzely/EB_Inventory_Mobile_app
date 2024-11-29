@@ -227,64 +227,39 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
 
     List<List<DateTime>> periods = [
       [
-        DateTime(2024, 10, 12),
-        DateTime(2024, 10, 20)
-      ], // Actual range: Oct 12 - Oct 20 (labeled as Oct 12 - Oct 18)
-      [
-        DateTime(2024, 10, 19),
-        DateTime(2024, 10, 27)
-      ], // Actual range: Oct 19 - Oct 27 (labeled as Oct 19 - Oct 25)
-      [
-        DateTime(2024, 10, 26),
-        DateTime(2024, 11, 3)
-      ], // Actual range: Oct 26 - Nov 3 (labeled as Oct 26 - Nov 1)
-      [
-        DateTime(2024, 11, 2),
-        DateTime(2024, 11, 10)
-      ], // Actual range: Nov 2 - Nov 10 (labeled as Nov 2 - Nov 8)
-      [
-        DateTime(2024, 11, 9),
-        DateTime(2024, 11, 15)
-      ], // Actual range: Nov 9 - Nov 17 (labeled as Nov 9 - Nov 15)
-      [
-        DateTime(2024, 11, 16),
-        DateTime(2024, 11, 22)
-      ], // Actual range: Nov 16 - Nov 24 (labeled as Nov 16 - Nov 22)
-      [
-        DateTime(2024, 11, 23),
-        DateTime(2024, 11, 29)
-      ], // Actual range: Nov 23 - Dec 1 (labeled as Nov 23 - Nov 29)
-      [
-        DateTime(2024, 11, 30),
-        DateTime(2024, 12, 6)
-      ], // Actual range: Nov 30 - Dec 8 (labeled as Nov 30 - Dec 6)
-      [
-        DateTime(2024, 12, 7),
-        DateTime(2024, 12, 13)
-      ], // Actual range: Dec 7 - Dec 15 (labeled as Dec 7 - Dec 13)
-      [
-        DateTime(2024, 12, 14),
-        DateTime(2024, 12, 20)
-      ], // Actual range: Dec 14 - Dec 22 (labeled as Dec 14 - Dec 20)
-      [
-        DateTime(2024, 12, 21),
-        DateTime(2024, 12, 27)
-      ], // Actual range: Dec 21 - Dec 29 (labeled as Dec 21 - Dec 27)
+        DateTime(2024, 11, 18), // Week start
+        DateTime(2024, 11, 24) // Week end (Sunday)
+      ],
+      [DateTime(2024, 11, 25), DateTime(2024, 12, 1)],
+      [DateTime(2024, 12, 2), DateTime(2024, 12, 8)],
+      [DateTime(2024, 12, 9), DateTime(2024, 12, 15)],
+      [DateTime(2024, 12, 16), DateTime(2024, 12, 22)],
+      [DateTime(2024, 12, 23), DateTime(2024, 12, 29)],
+      [DateTime(2024, 12, 30), DateTime(2025, 1, 5)],
     ];
+
     List<DateTime> currentPeriod = periods.firstWhere(
         (period) =>
-            currentDate.isAfter(period[0]) && currentDate.isBefore(period[1]),
-        orElse: () =>
-            [DateTime(0), DateTime(0)] // return a default empty period
-        );
+            currentDate.isAfter(period[0].subtract(const Duration(days: 1))) &&
+            currentDate.isBefore(period[1].add(const Duration(days: 1))),
+        orElse: () => [DateTime(0), DateTime(0)]);
 
     if (currentPeriod.isNotEmpty) {
-      // Proceed with currentPeriod logic
-      String periodString =
-          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1].subtract(Duration(days: 0)))}';
-      items.add(
-          DropdownMenuItem(child: Text(periodString), value: periodString));
-      print("Selected period: ${currentPeriod[0]} - ${currentPeriod[1]}");
+      // Displayed workweek: Monday to Saturday
+      String displayString =
+          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1].subtract(Duration(days: 1)))}';
+
+      // Covered week: Monday to Sunday
+      String coveredString =
+          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1])}';
+
+      items.add(DropdownMenuItem(
+          child: Text(displayString),
+          value: coveredString // Store the full covered week as value
+          ));
+
+      print("Displayed week: $displayString");
+      print("Covered week: $coveredString");
     } else {
       // Handle the case where no period is found
       print("No matching period found.");
@@ -708,51 +683,35 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                                       _selectedPeriod = value;
                                       _isSaveEnabled = _selectedPeriod != null;
                                       if (value != null) {
-                                        String actualValue =
-                                            value.split('-')[1];
-                                        print('Selected period: $value');
+                                        String actualValue = value.split('-')[
+                                            0]; // Use the first date (start date)
+                                        print('Selected Period: $value');
                                         switch (actualValue) {
-                                          case 'Oct18':
-                                            _monthController.text = 'October';
-                                            _weekController.text = 'Week 42';
-                                            break;
-                                          case 'Oct25':
-                                            _monthController.text = 'October';
-                                            _weekController.text = 'Week 43';
-                                            break;
-                                          case 'Nov01':
-                                            _monthController.text = 'November';
-                                            _weekController.text = 'Week 44';
-                                            break;
-                                          case 'Nov08':
-                                            _monthController.text = 'November';
-                                            _weekController.text = 'Week 45';
-                                            break;
-                                          case 'Nov15':
+                                          case 'Nov18':
                                             _monthController.text = 'November';
                                             _weekController.text = 'Week 46';
                                             break;
-                                          case 'Nov22':
+                                          case 'Nov25':
                                             _monthController.text = 'November';
                                             _weekController.text = 'Week 47';
                                             break;
-                                          case 'Nov29':
+                                          case 'Dec02':
                                             _monthController.text = 'November';
                                             _weekController.text = 'Week 48';
                                             break;
-                                          case 'Dec06':
+                                          case 'Dec09':
                                             _monthController.text = 'December';
                                             _weekController.text = 'Week 49';
                                             break;
-                                          case 'Dec13':
+                                          case 'Dec16':
                                             _monthController.text = 'December';
                                             _weekController.text = 'Week 50';
                                             break;
-                                          case 'Dec20':
+                                          case 'Dec23':
                                             _monthController.text = 'December';
                                             _weekController.text = 'Week 51';
                                             break;
-                                          case 'Dec27':
+                                          case 'Dec30':
                                             _monthController.text = 'December';
                                             _weekController.text = 'Week 52';
                                             break;
