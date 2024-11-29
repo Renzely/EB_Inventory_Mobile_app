@@ -359,7 +359,9 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
   String? _formatTime(String? time) {
     if (time == null) return 'Not recorded';
     try {
-      DateTime dateTime = DateTime.parse(time);
+      // Try parsing the time using DateTime.tryParse() for safer error handling
+      DateTime dateTime = DateTime.tryParse(time) ??
+          DateTime.now(); // Default to current time if parsing fails
       return DateFormat('h:mm a').format(dateTime);
     } catch (e) {
       print('Error formatting time: $e');
