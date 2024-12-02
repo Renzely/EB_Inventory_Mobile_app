@@ -294,8 +294,8 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
     final attendanceModel =
         Provider.of<AttendanceModel>(context, listen: false);
 
-    attendanceModel.updateTimeIn(serverData['timeIn'] ?? 'Not recorded');
-    attendanceModel.updateTimeOut(serverData['timeOut'] ?? 'Not recorded');
+    attendanceModel.updateTimeIn(serverData['timeIn']);
+    attendanceModel.updateTimeOut(serverData['timeOut']);
     attendanceModel
         .setIsTimeInRecorded(serverData['isTimeInRecorded'] ?? false);
     attendanceModel
