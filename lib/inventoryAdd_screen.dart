@@ -414,33 +414,33 @@ class _AddInventoryState extends State<AddInventory> {
                                                       break;
                                                     case 'Dec02':
                                                       _monthController.text =
-                                                          'November';
+                                                          'December';
                                                       _weekController.text =
-                                                          'Week 48';
+                                                          'Week 49';
                                                       break;
                                                     case 'Dec09':
                                                       _monthController.text =
                                                           'December';
                                                       _weekController.text =
-                                                          'Week 49';
+                                                          'Week 50';
                                                       break;
                                                     case 'Dec16':
                                                       _monthController.text =
                                                           'December';
                                                       _weekController.text =
-                                                          'Week 50';
+                                                          'Week 51';
                                                       break;
                                                     case 'Dec23':
                                                       _monthController.text =
                                                           'December';
                                                       _weekController.text =
-                                                          'Week 51';
+                                                          'Week 52';
                                                       break;
                                                     case 'Dec30':
                                                       _monthController.text =
                                                           'December';
                                                       _weekController.text =
-                                                          'Week 52';
+                                                          'Week 1';
                                                       break;
                                                     default:
                                                       print(
