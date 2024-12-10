@@ -108,23 +108,25 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
 
   Future<void> _loadSelfieUrl(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isRecorded =
+        prefs.getBool('isTimeInRecorded_${_selectedAccount}') ?? false;
     String? storedSelfieUrl = prefs.getString('selfieUrl_${_selectedAccount}');
+
+    final attendanceModel =
+        Provider.of<AttendanceModel>(context, listen: false);
+    attendanceModel.setIsTimeInRecorded(isRecorded);
     if (storedSelfieUrl != null) {
-      final attendanceModel =
-          Provider.of<AttendanceModel>(context, listen: false);
       attendanceModel.setSelfieUrlForBranch(_selectedAccount!, storedSelfieUrl);
-      print('Loaded selfie URL for branch $_selectedAccount: $storedSelfieUrl');
-    } else {
-      print(
-          'No selfie URL found for branch $_selectedAccount in SharedPreferences.');
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _loadSelfieUrl(
-        context); // Load the selfie URL when the screen is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadSelfieUrl(
+          context); // Load the selfie URL when the screen is initialized
+    });
     _loadSavedBranch();
 
     // Set loading states to true initially
@@ -515,13 +517,6 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
       setState(() {
         timeInLocation = location;
       });
-
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('timeInLocation', location);
-      await prefs.setDouble('timeInLatitude', latitude);
-      await prefs.setDouble('timeInLongitude', longitude);
-      await prefs.setString('timeIn', currentTimeIn); // Save Time In
-      await prefs.setBool('isTimeInRecorded', true); // Save Time In status
     }
 
     // Step 1: Capture and upload selfie
@@ -576,6 +571,15 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
       _showSnackbar(context, 'Error uploading selfie: $e');
       return;
     }
+
+    // Step 2: Save data to SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('timeInLocation', location);
+    await prefs.setDouble('timeInLatitude', latitude ?? 0.0);
+    await prefs.setDouble('timeInLongitude', longitude ?? 0.0);
+    await prefs.setString('timeIn', currentTimeIn); // Save Time In
+    await prefs.setBool('isTimeInRecorded_${_selectedAccount}', true);
+    await prefs.setString('selfieUrl_${_selectedAccount}', selfieUrl);
 
     // Step 3: Save Time In to the database
     try {
@@ -886,8 +890,7 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
                       ),
                       SizedBox(height: 15),
                       if (attendanceModel.isTimeInRecorded &&
-                          _selectedAccount !=
-                              null && // Check if _selectedAccount is not null
+                          _selectedAccount != null &&
                           attendanceModel
                                   .getSelfieUrlForBranch(_selectedAccount!) !=
                               null)
