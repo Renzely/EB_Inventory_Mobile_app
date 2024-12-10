@@ -107,16 +107,28 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
   }
 
   Future<void> _loadSelfieUrl(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool isRecorded =
-        prefs.getBool('isTimeInRecorded_${_selectedAccount}') ?? false;
-    String? storedSelfieUrl = prefs.getString('selfieUrl_${_selectedAccount}');
+    if (_selectedAccount == null) {
+      print("No branch selected. Cannot load selfie URL.");
+      return;
+    }
 
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Load 'isTimeInRecorded' flag and selfie URL for the selected branch
+    bool isRecorded =
+        prefs.getBool('isTimeInRecorded_${_selectedAccount!}') ?? false;
+    String? storedSelfieUrl = prefs.getString('selfieUrl_${_selectedAccount!}');
+
+    // Update the AttendanceModel
     final attendanceModel =
         Provider.of<AttendanceModel>(context, listen: false);
     attendanceModel.setIsTimeInRecorded(isRecorded);
+
     if (storedSelfieUrl != null) {
       attendanceModel.setSelfieUrlForBranch(_selectedAccount!, storedSelfieUrl);
+      print("Loaded selfie URL for branch $_selectedAccount: $storedSelfieUrl");
+    } else {
+      print("No selfie URL found for branch $_selectedAccount.");
     }
   }
 
@@ -216,6 +228,7 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
     setState(() {
       _selectedAccount = newBranch;
     });
+    _loadSelfieUrl(context);
     _saveSelectedBranch(newBranch); // Save the selected branch
 
     // Reset attendance model
@@ -696,6 +709,12 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
     final attendanceModel =
         Provider.of<AttendanceModel>(context, listen: false);
 
+    // Safely handle null _selectedAccount
+    if (_selectedAccount == null) {
+      _showSnackbar(context, "Please select a branch first.");
+      return;
+    }
+
     final selfieUrl = attendanceModel.getSelfieUrlForBranch(_selectedAccount!);
     print("Retrieved selfie URL for branch $_selectedAccount: $selfieUrl");
 
@@ -721,8 +740,7 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
                           height: 200,
                         )
                       : Image.network(
-                          // Handle network URL if needed
-                          selfieUrl,
+                          selfieUrl, // Handle network URL if needed
                           fit: BoxFit.cover,
                           width: 200,
                           height: 200,
