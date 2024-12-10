@@ -196,11 +196,13 @@ class MongoDatabase {
   }
 
   static Future<String> logTimeIn(
-      String userEmail,
-      String timeInLocation,
-      String accountNameBranchManning,
-      double timeInLatitude,
-      double timeInLongitude) async {
+    String userEmail,
+    String timeInLocation,
+    String accountNameBranchManning,
+    double timeInLatitude,
+    double timeInLongitude,
+    String selfieUrl, // Selfie URL parameter
+  ) async {
     try {
       await connect();
       var timeLogCollection = db.collection(USER_ATTENDANCE);
@@ -234,6 +236,7 @@ class MongoDatabase {
                 'longitude': timeInLongitude,
               },
               'time_out_coordinates': null,
+              'selfieUrl': selfieUrl, // Include selfie URL in the log
             }
           ]
         };

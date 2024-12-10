@@ -89,6 +89,8 @@ class _LoginPageState extends State<LoginPage> {
                     DateTimeWidget(),
                     AttendanceWidget(
                       userEmail: userDetails['emailAddress'] ?? '',
+                      userFirstName: userDetails['firstName'] ?? '',
+                      userLastName: userDetails['lastName'] ?? '',
                     ),
                   ],
                 ),
