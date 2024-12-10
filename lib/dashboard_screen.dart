@@ -19,6 +19,11 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
+import 'dart:typed_data';
+import 'dart:io';
 
 class Attendance extends StatelessWidget {
   final String userName;
@@ -47,7 +52,9 @@ class Attendance extends StatelessWidget {
               children: [
                 DateTimeWidget(),
                 AttendanceWidget(
-                    userEmail: userEmail), // Pass the userEmail here
+                    userEmail: userEmail,
+                    userFirstName: userName,
+                    userLastName: userLastName),
               ],
             ),
           ),
@@ -62,9 +69,14 @@ class Attendance extends StatelessWidget {
 
 class AttendanceWidget extends StatefulWidget {
   final String userEmail;
+  final String userFirstName;
+  final String userLastName;
 
-  AttendanceWidget({required this.userEmail});
-
+  AttendanceWidget({
+    required this.userEmail,
+    required this.userFirstName,
+    required this.userLastName,
+  });
   @override
   _AttendanceWidgetState createState() => _AttendanceWidgetState();
 }
@@ -77,11 +89,42 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
   String? _selectedAccount; // Persisted selected value
   List<String> _branchList = [];
   Map<String, Map<String, dynamic>> _attendanceData = {};
+  File? _selfie;
+  final picker = ImagePicker();
+
+  Future<void> _pickSelfie() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        _selfie = File(pickedFile.path);
+      });
+
+      // Save the selfie URL (or file path) to SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+          'selfieUrl', pickedFile.path); // Store the path of the image file
+    }
+  }
+
+  Future<void> _loadSelfieUrl(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? storedSelfieUrl = prefs.getString('selfieUrl_${_selectedAccount}');
+    if (storedSelfieUrl != null) {
+      final attendanceModel =
+          Provider.of<AttendanceModel>(context, listen: false);
+      attendanceModel.setSelfieUrlForBranch(_selectedAccount!, storedSelfieUrl);
+      print('Loaded selfie URL for branch $_selectedAccount: $storedSelfieUrl');
+    } else {
+      print(
+          'No selfie URL found for branch $_selectedAccount in SharedPreferences.');
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-
+    _loadSelfieUrl(
+        context); // Load the selfie URL when the screen is initialized
     _loadSavedBranch();
 
     // Set loading states to true initially
@@ -481,6 +524,60 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
       await prefs.setBool('isTimeInRecorded', true); // Save Time In status
     }
 
+    // Step 1: Capture and upload selfie
+    if (_selfie == null) {
+      await _pickSelfie();
+    }
+    if (_selfie == null) {
+      _showSnackbar(context, 'Selfie is required to record Time In');
+      return;
+    }
+
+    String selfieUrl = '';
+    try {
+      // Generate the file name using first name, last name, and timestamp
+      String fileName =
+          '${widget.userFirstName}_${widget.userLastName}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      // Compress and resize the image (optional step to reduce file size)
+      File compressedImage = await _compressImage(_selfie!);
+
+      // Get the pre-signed URL from the backend
+      final response = await http.post(
+        Uri.parse(
+            'https://eb-inventory-backend.onrender.com/save-attendance-images'),
+        body: jsonEncode({
+          'fileName': fileName, // Pass the generated file name
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to generate pre-signed URL');
+      }
+
+      final uploadUrl = jsonDecode(response.body)['url'];
+
+      // Step 2: Upload selfie to S3
+      final uploadResponse = await http.put(
+        Uri.parse(uploadUrl),
+        body: compressedImage.readAsBytesSync(),
+        headers: {'Content-Type': 'image/jpeg'},
+      );
+
+      if (uploadResponse.statusCode != 200) {
+        throw Exception(
+            'Failed to upload selfie. Status Code: ${uploadResponse.statusCode}');
+      }
+
+      // Extract the uploaded image URL (this URL doesn't include the query params)
+      selfieUrl = uploadUrl.split('?').first;
+    } catch (e) {
+      _showSnackbar(context, 'Error uploading selfie: $e');
+      return;
+    }
+
+    // Step 3: Save Time In to the database
     try {
       var result = await MongoDatabase.logTimeIn(
         widget.userEmail,
@@ -488,16 +585,43 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
         _selectedAccount ?? '',
         latitude ?? 0.0, // Default to 0.0 if position is null
         longitude ?? 0.0, // Default to 0.0 if position is null
+        selfieUrl, // Pass the selfie URL
       );
+
       if (result == "Success") {
+        // Update the attendance model and UI state after successful Time In
         attendanceModel.updateTimeIn(currentTimeIn);
         attendanceModel.setIsTimeInRecorded(true);
+        attendanceModel.setSelfieUrlForBranch(_selectedAccount!, selfieUrl);
+
         _showSnackbar(context, 'Time In recorded successfully');
       } else {
         _showSnackbar(context, 'Failed to record Time In');
       }
     } catch (e) {
       _showSnackbar(context, 'Error recording Time In');
+    }
+  }
+
+  Future<File> _compressImage(File imageFile) async {
+    final bytes = await imageFile.readAsBytes();
+    img.Image? image = img.decodeImage(Uint8List.fromList(bytes));
+
+    if (image != null) {
+      // Resize the image (optional: adjust the width and height as needed)
+      img.Image resizedImage =
+          img.copyResize(image, width: 800); // Adjust width to 800px
+
+      // Compress the image to reduce quality (optional: adjust the quality from 0 to 100)
+      List<int> compressedBytes =
+          img.encodeJpg(resizedImage, quality: 80); // Quality 80 (out of 100)
+
+      // Convert compressed image to File for upload
+      File compressedImageFile = File(imageFile.path)
+        ..writeAsBytesSync(compressedBytes);
+      return compressedImageFile;
+    } else {
+      throw Exception('Failed to process image');
     }
   }
 
@@ -561,6 +685,55 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
         content: Text(message),
         duration: Duration(seconds: 3),
       ),
+    );
+  }
+
+  void _viewSelfie(BuildContext context) {
+    final attendanceModel =
+        Provider.of<AttendanceModel>(context, listen: false);
+
+    final selfieUrl = attendanceModel.getSelfieUrlForBranch(_selectedAccount!);
+    print("Retrieved selfie URL for branch $_selectedAccount: $selfieUrl");
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Your Time In Picture",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              SizedBox(height: 15),
+              selfieUrl != null
+                  ? (selfieUrl.startsWith(
+                          '/data/user/') // Check if it's a local file path
+                      ? Image.file(
+                          File(selfieUrl),
+                          fit: BoxFit.cover,
+                          width: 200,
+                          height: 200,
+                        )
+                      : Image.network(
+                          // Handle network URL if needed
+                          selfieUrl,
+                          fit: BoxFit.cover,
+                          width: 200,
+                          height: 200,
+                        ))
+                  : const Text("No photo available."),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Close"),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -629,14 +802,14 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(35),
-                        topRight: Radius.circular(35),
-                        bottomLeft: Radius.circular(25),
-                        bottomRight: Radius.circular(25)),
+                      topLeft: Radius.circular(35),
+                      topRight: Radius.circular(35),
+                      bottomLeft: Radius.circular(25),
+                      bottomRight: Radius.circular(25),
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Color.fromARGB(255, 26, 20, 71)
-                            .withOpacity(0.8), // Adjust the opacity if needed
+                        color: Color.fromARGB(255, 26, 20, 71).withOpacity(0.8),
                         blurRadius: 20,
                         offset: Offset(0, 10),
                       ),
@@ -653,7 +826,33 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
                       ElevatedButton(
                         onPressed: !attendanceModel.isTimeInRecorded &&
                                 !_isTimeInLoading
-                            ? () => _confirmAndRecordTimeIn(context)
+                            ? () async {
+                                setState(() {
+                                  _isTimeInLoading =
+                                      true; // Show loading spinner
+                                });
+
+                                // Step 1: Capture a selfie
+                                await _pickSelfie();
+
+                                if (_selfie == null) {
+                                  _showSnackbar(context,
+                                      'Selfie is required for Time In');
+                                  setState(() {
+                                    _isTimeInLoading =
+                                        false; // Stop loading spinner
+                                  });
+                                  return;
+                                }
+
+                                // Step 2: Record Time In with selfie
+                                await _confirmAndRecordTimeIn(context);
+
+                                setState(() {
+                                  _isTimeInLoading =
+                                      false; // Stop loading spinner
+                                });
+                              }
                             : null,
                         style: ButtonStyle(
                           padding:
@@ -685,6 +884,31 @@ class _AttendanceWidgetState extends State<AttendanceWidget> {
                                 ),
                               ),
                       ),
+                      SizedBox(height: 15),
+                      if (attendanceModel.isTimeInRecorded &&
+                          _selectedAccount !=
+                              null && // Check if _selectedAccount is not null
+                          attendanceModel
+                                  .getSelfieUrlForBranch(_selectedAccount!) !=
+                              null)
+                        ElevatedButton(
+                          onPressed: () {
+                            _viewSelfie(context); // Function to view the selfie
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 15, horizontal: 30),
+                            backgroundColor: Colors.blue,
+                          ),
+                          child: const Text(
+                            "View Picture",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
                       SizedBox(height: 15),
                       Text(
                         "Time In: ${_formatTime(attendanceModel.timeIn)}",

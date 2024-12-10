@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 class AttendanceModel extends ChangeNotifier {
+  Map<String, String> _selfieUrls = {};
   String? _timeIn;
   String? _timeOut;
   bool _isTimeInRecorded = false;
@@ -17,6 +18,17 @@ class AttendanceModel extends ChangeNotifier {
 
   bool get isTimeInRecorded => _isTimeInRecorded;
   bool get isTimeOutRecorded => _isTimeOutRecorded;
+
+  // Get selfie URL for a specific branch
+  String? getSelfieUrlForBranch(String branch) {
+    return _selfieUrls[branch];
+  }
+
+  // Set selfie URL for a specific branch
+  void setSelfieUrlForBranch(String branch, String selfieUrl) {
+    _selfieUrls[branch] = selfieUrl;
+    notifyListeners();
+  }
 
   void updateTimeInLocation(String location) {
     _timeInLocation = location;
