@@ -1121,6 +1121,25 @@ class _InventoryState extends State<Inventory> {
 
   // Function to fetch editing status from MongoDB
 
+  Future<void> _markItemAsDone(String inputId, String userEmail) async {
+    try {
+      final db = await mongo.Db.create(INVENTORY_CONN_URL);
+      await db.open();
+      final collection = db.collection(USER_INVENTORY);
+
+      // Update the item to mark it as done
+      await collection.update(
+        mongo.where.eq('inputId', inputId).eq('userEmail', userEmail),
+        mongo.modify.set('isDone', true),
+      );
+
+      await db.close();
+      print('Item marked as done successfully.');
+    } catch (e) {
+      print('Error marking item as done: $e');
+    }
+  }
+
   Future<bool> _getEditingStatus(String inputId, String userEmail) async {
     return await MongoDatabase.getEditingStatus(inputId, userEmail);
   }
@@ -1213,7 +1232,7 @@ class _InventoryState extends State<Inventory> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(
                       child: CircularProgressIndicator(
-                        color: Color.fromARGB(255, 26, 20, 71),
+                        color: Color.fromRGBO(26, 20, 71, 1),
                         backgroundColor: Colors.transparent,
                       ),
                     );
@@ -1308,9 +1327,106 @@ class _InventoryState extends State<Inventory> {
                                       }
 
                                       bool isEditing = snapshot.data ??
-                                          false; // Use false as default
+                                          true; // Use false as default
                                       print(
                                           'Item ${item.inputId} isEditing: $isEditing');
+
+                                      // Function to check if the item should be disabled based on the day of the week and item status
+                                      bool _isEditingDisabled(
+                                          InventoryItem item) {
+                                        DateTime now = DateTime.now();
+                                        bool isMondayToThursday = now.weekday >=
+                                                DateTime.monday &&
+                                            now.weekday <= DateTime.thursday;
+
+                                        // // Disable button if it's Monday to Thursday and the item status is "Carried"
+                                        // if (item.status == 'Carried' &&
+                                        //     isMondayToThursday) {
+                                        //   return true; // Disabled Monday to Thursday for "Carried"
+                                        // }
+
+                                        // Disable permanently for "Not Carried" or "Delisted"
+                                        return item.status == 'Not Carried' ||
+                                            item.status == 'Delisted';
+                                      }
+
+                                      // Function to get the color for the button
+                                      Color? _getButtonColor(
+                                          InventoryItem item) {
+                                        if (_isEditingDisabled(item)) {
+                                          return Colors.red; // Red for disabled
+                                        }
+                                        return null; // Default color if enabled
+                                      }
+
+                                      // Function to get the onPressed action based on the item status and current day
+                                      VoidCallback? _getButtonAction(
+                                          InventoryItem item) {
+                                        if (_isEditingDisabled(item)) {
+                                          return null; // Disable the button if the condition is met
+                                        }
+
+                                        return item.status == 'Carried' &&
+                                                !isEditing
+                                            ? () async {
+                                                await _updateEditingStatus(
+                                                    item.inputId,
+                                                    widget.userEmail,
+                                                    false); // Start editing
+                                                bool hasSavedChanges =
+                                                    false; // Track if changes are saved
+
+                                                await Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        EditInventoryScreen(
+                                                      inventoryItem: item,
+                                                      userEmail:
+                                                          widget.userEmail,
+                                                      userContactNum:
+                                                          widget.userContactNum,
+                                                      userLastName:
+                                                          widget.userLastName,
+                                                      userMiddleName:
+                                                          widget.userMiddleName,
+                                                      userName: widget.userName,
+                                                      onCancel: () async {
+                                                        // Reset editing status back to false (not editing anymore)
+                                                        await _updateEditingStatus(
+                                                            item.inputId,
+                                                            widget.userEmail,
+                                                            false);
+                                                        setState(
+                                                            () {}); // Refresh UI after cancel
+                                                      },
+                                                      onSave: () async {
+                                                        hasSavedChanges =
+                                                            true; // Indicate that changes have been saved
+                                                        await _updateEditingStatus(
+                                                            item.inputId,
+                                                            widget.userEmail,
+                                                            true); // Mark as edited
+                                                        setState(
+                                                            () {}); // Refresh UI after saving
+                                                      },
+                                                    ),
+                                                  ),
+                                                );
+
+                                                // Only update editing status to true if changes were saved
+                                                if (hasSavedChanges) {
+                                                  await _updateEditingStatus(
+                                                      item.inputId,
+                                                      widget.userEmail,
+                                                      true);
+                                                }
+
+                                                setState(
+                                                    () {}); // Refresh UI after editing
+                                              }
+                                            : null; // No action if not "Carried" or isEditing is true
+                                      }
 
                                       return ListTile(
                                         title: Row(
@@ -1318,75 +1434,73 @@ class _InventoryState extends State<Inventory> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(item.week),
-                                            IconButton(
-                                              icon: Icon(
-                                                Icons.edit_document,
-                                                color: item.status ==
-                                                            'Carried' &&
-                                                        !isEditing
-                                                    ? Color.fromARGB(255, 26,
-                                                        20, 71) // Enabled color
-                                                    : Colors
-                                                        .grey, // Disabled color (grey)
-                                              ),
-                                              onPressed: item.status ==
-                                                          'Carried' &&
-                                                      !isEditing
-                                                  ? () async {
-                                                      await _updateEditingStatus(
-                                                          item.inputId,
-                                                          widget.userEmail,
-                                                          false); // Start editing
-                                                      bool hasSavedChanges =
-                                                          true; // Track if changes are saved
+                                            if (item.status == 'Carried' &&
+                                                !item
+                                                    .isDone) // ✅ Show Icon if Carried & Not Done
+                                              IconButton(
+                                                icon: Icon(Icons.edit),
+                                                color: _getButtonColor(item) ??
+                                                    Color.fromRGBO(
+                                                        26, 20, 71, 1),
+                                                onPressed: () async {
+                                                  await _updateEditingStatus(
+                                                      item.inputId,
+                                                      widget.userEmail,
+                                                      false);
 
-                                                      await Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              EditInventoryScreen(
-                                                            inventoryItem: item,
-                                                            userEmail: widget
-                                                                .userEmail,
-                                                            userContactNum: widget
-                                                                .userContactNum,
-                                                            userLastName: widget
-                                                                .userLastName,
-                                                            userMiddleName: widget
-                                                                .userMiddleName,
-                                                            userName:
-                                                                widget.userName,
-                                                            onCancel: () async {
-                                                              // Reset editing status back to false (not editing anymore)
-                                                              await _updateEditingStatus(
-                                                                  item.inputId,
-                                                                  widget
-                                                                      .userEmail,
-                                                                  false);
-                                                              setState(
-                                                                  () {}); // Refresh UI after cancel
-                                                            },
-                                                            onSave: () async {
-                                                              hasSavedChanges =
-                                                                  true; // Indicate that changes have been saved
-                                                            },
-                                                          ),
-                                                        ),
-                                                      );
-
-                                                      // Only update editing status to true if changes were saved
-                                                      if (hasSavedChanges) {
-                                                        await _updateEditingStatus(
-                                                            item.inputId,
+                                                  bool hasSavedChanges = false;
+                                                  await Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          EditInventoryScreen(
+                                                        inventoryItem: item,
+                                                        userEmail:
                                                             widget.userEmail,
-                                                            true);
-                                                      }
+                                                        userContactNum: widget
+                                                            .userContactNum,
+                                                        userLastName:
+                                                            widget.userLastName,
+                                                        userMiddleName: widget
+                                                            .userMiddleName,
+                                                        userName:
+                                                            widget.userName,
+                                                        onCancel: () async {
+                                                          await _updateEditingStatus(
+                                                              item.inputId,
+                                                              widget.userEmail,
+                                                              false);
+                                                          setState(() {});
+                                                        },
+                                                        onSave: () async {
+                                                          hasSavedChanges =
+                                                              true;
+                                                          await _updateEditingStatus(
+                                                              item.inputId,
+                                                              widget.userEmail,
+                                                              true);
 
-                                                      setState(
-                                                          () {}); // Refresh UI after editing
-                                                    }
-                                                  : null, // Disable button if isEditing is true
-                                            ),
+                                                          // ✅ Mark item as done after saving changes
+                                                          await _markItemAsDone(
+                                                              item.inputId,
+                                                              widget.userEmail);
+
+                                                          setState(() {});
+                                                        },
+                                                      ),
+                                                    ),
+                                                  );
+
+                                                  if (hasSavedChanges) {
+                                                    await _updateEditingStatus(
+                                                        item.inputId,
+                                                        widget.userEmail,
+                                                        true);
+                                                  }
+
+                                                  setState(() {});
+                                                },
+                                              ),
                                           ],
                                         ),
                                         subtitle: Container(
