@@ -378,6 +378,21 @@ class MongoDatabase {
     }
   }
 
+  Future<void> _markItemAsDone(String inputId) async {
+    final collection = db.collection(
+        USER_INVENTORY); // Make sure this matches your collection name
+
+    try {
+      await collection.updateOne(
+        where.eq('inputId', inputId), // Match the item by inputId
+        modify.set('isDone', true), // Set isDone to true
+      );
+      print('Item marked as done successfully!');
+    } catch (e) {
+      print('Error marking item as done: $e');
+    }
+  }
+
   // static Future<List<Map<String, dynamic>>> getSkusByBranchAndCategory(
   //     String branchName, String category) async {
   //   try {

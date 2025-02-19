@@ -178,6 +178,7 @@ class InventoryItem {
   dynamic noOfDaysOOS;
   final List<Map<String, dynamic>> expiryFields;
   final bool isEditing; // New field
+  final bool isDone;
 
   InventoryItem({
     required this.id,
@@ -208,6 +209,7 @@ class InventoryItem {
     required this.remarksOOS,
     //required this.reasonOOS,
     required this.isEditing,
+    required this.isDone,
   });
 
   factory InventoryItem.fromJson(Map<String, dynamic> json) => InventoryItem(
@@ -244,6 +246,7 @@ class InventoryItem {
         remarksOOS: json['remarksOOS'] ?? '',
         //reasonOOS: json['reasonOOS'] ?? '',
         isEditing: json['isEditing'] ?? false, // Default value if null
+        isDone: json['isDone'] ?? false,
       );
 
   Map<String, dynamic> toJson() => {

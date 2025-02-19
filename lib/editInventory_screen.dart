@@ -226,16 +226,84 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
     DateTime currentDate = getCurrentWeekStartDate();
 
     List<List<DateTime>> periods = [
+      // January
+      [DateTime(2025, 1, 6), DateTime(2025, 1, 12)], // Week 1
+      [DateTime(2025, 1, 13), DateTime(2025, 1, 19)], // Week 2
+      [DateTime(2025, 1, 20), DateTime(2025, 1, 26)], // Week 3
+      [DateTime(2025, 1, 27), DateTime(2025, 2, 2)], // Week 4
+
+      // February
+      [DateTime(2025, 2, 3), DateTime(2025, 2, 9)], // Week 5
+      [DateTime(2025, 2, 10), DateTime(2025, 2, 16)], // Week 6
+      [DateTime(2025, 2, 17), DateTime(2025, 2, 23)], // Week 7
+      [DateTime(2025, 2, 24), DateTime(2025, 3, 2)], // Week 8
+
+      // March
+      [DateTime(2025, 3, 3), DateTime(2025, 3, 9)], // Week 9
+      [DateTime(2025, 3, 10), DateTime(2025, 3, 16)], // Week 10
+      [DateTime(2025, 3, 17), DateTime(2025, 3, 23)], // Week 11
+      [DateTime(2025, 3, 24), DateTime(2025, 3, 30)], // Week 12
+      [DateTime(2025, 3, 31), DateTime(2025, 4, 6)], // Week 13
+
+      // April
+      [DateTime(2025, 4, 7), DateTime(2025, 4, 13)], // Week 14
+      [DateTime(2025, 4, 14), DateTime(2025, 4, 20)], // Week 15
+      [DateTime(2025, 4, 21), DateTime(2025, 4, 27)], // Week 16
+      [DateTime(2025, 4, 28), DateTime(2025, 5, 4)], // Week 17
+
+      // May
+      [DateTime(2025, 5, 5), DateTime(2025, 5, 11)], // Week 18
+      [DateTime(2025, 5, 12), DateTime(2025, 5, 18)], // Week 19
+      [DateTime(2025, 5, 19), DateTime(2025, 5, 25)], // Week 20
+      [DateTime(2025, 5, 26), DateTime(2025, 6, 1)], // Week 21
+
+      // June
+      [DateTime(2025, 6, 2), DateTime(2025, 6, 8)], // Week 22
+      [DateTime(2025, 6, 9), DateTime(2025, 6, 15)], // Week 23
+      [DateTime(2025, 6, 16), DateTime(2025, 6, 22)], // Week 24
+      [DateTime(2025, 6, 23), DateTime(2025, 6, 29)], // Week 25
+      [DateTime(2025, 6, 30), DateTime(2025, 7, 6)], // Week 26
+
+      // July
+      [DateTime(2025, 7, 7), DateTime(2025, 7, 13)], // Week 27
+      [DateTime(2025, 7, 14), DateTime(2025, 7, 20)], // Week 28
+      [DateTime(2025, 7, 21), DateTime(2025, 7, 27)], // Week 29
+      [DateTime(2025, 7, 28), DateTime(2025, 8, 3)], // Week 30
+
+      // August
+      [DateTime(2025, 8, 4), DateTime(2025, 8, 10)], // Week 31
+      [DateTime(2025, 8, 11), DateTime(2025, 8, 17)], // Week 32
+      [DateTime(2025, 8, 18), DateTime(2025, 8, 24)], // Week 33
+      [DateTime(2025, 8, 25), DateTime(2025, 8, 31)], // Week 34
+
+      // September
+      [DateTime(2025, 9, 1), DateTime(2025, 9, 7)], // Week 35
+      [DateTime(2025, 9, 8), DateTime(2025, 9, 14)], // Week 36
+      [DateTime(2025, 9, 15), DateTime(2025, 9, 21)], // Week 37
+      [DateTime(2025, 9, 22), DateTime(2025, 9, 28)], // Week 38
+      [DateTime(2025, 9, 29), DateTime(2025, 10, 5)], // Week 39
+
+      // October
+      [DateTime(2025, 10, 6), DateTime(2025, 10, 12)], // Week 40
+      [DateTime(2025, 10, 13), DateTime(2025, 10, 19)], // Week 41
+      [DateTime(2025, 10, 20), DateTime(2025, 10, 26)], // Week 42
+      [DateTime(2025, 10, 27), DateTime(2025, 11, 2)], // Week 43
+
+      // November
+      [DateTime(2025, 11, 3), DateTime(2025, 11, 9)], // Week 44
+      [DateTime(2025, 11, 10), DateTime(2025, 11, 16)], // Week 45
+      [DateTime(2025, 11, 17), DateTime(2025, 11, 23)], // Week 46
+      [DateTime(2025, 11, 24), DateTime(2025, 11, 30)], // Week 47
+
+      // December
+      [DateTime(2025, 12, 1), DateTime(2025, 12, 7)], // Week 48
+      [DateTime(2025, 12, 8), DateTime(2025, 12, 14)], // Week 49
+      [DateTime(2025, 12, 15), DateTime(2025, 12, 21)], // Week 50
+      [DateTime(2025, 12, 22), DateTime(2025, 12, 28)], // Week 51
       [
-        DateTime(2024, 11, 18), // Week start
-        DateTime(2024, 11, 24) // Week end (Sunday)
-      ],
-      [DateTime(2024, 11, 25), DateTime(2024, 12, 1)],
-      [DateTime(2024, 12, 2), DateTime(2024, 12, 8)],
-      [DateTime(2024, 12, 9), DateTime(2024, 12, 15)],
-      [DateTime(2024, 12, 16), DateTime(2024, 12, 22)],
-      [DateTime(2024, 12, 23), DateTime(2024, 12, 29)],
-      [DateTime(2024, 12, 30), DateTime(2025, 1, 5)],
+        DateTime(2025, 12, 29),
+        DateTime(2026, 1, 4)
+      ] // Week 52 (spans into 2026)
     ];
 
     List<DateTime> currentPeriod = periods.firstWhere(
@@ -247,7 +315,7 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
     if (currentPeriod.isNotEmpty) {
       // Displayed workweek: Monday to Saturday
       String displayString =
-          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1].subtract(Duration(days: 1)))}';
+          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1].subtract(Duration(days: 2)))}';
 
       // Covered week: Monday to Sunday
       String coveredString =
@@ -687,37 +755,235 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
                                             0]; // Use the first date (start date)
                                         print('Selected Period: $value');
                                         switch (actualValue) {
-                                          case 'Nov18':
+                                          case 'Jan06': // Week 2
+                                            _monthController.text = 'January';
+                                            _weekController.text = 'Week 2';
+                                            break;
+                                          case 'Jan13': // Week 3
+                                            _monthController.text = 'January';
+                                            _weekController.text = 'Week 3';
+                                            break;
+                                          case 'Jan20': // Week 4
+                                            _monthController.text = 'January';
+                                            _weekController.text = 'Week 4';
+                                            break;
+                                          case 'Jan27': // Week 5
+                                            _monthController.text = 'January';
+                                            _weekController.text = 'Week 5';
+                                            break;
+
+                                          // February
+                                          case 'Feb03': // Week 6
+                                            _monthController.text = 'February';
+                                            _weekController.text = 'Week 6';
+                                            break;
+                                          case 'Feb10': // Week 7
+                                            _monthController.text = 'February';
+                                            _weekController.text = 'Week 7';
+                                            break;
+                                          case 'Feb17': // Week 8
+                                            _monthController.text = 'February';
+                                            _weekController.text = 'Week 8';
+                                            break;
+                                          case 'Feb24': // Week 9
+                                            _monthController.text = 'February';
+                                            _weekController.text = 'Week 9';
+                                            break;
+
+                                          // March
+                                          case 'Mar03': // Week 10
+                                            _monthController.text = 'March';
+                                            _weekController.text = 'Week 10';
+                                            break;
+                                          case 'Mar10': // Week 11
+                                            _monthController.text = 'March';
+                                            _weekController.text = 'Week 11';
+                                            break;
+                                          case 'Mar17': // Week 12
+                                            _monthController.text = 'March';
+                                            _weekController.text = 'Week 12';
+                                            break;
+                                          case 'Mar24': // Week 13
+                                            _monthController.text = 'March';
+                                            _weekController.text = 'Week 13';
+                                            break;
+                                          case 'Mar31': // Week 14
+                                            _monthController.text = 'March';
+                                            _weekController.text = 'Week 14';
+                                            break;
+
+                                          // April
+                                          case 'Apr07': // Week 15
+                                            _monthController.text = 'April';
+                                            _weekController.text = 'Week 15';
+                                            break;
+                                          case 'Apr14': // Week 16
+                                            _monthController.text = 'April';
+                                            _weekController.text = 'Week 16';
+                                            break;
+                                          case 'Apr21': // Week 17
+                                            _monthController.text = 'April';
+                                            _weekController.text = 'Week 17';
+                                            break;
+                                          case 'Apr28': // Week 18
+                                            _monthController.text = 'April';
+                                            _weekController.text = 'Week 18';
+                                            break;
+
+                                          // May
+                                          case 'May05': // Week 19
+                                            _monthController.text = 'May';
+                                            _weekController.text = 'Week 19';
+                                            break;
+                                          case 'May12': // Week 20
+                                            _monthController.text = 'May';
+                                            _weekController.text = 'Week 20';
+                                            break;
+                                          case 'May19': // Week 21
+                                            _monthController.text = 'May';
+                                            _weekController.text = 'Week 21';
+                                            break;
+                                          case 'May26': // Week 22
+                                            _monthController.text = 'May';
+                                            _weekController.text = 'Week 22';
+                                            break;
+
+                                          // June
+                                          case 'Jun02': // Week 23
+                                            _monthController.text = 'June';
+                                            _weekController.text = 'Week 23';
+                                            break;
+                                          case 'Jun09': // Week 24
+                                            _monthController.text = 'June';
+                                            _weekController.text = 'Week 24';
+                                            break;
+                                          case 'Jun16': // Week 25
+                                            _monthController.text = 'June';
+                                            _weekController.text = 'Week 25';
+                                            break;
+                                          case 'Jun23': // Week 26
+                                            _monthController.text = 'June';
+                                            _weekController.text = 'Week 26';
+                                            break;
+                                          case 'Jun30': // Week 27
+                                            _monthController.text = 'June';
+                                            _weekController.text = 'Week 27';
+                                            break;
+
+                                          // July
+                                          case 'Jul07': // Week 28
+                                            _monthController.text = 'July';
+                                            _weekController.text = 'Week 28';
+                                            break;
+                                          case 'Jul14': // Week 29
+                                            _monthController.text = 'July';
+                                            _weekController.text = 'Week 29';
+                                            break;
+                                          case 'Jul21': // Week 30
+                                            _monthController.text = 'July';
+                                            _weekController.text = 'Week 30';
+                                            break;
+                                          case 'Jul28': // Week 31
+                                            _monthController.text = 'July';
+                                            _weekController.text = 'Week 31';
+                                            break;
+
+                                          // August
+                                          case 'Aug04': // Week 32
+                                            _monthController.text = 'August';
+                                            _weekController.text = 'Week 32';
+                                            break;
+                                          case 'Aug11': // Week 33
+                                            _monthController.text = 'August';
+                                            _weekController.text = 'Week 33';
+                                            break;
+                                          case 'Aug18': // Week 34
+                                            _monthController.text = 'August';
+                                            _weekController.text = 'Week 34';
+                                            break;
+                                          case 'Aug25': // Week 35
+                                            _monthController.text = 'August';
+                                            _weekController.text = 'Week 35';
+                                            break;
+
+                                          // September
+                                          case 'Sep01': // Week 36
+                                            _monthController.text = 'September';
+                                            _weekController.text = 'Week 36';
+                                            break;
+                                          case 'Sep08': // Week 37
+                                            _monthController.text = 'September';
+                                            _weekController.text = 'Week 37';
+                                            break;
+                                          case 'Sep15': // Week 38
+                                            _monthController.text = 'September';
+                                            _weekController.text = 'Week 38';
+                                            break;
+                                          case 'Sep22': // Week 39
+                                            _monthController.text = 'September';
+                                            _weekController.text = 'Week 39';
+                                            break;
+                                          case 'Sep29': // Week 40
+                                            _monthController.text = 'September';
+                                            _weekController.text = 'Week 40';
+                                            break;
+
+                                          // October
+                                          case 'Oct06': // Week 41
+                                            _monthController.text = 'October';
+                                            _weekController.text = 'Week 41';
+                                            break;
+                                          case 'Oct13': // Week 42
+                                            _monthController.text = 'October';
+                                            _weekController.text = 'Week 42';
+                                            break;
+                                          case 'Oct20': // Week 43
+                                            _monthController.text = 'October';
+                                            _weekController.text = 'Week 43';
+                                            break;
+                                          case 'Oct27': // Week 44
+                                            _monthController.text = 'October';
+                                            _weekController.text = 'Week 44';
+                                            break;
+
+                                          // November
+                                          case 'Nov03': // Week 45
+                                            _monthController.text = 'November';
+                                            _weekController.text = 'Week 45';
+                                            break;
+                                          case 'Nov10': // Week 46
                                             _monthController.text = 'November';
                                             _weekController.text = 'Week 46';
                                             break;
-                                          case 'Nov25':
+                                          case 'Nov17': // Week 47
                                             _monthController.text = 'November';
                                             _weekController.text = 'Week 47';
                                             break;
-                                          case 'Dec02':
+                                          case 'Nov24': // Week 48
                                             _monthController.text = 'November';
                                             _weekController.text = 'Week 48';
                                             break;
-                                          case 'Dec09':
+
+                                          // December
+                                          case 'Dec01': // Week 49
                                             _monthController.text = 'December';
                                             _weekController.text = 'Week 49';
                                             break;
-                                          case 'Dec16':
+                                          case 'Dec08': // Week 50
                                             _monthController.text = 'December';
                                             _weekController.text = 'Week 50';
                                             break;
-                                          case 'Dec23':
+                                          case 'Dec15': // Week 51
                                             _monthController.text = 'December';
                                             _weekController.text = 'Week 51';
                                             break;
-                                          case 'Dec30':
+                                          case 'Dec22': // Week 52
                                             _monthController.text = 'December';
                                             _weekController.text = 'Week 52';
                                             break;
-                                          default:
-                                            _monthController.clear();
-                                            _weekController.clear();
+                                          case 'Dec29': // Week 1 (spans into 2026)
+                                            _monthController.text = 'December';
+                                            _weekController.text = 'Week 1';
                                             break;
                                         }
                                         checkSaveEnabled(); // Ensure button state is updated
