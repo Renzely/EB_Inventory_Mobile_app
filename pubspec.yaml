@@ -42,11 +42,13 @@ flutter:
     - assets/images/Studio-Project-nobg.png
     - assets/images/account.png
     - assets/images/2x2_YNSON.png
-    - assets/images/bmp.png
+    - assets/images/engkanto_logo.png
 
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: "AppIcon"
-  image_path: "assets/images/bmp.png"
+  image_path: "assets/images/engkanto_logo.png"
   min_sdk_android: 21
   remove_alpha_ios: true
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/images/engkanto_logo.png"
