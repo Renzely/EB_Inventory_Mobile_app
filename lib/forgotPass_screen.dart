@@ -276,8 +276,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   Future<void> _sendOtpForgotPass(String emailAddress) async {
     try {
       final response = await http.post(
-        Uri.parse(
-            'https://eb-inventory-backend.onrender.com/send-otp-forgotpassword'),
+        Uri.parse('https://engkanto.onrender.com/send-otp-forgotpassword'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

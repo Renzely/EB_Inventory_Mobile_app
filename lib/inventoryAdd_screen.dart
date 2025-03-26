@@ -58,7 +58,7 @@ class _AddInventoryState extends State<AddInventory> {
     _selectedDate =
         DateTime.now(); // Initialize _selectedDate to the current date
     _dateController = TextEditingController(
-      text: DateFormat('dd-MM-yyyy')
+      text: DateFormat('yyyy-MM-dd')
           .format(_selectedDate), // Set initial text of controller
     );
     _weekController.addListener(() {
@@ -144,145 +144,84 @@ class _AddInventoryState extends State<AddInventory> {
     });
   }
 
+// Method to get filtered period items
   List<DropdownMenuItem<String>> _getFilteredPeriodItems() {
     List<DropdownMenuItem<String>> items = [];
 
-    // Get current date or use the override date if set
-    DateTime currentDate = getCurrentWeekStartDate();
+    // Get the current date
+    DateTime currentDate = DateTime.now();
 
-    List<List<DateTime>> periods = [
-      // January
-      [DateTime(2025, 1, 6), DateTime(2025, 1, 12)], // Week 1
-      [DateTime(2025, 1, 13), DateTime(2025, 1, 19)], // Week 2
-      [DateTime(2025, 1, 20), DateTime(2025, 1, 26)], // Week 3
-      [DateTime(2025, 1, 27), DateTime(2025, 2, 2)], // Week 4
+    // Find the most recent Monday (start of the period)
+    DateTime startOfWeek = currentDate
+        .subtract(Duration(days: (currentDate.weekday - DateTime.monday) % 7));
 
-      // February
-      [DateTime(2025, 2, 3), DateTime(2025, 2, 9)], // Week 5
-      [DateTime(2025, 2, 10), DateTime(2025, 2, 16)], // Week 6
-      [DateTime(2025, 2, 17), DateTime(2025, 2, 23)], // Week 7
-      [DateTime(2025, 2, 24), DateTime(2025, 3, 2)], // Week 8
+    // Calculate the end of the period (Saturday)
+    DateTime endOfWeek = startOfWeek.add(Duration(days: 5));
 
-      // March
-      [DateTime(2025, 3, 3), DateTime(2025, 3, 9)], // Week 9
-      [DateTime(2025, 3, 10), DateTime(2025, 3, 16)], // Week 10
-      [DateTime(2025, 3, 17), DateTime(2025, 3, 23)], // Week 11
-      [DateTime(2025, 3, 24), DateTime(2025, 3, 30)], // Week 12
-      [DateTime(2025, 3, 31), DateTime(2025, 4, 6)], // Week 13
+    // Format the period string
+    String periodString =
+        '${DateFormat('MMMdd').format(startOfWeek)}-${DateFormat('MMMdd').format(endOfWeek)}';
 
-      // April
-      [DateTime(2025, 4, 7), DateTime(2025, 4, 13)], // Week 14
-      [DateTime(2025, 4, 14), DateTime(2025, 4, 20)], // Week 15
-      [DateTime(2025, 4, 21), DateTime(2025, 4, 27)], // Week 16
-      [DateTime(2025, 4, 28), DateTime(2025, 5, 4)], // Week 17
+    items.add(DropdownMenuItem(child: Text(periodString), value: periodString));
 
-      // May
-      [DateTime(2025, 5, 5), DateTime(2025, 5, 11)], // Week 18
-      [DateTime(2025, 5, 12), DateTime(2025, 5, 18)], // Week 19
-      [DateTime(2025, 5, 19), DateTime(2025, 5, 25)], // Week 20
-      [DateTime(2025, 5, 26), DateTime(2025, 6, 1)], // Week 21
-
-      // June
-      [DateTime(2025, 6, 2), DateTime(2025, 6, 8)], // Week 22
-      [DateTime(2025, 6, 9), DateTime(2025, 6, 15)], // Week 23
-      [DateTime(2025, 6, 16), DateTime(2025, 6, 22)], // Week 24
-      [DateTime(2025, 6, 23), DateTime(2025, 6, 29)], // Week 25
-      [DateTime(2025, 6, 30), DateTime(2025, 7, 6)], // Week 26
-
-      // July
-      [DateTime(2025, 7, 7), DateTime(2025, 7, 13)], // Week 27
-      [DateTime(2025, 7, 14), DateTime(2025, 7, 20)], // Week 28
-      [DateTime(2025, 7, 21), DateTime(2025, 7, 27)], // Week 29
-      [DateTime(2025, 7, 28), DateTime(2025, 8, 3)], // Week 30
-
-      // August
-      [DateTime(2025, 8, 4), DateTime(2025, 8, 10)], // Week 31
-      [DateTime(2025, 8, 11), DateTime(2025, 8, 17)], // Week 32
-      [DateTime(2025, 8, 18), DateTime(2025, 8, 24)], // Week 33
-      [DateTime(2025, 8, 25), DateTime(2025, 8, 31)], // Week 34
-
-      // September
-      [DateTime(2025, 9, 1), DateTime(2025, 9, 7)], // Week 35
-      [DateTime(2025, 9, 8), DateTime(2025, 9, 14)], // Week 36
-      [DateTime(2025, 9, 15), DateTime(2025, 9, 21)], // Week 37
-      [DateTime(2025, 9, 22), DateTime(2025, 9, 28)], // Week 38
-      [DateTime(2025, 9, 29), DateTime(2025, 10, 5)], // Week 39
-
-      // October
-      [DateTime(2025, 10, 6), DateTime(2025, 10, 12)], // Week 40
-      [DateTime(2025, 10, 13), DateTime(2025, 10, 19)], // Week 41
-      [DateTime(2025, 10, 20), DateTime(2025, 10, 26)], // Week 42
-      [DateTime(2025, 10, 27), DateTime(2025, 11, 2)], // Week 43
-
-      // November
-      [DateTime(2025, 11, 3), DateTime(2025, 11, 9)], // Week 44
-      [DateTime(2025, 11, 10), DateTime(2025, 11, 16)], // Week 45
-      [DateTime(2025, 11, 17), DateTime(2025, 11, 23)], // Week 46
-      [DateTime(2025, 11, 24), DateTime(2025, 11, 30)], // Week 47
-
-      // December
-      [DateTime(2025, 12, 1), DateTime(2025, 12, 7)], // Week 48
-      [DateTime(2025, 12, 8), DateTime(2025, 12, 14)], // Week 49
-      [DateTime(2025, 12, 15), DateTime(2025, 12, 21)], // Week 50
-      [DateTime(2025, 12, 22), DateTime(2025, 12, 28)], // Week 51
-      [
-        DateTime(2025, 12, 29),
-        DateTime(2026, 1, 4)
-      ] // Week 52 (spans into 2026)
-    ];
-
-    List<DateTime> currentPeriod = periods.firstWhere(
-        (period) =>
-            currentDate.isAfter(period[0].subtract(const Duration(days: 1))) &&
-            currentDate.isBefore(period[1].add(const Duration(days: 1))),
-        orElse: () => [DateTime(0), DateTime(0)]);
-
-    if (currentPeriod.isNotEmpty) {
-      // Displayed workweek: Monday to Saturday
-      String displayString =
-          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1].subtract(Duration(days: 2)))}';
-
-      // Covered week: Monday to Sunday
-      String coveredString =
-          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1])}';
-
-      items.add(DropdownMenuItem(
-          child: Text(displayString),
-          value: coveredString // Store the full covered week as value
-          ));
-
-      print("Displayed week: $displayString");
-      print("Covered week: $coveredString");
-    } else {
-      // Handle the case where no period is found
-      print("No matching period found.");
-    }
+    print(
+        "Selected period: ${DateFormat('MMM dd').format(startOfWeek)} - ${DateFormat('MMM dd').format(endOfWeek)}");
 
     return items;
   }
 
-  DateTime getCurrentWeekStartDate({DateTime? overrideDate}) {
-    // Use the overrideDate if provided, otherwise use the actual current date
-    var now = overrideDate ?? DateTime.now();
-    var today = DateTime(now.year, now.month, now.day);
-    var firstDayOfWeek = today.subtract(Duration(days: today.weekday - 1));
-    return firstDayOfWeek;
+// // Method to get the current week start date
+//   DateTime getCurrentWeekStartDate({DateTime? overrideDate}) {
+//     // Use the overrideDate if provided, otherwise use the actual current date
+//     var now = overrideDate ?? DateTime.now();
+//     var today = DateTime(now.year, now.month, now.day);
+//     var firstDayOfWeek = today.subtract(Duration(days: today.weekday - 1));
+//     return firstDayOfWeek;
+//   }
+
+  List<List<DateTime>> _generatePeriods(DateTime startDate) {
+    List<List<DateTime>> periods = [];
+
+    // Generate 5 periods (Monday to Saturday)
+    for (int i = 0; i < 5; i++) {
+      DateTime periodStart =
+          startDate.add(Duration(days: i * 7)); // Start of each week (Monday)
+      DateTime periodEnd =
+          periodStart.add(Duration(days: 5)); // End of each week (Saturday)
+      periods.add([periodStart, periodEnd]);
+    }
+
+    return periods;
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return new WillPopScope(
         onWillPop: () async => false,
-        child: MaterialApp(
+        child: new MaterialApp(
             debugShowCheckedModeBanner: false,
             home: Scaffold(
               appBar: AppBar(
-                backgroundColor: Color.fromARGB(255, 26, 20, 71),
-                elevation: 0,
                 title: Text(
-                  'INVENTORY',
+                  'INVENTORY PROCESS',
                   style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                elevation: 0,
+                flexibleSpace: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Color.fromARGB(255, 26, 20, 71),
+                        Color.fromARGB(255, 33, 26, 87),
+                        Color.fromARGB(255, 255, 196, 0),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
                 ),
               ),
               body: SingleChildScrollView(
@@ -297,7 +236,7 @@ class _AddInventoryState extends State<AddInventory> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'DATE',
+                              'Date',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -340,7 +279,7 @@ class _AddInventoryState extends State<AddInventory> {
                             // ),
                             SizedBox(height: 16),
                             Text(
-                              'MERCHANDISER',
+                              'Merchandiser',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16),
                             ),
@@ -357,7 +296,7 @@ class _AddInventoryState extends State<AddInventory> {
                             ),
                             SizedBox(height: 16),
                             Text(
-                              'OUTLET',
+                              'Branch/Outlet',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16),
                             ),
@@ -431,7 +370,11 @@ class _AddInventoryState extends State<AddInventory> {
                             if (_selectedAccount != null) ...[
                               SizedBox(height: 16),
                               Text(
-                                'WEEKS COVERED',
+                                'Additional Information',
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'Weeks Covered',
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16),
                               ),
@@ -461,361 +404,277 @@ class _AddInventoryState extends State<AddInventory> {
                                                     _selectedAccount != null &&
                                                         _selectedPeriod != null;
 
+                                                // Null check before splitting
                                                 if (value != null) {
-                                                  String selectedPeriod = value
+                                                  String actualValue = value
                                                           .split('-')[
-                                                      0]; // Extract the first day, e.g., "Jan06" from "Jan06-Jan12"
-                                                  switch (selectedPeriod) {
-                                                    // January
-                                                    case 'Jan06': // Week 2
-                                                      _monthController.text =
-                                                          'January';
-                                                      _weekController.text =
-                                                          'Week 2';
-                                                      break;
-                                                    case 'Jan13': // Week 3
-                                                      _monthController.text =
-                                                          'January';
-                                                      _weekController.text =
-                                                          'Week 3';
-                                                      break;
-                                                    case 'Jan20': // Week 4
-                                                      _monthController.text =
-                                                          'January';
-                                                      _weekController.text =
-                                                          'Week 4';
-                                                      break;
-                                                    case 'Jan27': // Week 5
-                                                      _monthController.text =
-                                                          'January';
-                                                      _weekController.text =
-                                                          'Week 5';
-                                                      break;
+                                                      1]; // Get the second part of the date
+                                                  print(
+                                                      'Selected period: $value');
 
-                                                    // February
-                                                    case 'Feb03': // Week 6
-                                                      _monthController.text =
-                                                          'February';
-                                                      _weekController.text =
-                                                          'Week 6';
-                                                      break;
-                                                    case 'Feb10': // Week 7
-                                                      _monthController.text =
-                                                          'February';
-                                                      _weekController.text =
-                                                          'Week 7';
-                                                      break;
-                                                    case 'Feb17': // Week 8
-                                                      _monthController.text =
-                                                          'February';
-                                                      _weekController.text =
-                                                          'Week 8';
-                                                      break;
-                                                    case 'Feb24': // Week 9
-                                                      _monthController.text =
-                                                          'February';
-                                                      _weekController.text =
-                                                          'Week 9';
-                                                      break;
-
-                                                    // March
-                                                    case 'Mar03': // Week 10
-                                                      _monthController.text =
-                                                          'March';
-                                                      _weekController.text =
-                                                          'Week 10';
-                                                      break;
-                                                    case 'Mar10': // Week 11
-                                                      _monthController.text =
-                                                          'March';
-                                                      _weekController.text =
-                                                          'Week 11';
-                                                      break;
-                                                    case 'Mar17': // Week 12
-                                                      _monthController.text =
-                                                          'March';
-                                                      _weekController.text =
-                                                          'Week 12';
-                                                      break;
-                                                    case 'Mar24': // Week 13
+                                                  switch (value) {
+                                                    case 'Mar24-Mar29':
                                                       _monthController.text =
                                                           'March';
                                                       _weekController.text =
                                                           'Week 13';
                                                       break;
-                                                    case 'Mar31': // Week 14
+                                                    case 'Mar31-Apr05':
                                                       _monthController.text =
                                                           'March';
                                                       _weekController.text =
                                                           'Week 14';
                                                       break;
-
-                                                    // April
-                                                    case 'Apr07': // Week 15
+                                                    case 'Apr07-Apr12':
                                                       _monthController.text =
                                                           'April';
                                                       _weekController.text =
                                                           'Week 15';
                                                       break;
-                                                    case 'Apr14': // Week 16
+                                                    case 'Apr14-Apr19':
                                                       _monthController.text =
                                                           'April';
                                                       _weekController.text =
                                                           'Week 16';
                                                       break;
-                                                    case 'Apr21': // Week 17
+                                                    case 'Apr21-Apr26':
                                                       _monthController.text =
                                                           'April';
                                                       _weekController.text =
                                                           'Week 17';
                                                       break;
-                                                    case 'Apr28': // Week 18
+                                                    case 'Apr28-May03':
                                                       _monthController.text =
                                                           'April';
                                                       _weekController.text =
                                                           'Week 18';
                                                       break;
-
-                                                    // May
-                                                    case 'May05': // Week 19
+                                                    case 'May05-May10':
                                                       _monthController.text =
                                                           'May';
                                                       _weekController.text =
                                                           'Week 19';
                                                       break;
-                                                    case 'May12': // Week 20
+                                                    case 'May12-May17':
                                                       _monthController.text =
                                                           'May';
                                                       _weekController.text =
                                                           'Week 20';
                                                       break;
-                                                    case 'May19': // Week 21
+                                                    case 'May19-May24':
                                                       _monthController.text =
                                                           'May';
                                                       _weekController.text =
                                                           'Week 21';
                                                       break;
-                                                    case 'May26': // Week 22
+                                                    case 'May26-May31':
                                                       _monthController.text =
                                                           'May';
                                                       _weekController.text =
                                                           'Week 22';
                                                       break;
-
-                                                    // June
-                                                    case 'Jun02': // Week 23
+                                                    case 'Jun02-Jun07':
                                                       _monthController.text =
                                                           'June';
                                                       _weekController.text =
                                                           'Week 23';
                                                       break;
-                                                    case 'Jun09': // Week 24
+                                                    case 'Jun09-Jun14':
                                                       _monthController.text =
                                                           'June';
                                                       _weekController.text =
                                                           'Week 24';
                                                       break;
-                                                    case 'Jun16': // Week 25
+                                                    case 'Jun16-Jun21':
                                                       _monthController.text =
                                                           'June';
                                                       _weekController.text =
                                                           'Week 25';
                                                       break;
-                                                    case 'Jun23': // Week 26
+                                                    case 'Jun23-Jun28':
                                                       _monthController.text =
                                                           'June';
                                                       _weekController.text =
                                                           'Week 26';
                                                       break;
-                                                    case 'Jun30': // Week 27
+                                                    case 'Jun30-Jul05':
                                                       _monthController.text =
                                                           'June';
                                                       _weekController.text =
                                                           'Week 27';
                                                       break;
-
-                                                    // July
-                                                    case 'Jul07': // Week 28
+                                                    case 'Jul07-Jul12':
                                                       _monthController.text =
                                                           'July';
                                                       _weekController.text =
                                                           'Week 28';
                                                       break;
-                                                    case 'Jul14': // Week 29
+                                                    case 'Jul14-Jul19':
                                                       _monthController.text =
                                                           'July';
                                                       _weekController.text =
                                                           'Week 29';
                                                       break;
-                                                    case 'Jul21': // Week 30
+                                                    case 'Jul21-Jul26':
                                                       _monthController.text =
                                                           'July';
                                                       _weekController.text =
                                                           'Week 30';
                                                       break;
-                                                    case 'Jul28': // Week 31
+                                                    case 'Jul28-Aug02':
                                                       _monthController.text =
                                                           'July';
                                                       _weekController.text =
                                                           'Week 31';
                                                       break;
-
-                                                    // August
-                                                    case 'Aug04': // Week 32
+                                                    case 'Aug04-Aug09':
                                                       _monthController.text =
                                                           'August';
                                                       _weekController.text =
                                                           'Week 32';
                                                       break;
-                                                    case 'Aug11': // Week 33
+                                                    case 'Aug11-Aug16':
                                                       _monthController.text =
                                                           'August';
                                                       _weekController.text =
                                                           'Week 33';
                                                       break;
-                                                    case 'Aug18': // Week 34
+                                                    case 'Aug18-Aug23':
                                                       _monthController.text =
                                                           'August';
                                                       _weekController.text =
                                                           'Week 34';
                                                       break;
-                                                    case 'Aug25': // Week 35
+                                                    case 'Aug25-Aug30':
                                                       _monthController.text =
                                                           'August';
                                                       _weekController.text =
                                                           'Week 35';
                                                       break;
-
-                                                    // September
-                                                    case 'Sep01': // Week 36
+                                                    case 'Sep01-Sep06':
                                                       _monthController.text =
                                                           'September';
                                                       _weekController.text =
                                                           'Week 36';
                                                       break;
-                                                    case 'Sep08': // Week 37
+                                                    case 'Sep08-Sep13':
                                                       _monthController.text =
                                                           'September';
                                                       _weekController.text =
                                                           'Week 37';
                                                       break;
-                                                    case 'Sep15': // Week 38
+                                                    case 'Sep15-Sep20':
                                                       _monthController.text =
                                                           'September';
                                                       _weekController.text =
                                                           'Week 38';
                                                       break;
-                                                    case 'Sep22': // Week 39
+                                                    case 'Sep22-Sep27':
                                                       _monthController.text =
                                                           'September';
                                                       _weekController.text =
                                                           'Week 39';
                                                       break;
-                                                    case 'Sep29': // Week 40
+                                                    case 'Sep29-Oct04':
                                                       _monthController.text =
                                                           'September';
                                                       _weekController.text =
                                                           'Week 40';
                                                       break;
-
-                                                    // October
-                                                    case 'Oct06': // Week 41
+                                                    case 'Oct06-Oct11':
                                                       _monthController.text =
                                                           'October';
                                                       _weekController.text =
                                                           'Week 41';
                                                       break;
-                                                    case 'Oct13': // Week 42
+                                                    case 'Oct13-Oct18':
                                                       _monthController.text =
                                                           'October';
                                                       _weekController.text =
                                                           'Week 42';
                                                       break;
-                                                    case 'Oct20': // Week 43
+                                                    case 'Oct20-Oct25':
                                                       _monthController.text =
                                                           'October';
                                                       _weekController.text =
                                                           'Week 43';
                                                       break;
-                                                    case 'Oct27': // Week 44
+                                                    case 'Oct27-Nov01':
                                                       _monthController.text =
                                                           'October';
                                                       _weekController.text =
                                                           'Week 44';
                                                       break;
-
-                                                    // November
-                                                    case 'Nov03': // Week 45
+                                                    case 'Nov03-Nov08':
                                                       _monthController.text =
                                                           'November';
                                                       _weekController.text =
                                                           'Week 45';
                                                       break;
-                                                    case 'Nov10': // Week 46
+                                                    case 'Nov10-Nov15':
                                                       _monthController.text =
                                                           'November';
                                                       _weekController.text =
                                                           'Week 46';
                                                       break;
-                                                    case 'Nov17': // Week 47
+                                                    case 'Nov17-Nov22':
                                                       _monthController.text =
                                                           'November';
                                                       _weekController.text =
                                                           'Week 47';
                                                       break;
-                                                    case 'Nov24': // Week 48
+                                                    case 'Nov24-Nov29':
                                                       _monthController.text =
                                                           'November';
                                                       _weekController.text =
                                                           'Week 48';
                                                       break;
-
-                                                    // December
-                                                    case 'Dec01': // Week 49
+                                                    case 'Dec01-Dec06':
                                                       _monthController.text =
                                                           'December';
                                                       _weekController.text =
                                                           'Week 49';
                                                       break;
-                                                    case 'Dec08': // Week 50
+                                                    case 'Dec08-Dec13':
                                                       _monthController.text =
                                                           'December';
                                                       _weekController.text =
                                                           'Week 50';
                                                       break;
-                                                    case 'Dec15': // Week 51
+                                                    case 'Dec15-Dec20':
                                                       _monthController.text =
                                                           'December';
                                                       _weekController.text =
                                                           'Week 51';
                                                       break;
-                                                    case 'Dec22': // Week 52
+                                                    case 'Dec22-Dec27':
                                                       _monthController.text =
                                                           'December';
                                                       _weekController.text =
                                                           'Week 52';
                                                       break;
-                                                    case 'Dec29': // Week 1 (spans into 2026)
+                                                    case 'Dec29-Jan03':
                                                       _monthController.text =
                                                           'December';
                                                       _weekController.text =
                                                           'Week 1';
                                                       break;
+                                                    case 'Jan05-Jan10':
+                                                      _monthController.text =
+                                                          'January';
+                                                      _weekController.text =
+                                                          'Week 2';
+                                                      break;
 
                                                     default:
-                                                      print(
-                                                          'No match for selected period: $selectedPeriod');
                                                       _monthController.clear();
                                                       _weekController.clear();
                                                       break;
                                                   }
-                                                  _showAdditionalInfo =
-                                                      true; // Ensure this is set to true
                                                 } else {
+                                                  // Handle null value case
                                                   _monthController.clear();
                                                   _weekController.clear();
-                                                  _showAdditionalInfo =
-                                                      false; // Reset if no period is selected
                                                 }
                                                 _showAdditionalInfo = true;
                                               });
@@ -850,7 +709,7 @@ class _AddInventoryState extends State<AddInventory> {
                               ),
                               if (_showAdditionalInfo) ...[
                                 SizedBox(height: 16),
-                                Text('MONTH',
+                                Text('Month',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
@@ -866,9 +725,9 @@ class _AddInventoryState extends State<AddInventory> {
                                   controller: _monthController,
                                   readOnly: true,
                                 ),
-                                SizedBox(height: 16),
+                                SizedBox(height: 8),
                                 Text(
-                                  'WEEK',
+                                  'Week',
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16),
@@ -885,7 +744,7 @@ class _AddInventoryState extends State<AddInventory> {
                                 ),
                               ],
                             ],
-                            SizedBox(height: 25),
+                            SizedBox(height: 20),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
@@ -917,8 +776,7 @@ class _AddInventoryState extends State<AddInventory> {
                                       ),
                                       backgroundColor:
                                           MaterialStateProperty.all<Color>(
-                                        Color.fromARGB(255, 26, 20, 71),
-                                      )),
+                                              Color.fromARGB(255, 26, 20, 71))),
                                   child: const Text(
                                     'Cancel',
                                     style: TextStyle(
@@ -1000,7 +858,7 @@ class _AddInventoryState extends State<AddInventory> {
     if (pickedDate != null) {
       setState(() {
         _selectedDate = pickedDate;
-        _dateController.text = DateFormat('dd-MM-yyyy').format(pickedDate);
+        _dateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
       });
     }
   }
@@ -1045,8 +903,9 @@ class _SKUInventoryState extends State<SKUInventory> {
   String? _statusSelected;
   String? _selectedPeriod;
   String? _remarksOOS;
-  //String? _reasonOOS;
+  String? _reasonOOS;
   String? _selectedNoDeliveryOption;
+  String? _previousSelectedSku;
   String _inputid = '';
   int? _selectedNumberOfDaysOOS;
   bool _showCarriedTextField = false;
@@ -1054,6 +913,10 @@ class _SKUInventoryState extends State<SKUInventory> {
   bool _showDelistedTextField = false;
   bool _isSaveEnabled = false;
   bool _isEditing = true;
+  Set<String> _selectedSkus = {}; // Stores all selected SKUs
+  List<String> _delistedSkus = [];
+  List<String> _disabledSkus = [];
+  List<Map<String, dynamic>> _inventorySections = [];
   TextEditingController _beginningSAController = TextEditingController();
   TextEditingController _beginningWAController = TextEditingController();
   TextEditingController _endingSAController = TextEditingController();
@@ -1076,7 +939,7 @@ class _SKUInventoryState extends State<SKUInventory> {
   bool _showNoDeliveryDropdown = false;
   String selectedBranch = 'BranchName'; // Get this from user input or selection
   List<String> _availableSkuDescriptions = [];
-  List<String> _disabledSkus = [];
+  bool _disabledDropdown = false;
 
   String generateInputID() {
     var timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -1108,119 +971,226 @@ class _SKUInventoryState extends State<SKUInventory> {
   }
 
   void _saveInventoryItem() async {
-    String inputid = _inputid;
-    String AccountManning = _selectedaccountname ?? '';
-    String period = _selectedPeriod ?? '';
-    String Version = _versionSelected ?? '';
-    String status = _statusSelected ?? '';
-    String SKUDescription = _selectedDropdownValue ?? '';
-    String product = _productDetails ?? '';
-    String skucode = _skuCode ?? '';
-    String remarksOOS = _remarksOOS ?? '';
-    //String reasonOOS = _reasonOOS ?? '';
-    bool edit = _isEditing;
-    int numberOfDaysOOS = _selectedNumberOfDaysOOS ?? 0;
+    try {
+      String inputid = _inputid;
+      String AccountManning = _selectedaccountname ?? '';
+      String period = _selectedPeriod ?? '';
+      String Version = _versionSelected ?? '';
+      String status = _statusSelected ?? '';
+      String SKUDescription = _selectedDropdownValue ?? '';
+      String product = _productDetails ?? '';
+      String skucode = _skuCode ?? '';
+      String remarksOOS = _remarksOOS ?? '';
+      String reasonOOS = _reasonOOS ?? '';
+      bool edit = _isEditing;
+      int numberOfDaysOOS = _selectedNumberOfDaysOOS ?? 0;
 
-    int beginningSA = int.tryParse(_beginningSAController.text) ?? 0;
-    int beginningWA = int.tryParse(_beginningWAController.text) ?? 0;
+      int beginningSA = int.tryParse(_beginningSAController.text) ?? 0;
+      int beginningWA = int.tryParse(_beginningWAController.text) ?? 0;
+      int newBeginning = beginningSA + beginningWA;
 
-    int newBeginning = beginningSA + beginningWA;
+      int endingSA = int.tryParse(_endingSAController.text) ?? 0;
+      int endingWA = int.tryParse(_endingWAController.text) ?? 0;
+      int newEnding = endingSA + endingWA;
 
-    int endingSA = int.tryParse(_endingSAController.text) ?? 0;
-    int endingWA = int.tryParse(_endingWAController.text) ?? 0;
+      int beginning = int.tryParse(_beginningController.text) ?? 0;
+      int delivery = int.tryParse(_deliveryController.text) ?? 0;
+      int ending = int.tryParse(_endingController.text) ?? 0;
+      int offtake = beginning + delivery - ending;
 
-    int newEnding = endingSA + endingWA;
-
-    int beginning = int.tryParse(_beginningController.text) ?? 0;
-    int delivery = int.tryParse(_deliveryController.text) ?? 0;
-    int ending = int.tryParse(_endingController.text) ?? 0;
-
-    int offtake = beginning + delivery - ending;
-    double inventoryDaysLevel = 0;
-
-    if (status != "Not Carried" && status != "Delisted") {
-      if (offtake != 0 && ending != double.infinity && !ending.isNaN) {
-        inventoryDaysLevel = ending / (offtake / 7);
+      double inventoryDaysLevel = 0;
+      if (status != "Not Carried" && status != "Delisted") {
+        if (offtake != 0 && ending != double.infinity && !ending.isNaN) {
+          inventoryDaysLevel = ending / (offtake / 7);
+        }
       }
-    }
 
-    dynamic ncValue = 'NC';
-    dynamic delistedValue = 'Delisted';
-    dynamic beginningValue = beginning;
-    dynamic beginningSAValue = beginningSA;
-    dynamic beginningWAValue = beginningWA;
-    dynamic deliveryValue = delivery;
-    dynamic endingValue = ending;
-    dynamic endingSAValue = endingSA;
-    dynamic endingWAValue = endingWA;
-    dynamic offtakeValue = offtake;
-    dynamic noOfDaysOOSValue = numberOfDaysOOS;
+      dynamic ncValue = 'NC';
+      dynamic delistedValue = 'Delisted';
+      dynamic beginningValue = beginning;
+      dynamic beginningSAValue = beginningSA;
+      dynamic beginningWAValue = beginningWA;
+      dynamic deliveryValue = delivery;
+      dynamic endingValue = ending;
+      dynamic endingSAValue = endingSA;
+      dynamic endingWAValue = endingWA;
+      dynamic offtakeValue = offtake;
+      dynamic noOfDaysOOSValue = numberOfDaysOOS;
 
-    if (status == 'Delisted') {
-      beginningValue = delistedValue;
-      beginningSAValue = deliveryValue;
-      beginningWAValue = delistedValue;
-      deliveryValue = delistedValue;
-      endingValue = delistedValue;
-      endingSAValue = delistedValue;
-      endingWAValue = deliveryValue;
-      offtakeValue = delistedValue;
-      noOfDaysOOSValue = delistedValue;
-      _expiryFieldsValues = [
-        {'expiryMonth': delistedValue, 'expiryPcs': delistedValue}
-      ];
-    } else if (status == 'Not Carried') {
-      beginningValue = ncValue;
-      beginningSAValue = ncValue;
-      beginningWAValue = ncValue;
-      deliveryValue = ncValue;
-      endingValue = ncValue;
-      endingSAValue = ncValue;
-      endingWAValue = ncValue;
-      offtakeValue = ncValue;
-      noOfDaysOOSValue = ncValue;
-      _expiryFieldsValues = [
-        {'expiryMonth': ncValue, 'expiryPcs': ncValue}
-      ];
-    }
+      if (status == 'Delisted') {
+        beginningValue = delistedValue;
+        beginningSAValue = deliveryValue;
+        beginningWAValue = delistedValue;
+        deliveryValue = delistedValue;
+        endingValue = delistedValue;
+        endingSAValue = delistedValue;
+        endingWAValue = deliveryValue;
+        offtakeValue = delistedValue;
+        noOfDaysOOSValue = delistedValue;
+        _expiryFieldsValues = [
+          {'expiryMonth': delistedValue, 'expiryPcs': delistedValue}
+        ];
+      } else if (status == 'Not Carried') {
+        beginningValue = ncValue;
+        beginningSAValue = ncValue;
+        beginningWAValue = ncValue;
+        deliveryValue = ncValue;
+        endingValue = ncValue;
+        endingSAValue = ncValue;
+        endingWAValue = ncValue;
+        offtakeValue = ncValue;
+        noOfDaysOOSValue = ncValue;
+        _expiryFieldsValues = [
+          {'expiryMonth': ncValue, 'expiryPcs': ncValue}
+        ];
+      }
 
-    InventoryItem newItem = InventoryItem(
-      id: ObjectId(), // Generate this as needed
-      userEmail: widget.userEmail,
-      date: DateFormat('dd-MM-yyyy').format(DateTime.now()), // Current date
-      inputId: inputid,
-      name: '${widget.userName} ${widget.userLastName}',
-      accountNameBranchManning: widget.selectedAccount,
-      period: widget.SelectedPeriod,
-      month: widget.selectedMonth,
-      week: widget.selectedWeek,
-      //category: Version,
-      skuDescription: SKUDescription,
-      //products: product,
-      skuCode: skucode,
-      status: status,
-      beginning: beginningValue,
-      beginningSA: beginningSAValue,
-      beginningWA: beginningWAValue,
-      delivery: deliveryValue,
-      ending: endingValue,
-      endingSA: endingSAValue,
-      endingWA: endingWAValue,
-      offtake: offtakeValue,
-      inventoryDaysLevel: inventoryDaysLevel.toDouble(),
-      noOfDaysOOS: noOfDaysOOSValue,
-      expiryFields: _expiryFieldsValues,
-      remarksOOS: remarksOOS,
-      //reasonOOS: reasonOOS,
-      isEditing: true, // Set to false when saving new item
-      isDone: false,
-    );
+      // Create Inventory (Original)
+      InventoryItem newItem1 = InventoryItem(
+        id: ObjectId(),
+        userEmail: widget.userEmail ?? '',
+        date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+        inputId: inputid ?? '',
+        name: '${widget.userName ?? ''} ${widget.userLastName ?? ''}',
+        accountNameBranchManning: widget.selectedAccount ?? '',
+        period: widget.SelectedPeriod ?? '',
+        month: widget.selectedMonth ?? '',
+        week: widget.selectedWeek ?? '',
+        // category: Version ?? '',
+        skuDescription: SKUDescription ?? '',
+        skuCode: skucode ?? '',
+        status: status ?? '',
+        beginning: beginningValue ?? 0,
+        beginningSA: beginningSAValue ?? 0,
+        beginningWA: beginningWAValue ?? 0,
+        delivery: deliveryValue ?? 0,
+        ending: endingValue ?? 0,
+        endingSA: endingSAValue ?? 0,
+        endingWA: endingWAValue ?? 0,
+        offtake: offtakeValue ?? 0,
+        inventoryDaysLevel: inventoryDaysLevel?.toDouble() ?? 0.0,
+        noOfDaysOOS: noOfDaysOOSValue ?? 0,
+        expiryFields: _expiryFieldsValues ?? [],
+        remarksOOS: remarksOOS ?? '',
+        // reasonOOS: reasonOOS ?? '',
+        isEditing: true,
+      );
 
-    await _saveToDatabase(newItem);
+      // Save the original inventory item
+      await _saveToDatabase(newItem1);
 
-    // Update status of the original item if editing
-    if (_isEditing) {
-      await _updateEditingStatus(inputid, widget.userEmail, false);
+      // Create multiple additional inventory items from _inventorySections
+      // Create multiple additional inventory items from _inventorySections
+      for (var section in _inventorySections) {
+        String newInputId =
+            generateInputID(); // Generate a unique inputId for each item
+
+        // Extract status
+        String sectionStatus = section['statusSelected'] ?? '';
+
+        // Default numeric values
+        dynamic ncValue = 'NC';
+        dynamic delistedValue = 'Delisted';
+        dynamic beginningValue =
+            int.tryParse(section['beginningController']?.text ?? '0') ?? 0;
+        dynamic beginningSAValue =
+            int.tryParse(section['beginningSAController']?.text ?? '0') ?? 0;
+        dynamic beginningWAValue =
+            int.tryParse(section['beginningWAController']?.text ?? '0') ?? 0;
+        dynamic deliveryValue =
+            int.tryParse(section['deliveryController']?.text ?? '0') ?? 0;
+        dynamic endingValue =
+            int.tryParse(section['endingController']?.text ?? '0') ?? 0;
+        dynamic endingSAValue =
+            int.tryParse(section['endingSAController']?.text ?? '0') ?? 0;
+        dynamic endingWAValue =
+            int.tryParse(section['endingWAController']?.text ?? '0') ?? 0;
+        dynamic offtakeValue =
+            int.tryParse(section['offtakeController']?.text ?? '0') ?? 0;
+        dynamic noOfDaysOOSValue = section['selectedNumberOfDaysOOS'] ?? 0;
+
+        // Check status and apply appropriate values
+        if (sectionStatus == 'Delisted') {
+          beginningValue = delistedValue;
+          beginningSAValue = deliveryValue;
+          beginningWAValue = delistedValue;
+          deliveryValue = delistedValue;
+          endingValue = delistedValue;
+          endingSAValue = delistedValue;
+          endingWAValue = deliveryValue;
+          offtakeValue = delistedValue;
+          noOfDaysOOSValue = delistedValue;
+          _expiryFieldsValues = [
+            {'expiryMonth': delistedValue, 'expiryPcs': delistedValue}
+          ];
+        } else if (sectionStatus == 'Not Carried') {
+          beginningValue = ncValue;
+          beginningSAValue = ncValue;
+          beginningWAValue = ncValue;
+          deliveryValue = ncValue;
+          endingValue = ncValue;
+          endingSAValue = ncValue;
+          endingWAValue = ncValue;
+          offtakeValue = ncValue;
+          noOfDaysOOSValue = ncValue;
+          _expiryFieldsValues = [
+            {'expiryMonth': ncValue, 'expiryPcs': ncValue}
+          ];
+        }
+
+        // Create new inventory item with updated values
+        InventoryItem newItem = InventoryItem(
+          id: ObjectId(),
+          userEmail: widget.userEmail ?? '',
+          date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+          inputId: newInputId, // Use the newly generated inputId
+          name: '${widget.userName ?? ''} ${widget.userLastName ?? ''}',
+          accountNameBranchManning: widget.selectedAccount ?? '',
+          period: widget.SelectedPeriod ?? '',
+          month: widget.selectedMonth ?? '',
+          week: widget.selectedWeek ?? '',
+          // category: section['versionSelected'] ?? '',
+          skuDescription: section['skuDescription'] ?? '',
+          skuCode: section['skuCode'] ?? '',
+          status: sectionStatus,
+          beginning: beginningValue,
+          beginningSA: beginningSAValue,
+          beginningWA: beginningWAValue,
+          delivery: deliveryValue,
+          ending: endingValue,
+          endingSA: endingSAValue,
+          endingWA: endingWAValue,
+          offtake: offtakeValue,
+          inventoryDaysLevel: double.tryParse(
+                  section['inventoryDaysLevelController']?.text ?? '0.0') ??
+              0.0,
+          noOfDaysOOS: noOfDaysOOSValue,
+          expiryFields: _expiryFieldsValues ?? [],
+          remarksOOS: section['remarksOOS'] ?? '',
+          // reasonOOS: section['reasonOOS'] ?? '',
+          isEditing: true,
+        );
+
+        // Save each additional inventory item
+        await _saveToDatabase(newItem);
+      }
+
+      // If SKU is delisted, remove it from dropdown
+      if (status == 'Delisted') {
+        setState(() {
+          _categoryToSkuDescriptions[_versionSelected]?.remove(SKUDescription);
+        });
+      }
+
+      // // Refresh dropdown after saving
+      // updateDropdown();
+
+      // Update editing status
+      if (_isEditing) {
+        await _updateEditingStatus(inputid, widget.userEmail, true);
+      }
+    } catch (e) {
+      print('Error saving inventory items: $e');
     }
   }
 
@@ -1238,13 +1208,20 @@ class _SKUInventoryState extends State<SKUInventory> {
     }
   }
 
-  Future<List<InventoryItem>> getUserInventoryItems(String userEmail) async {
+  Future<List<InventoryItem>> getUserInventoryItems(
+      String userEmail, String selectedAccountName) async {
     List<InventoryItem> items = [];
     try {
       final db = await mongo.Db.create(INVENTORY_CONN_URL);
       await db.open();
       final collection = db.collection(USER_INVENTORY);
-      final result = await collection.find({'userEmail': userEmail}).toList();
+
+      // Fetch items where the SKU is not delisted and belongs to the selected account
+      final result = await collection.find({
+        'userEmail': userEmail,
+        'accountNameBranchManning': selectedAccountName,
+        'status': {'\$ne': 'Delisted'}, // Exclude delisted items
+      }).toList();
 
       for (var doc in result) {
         items.add(InventoryItem.fromJson(doc));
@@ -1257,51 +1234,97 @@ class _SKUInventoryState extends State<SKUInventory> {
     return items;
   }
 
-  void _addExpiryField() {
+  void _addExpiryField(int sectionIndex) {
     setState(() {
-      if (_expiryFields.length < 6) {
-        int index = _expiryFields.length;
-        _expiryFields.add(
+      List expiryFields;
+      List expiryFieldsValues;
+
+      if (sectionIndex == -1) {
+        // Use original inventory fields
+        expiryFields = _expiryFields;
+        expiryFieldsValues = _expiryFieldsValues;
+      } else {
+        // Ensure the section exists and initialize fields if they are null
+        if (_inventorySections[sectionIndex]['expiryFields'] == null) {
+          _inventorySections[sectionIndex]['expiryFields'] = [];
+        }
+        if (_inventorySections[sectionIndex]['expiryFieldsValues'] == null) {
+          _inventorySections[sectionIndex]['expiryFieldsValues'] = [];
+        }
+        expiryFields = _inventorySections[sectionIndex]['expiryFields'];
+        expiryFieldsValues =
+            _inventorySections[sectionIndex]['expiryFieldsValues'];
+      }
+
+      if (expiryFields.length < 6) {
+        int index = expiryFields.length;
+        expiryFieldsValues.add({'expiryMonth': '', 'expiryPcs': 0});
+
+        expiryFields.add(
           ExpiryField(
             index: index,
             onExpiryFieldChanged: (month, pcs, index) {
-              _updateExpiryField(
-                  index, {'expiryMonth': month, 'expiryPcs': pcs});
+              _updateExpiryField(sectionIndex, index,
+                  {'expiryMonth': month, 'expiryPcs': pcs});
             },
             onDeletePressed: () {
-              _removeExpiryField(index);
+              _removeExpiryField(sectionIndex, index);
             },
           ),
         );
-        _expiryFieldsValues.add({'expiryMonth': '', 'expiryPcs': 0});
       }
     });
   }
 
-  void _removeExpiryField(int index) {
+  void _removeExpiryField(int sectionIndex, int index) {
     setState(() {
-      _expiryFields.removeAt(index);
-      _expiryFieldsValues.removeAt(index);
+      // Use the sectionIndex to determine which inventory section to update
+      var expiryFields = sectionIndex == -1
+          ? _expiryFields
+          : _inventorySections[sectionIndex]['expiryFields'];
+      var expiryFieldsValues = sectionIndex == -1
+          ? _expiryFieldsValues
+          : _inventorySections[sectionIndex]['expiryFieldsValues'];
+
+      expiryFields.removeAt(index);
+      expiryFieldsValues.removeAt(index);
 
       // Update the index of remaining fields
-      for (int i = index; i < _expiryFields.length; i++) {
-        _expiryFields[i] = ExpiryField(
+      for (int i = index; i < expiryFields.length; i++) {
+        expiryFields[i] = ExpiryField(
           index: i,
           onExpiryFieldChanged: (month, pcs, index) {
-            _updateExpiryField(index, {'expiryMonth': month, 'expiryPcs': pcs});
+            _updateExpiryField(
+                sectionIndex, index, {'expiryMonth': month, 'expiryPcs': pcs});
           },
           onDeletePressed: () {
-            _removeExpiryField(i);
+            _removeExpiryField(sectionIndex, i);
           },
         );
       }
     });
   }
 
-  void _updateExpiryField(int index, Map<String, dynamic> newValue) {
+  void _updateExpiryField(
+      int sectionIndex, int index, Map<String, dynamic> newValue) {
     setState(() {
-      _expiryFieldsValues[index] = newValue;
+      // Use the sectionIndex to determine which inventory section to update
+      var expiryFieldsValues = sectionIndex == -1
+          ? _expiryFieldsValues
+          : _inventorySections[sectionIndex]['expiryFieldsValues'];
+
+      if (index < expiryFieldsValues.length) {
+        expiryFieldsValues[index] = newValue;
+      } else {
+        // Ensure list has enough entries before updating
+        while (expiryFieldsValues.length <= index) {
+          expiryFieldsValues.add({'expiryMonth': '', 'expiryPcs': 0});
+        }
+        expiryFieldsValues[index] = newValue;
+      }
     });
+
+    // print("Expiry Values: $expiryFieldsValues"); // Debugging
   }
 
   Map<String, List<String>> _categoryToSkuDescriptions = {
@@ -1317,8 +1340,6 @@ class _SKUInventoryState extends State<SKUInventory> {
   };
 
   Map<String, Map<String, String>> _skuToProductSkuCode = {
-    //CATEGORY V1
-
     'Engkanto Live it Up Lager': {
       'Product': ' ',
       '4-Pack Barcode': '4 806534 610144'
@@ -1352,51 +1373,149 @@ class _SKUInventoryState extends State<SKUInventory> {
   void _toggleDropdown(String version) {
     setState(() {
       if (_versionSelected == version) {
-        // If the same dropdown is clicked again, hide it
-        _versionSelected = null;
-        _isDropdownVisible = false; // Hide the dropdown
+        // If the selected version is clicked again, clear and reset
+        _versionSelected = null; // Clear version selection
+        _isDropdownVisible = false; // Hide dropdown
+
+        // Reset the fields as needed
+        _remarksOOS = null;
+        _selectedNoDeliveryOption = null;
+        _reasonOOS = null;
+        _showNoDeliveryDropdown = false;
+        _selectedNumberOfDaysOOS = 0;
+        _selectedDropdownValue = null; // Clear dropdown selection
+        _productDetails = null;
+        _skuCode = null;
+        _expiryFields.clear();
+        _statusSelected = null;
+        _showCarriedTextField = false;
+        _showNotCarriedTextField = false;
+        _showDelistedTextField = false;
+
+        // Clear text field controllers
+        _beginningController.clear();
+        _beginningSAController.clear();
+        _beginningWAController.clear();
+        _deliveryController.clear();
+        _endingSAController.clear();
+        _endingWAController.clear();
+        _endingController.clear();
+        _offtakeController.clear();
+
+        // Reset the disabled SKU list (to enable SKUs again)
+        _disabledSkus.clear();
       } else {
-        // Otherwise, show the clicked dropdown
+        // If a different version is clicked, select the version and show dropdown
         _versionSelected = version;
-        _isDropdownVisible = true; // Show the dropdown
+        _isDropdownVisible = true; // Show dropdown for the selected version
+        _selectedDropdownValue =
+            null; // Reset dropdown selection when switching versions
+
+        // If we're switching versions, make sure we load the correct SKU descriptions
+        // Update disabledSkus list if necessary for the new version
       }
-
-      // Reset remarks, reason, and their dropdown visibility
-      _remarksOOS = null; // Hide the Remarks dropdown
-      _selectedNoDeliveryOption = null; // Reset No Delivery option
-      //_reasonOOS = null; // Reset Reason for OOS
-      _showNoDeliveryDropdown = false; // Hide No Delivery reason dropdown
-
-      // Reset No. of Days OOS
-      _selectedNumberOfDaysOOS = 0; // Reset Number of Days OOS to 0
-
-      // Reset other fields and visibility states
-      _selectedDropdownValue = null;
-      _productDetails = null; // Clear product details
-      _skuCode = null; // Clear SKU code
-      _expiryFields.clear(); // Clear expiry fields when switching categories
-
-      // Hide buttons and text fields when a category is deselected
-      _showCarriedTextField = false;
-      _showNotCarriedTextField = false;
-      _showDelistedTextField = false;
-
-      // Reset text controllers (optional)
-      _beginningController.clear();
-      _deliveryController.clear();
-      _endingController.clear();
-      _offtakeController.clear();
     });
   }
 
   void _selectSKU(String? newValue) {
     if (newValue != null && _skuToProductSkuCode.containsKey(newValue)) {
+      // Store previous selection to potentially re-enable it
+      String? previousSelection = _selectedDropdownValue;
+
       setState(() {
         _selectedDropdownValue = newValue;
         _productDetails = _skuToProductSkuCode[newValue]!['Product'];
         _skuCode = _skuToProductSkuCode[newValue]!['4-Pack Barcode'];
+
+        // Add to disabled SKUs to prevent selection in other dropdowns
+        if (!_disabledSkus.contains(newValue)) {
+          _disabledSkus.add(newValue);
+        }
+
+        // Re-enable previous selection if it's different
+        if (previousSelection != null && previousSelection != newValue) {
+          _disabledSkus.remove(previousSelection);
+        }
+
+        _updateSelectedSkus(); // Update selected SKUs immediately
       });
+
+      // Save the disabled state
+      _saveSelectedSku(newValue);
     }
+  }
+
+  void _selectSKUnewinventory(String? newValue, int index) {
+    if (newValue != null && _skuToProductSkuCode.containsKey(newValue)) {
+      // Store previous selection to potentially re-enable it
+      String? previousSelection = _inventorySections[index]['skuDescription'];
+
+      setState(() {
+        _inventorySections[index]['skuDescription'] = newValue;
+        _inventorySections[index]['productDetails'] =
+            _skuToProductSkuCode[newValue]!['Product'];
+        _inventorySections[index]['skuCode'] =
+            _skuToProductSkuCode[newValue]!['4-Pack Barcode'];
+
+        // Add to disabled SKUs to prevent selection in other dropdowns
+        if (!_disabledSkus.contains(newValue)) {
+          _disabledSkus.add(newValue);
+        }
+
+        // Re-enable previous selection if it's different
+        if (previousSelection != null && previousSelection != newValue) {
+          _disabledSkus.remove(previousSelection);
+        }
+
+        _updateSelectedSkus(); // Ensure UI updates to reflect disabled options
+      });
+
+      // Save the disabled state
+      _saveSelectedSku(newValue);
+    }
+  }
+
+  void _updateSelectedSkus() {
+    Set<String> newSelectedSkus = {}; // Use a set to avoid duplicates
+
+    if (_selectedDropdownValue != null) {
+      newSelectedSkus.add(_selectedDropdownValue!); // Original SKU
+    }
+
+    for (var section in _inventorySections) {
+      if (section['skuDescription'] != null) {
+        newSelectedSkus.add(section['skuDescription']); // Additional SKU
+      }
+    }
+
+    setState(() {
+      _selectedSkus =
+          newSelectedSkus; // Update only after processing all selections
+
+      // Make sure all selected SKUs are in the disabled list to prevent duplicate selection
+      _disabledSkus = List<String>.from(_selectedSkus);
+    });
+
+    print("Updated Selected SKUs: $_selectedSkus");
+    print("Updated Disabled SKUs: $_disabledSkus");
+  }
+
+  void _addNewInventorySection() {
+    setState(() {
+      _inventorySections.add({
+        'skuDescription': null,
+        'productDetails': null,
+        'skuCode': null,
+        'versionSelected': null,
+        'statusSelected':
+            null, // ✅ Add status selection (Carried, Not Carried, Delisted)
+        'productsController':
+            TextEditingController(), // ✅ Add controller for product details
+        'skuCodeController':
+            TextEditingController(), // ✅ Add controller for SKU Code
+      });
+      _updateSelectedSkus(); // ✅ Update selected SKUs immediately
+    });
   }
 
   void _confirmSave() {
@@ -1406,196 +1525,314 @@ class _SKUInventoryState extends State<SKUInventory> {
     }
   }
 
-  void _toggleCarriedTextField(String status) {
+  void _toggleCarriedTextField(String status, [int? index]) {
     setState(() {
-      _statusSelected = status;
-      _showCarriedTextField = true;
-      _showNotCarriedTextField = false;
-      _showDelistedTextField = false;
-      _beginningController.clear();
-      _deliveryController.clear();
-      _endingController.clear();
-      _offtakeController.clear();
-      _expiryFields.clear(); // Clear expiry fields when switching categories
-    });
-  }
-
-  void _toggleNotCarriedTextField(String status) {
-    setState(() {
-      _statusSelected = status;
-      _showCarriedTextField = false;
-      _showNotCarriedTextField = true;
-      _showDelistedTextField = false;
-      _showNoDeliveryDropdown = false;
-      _showNoPOTextField = false;
-      _showUnservedTextField = false;
-      _beginningController.clear();
-      _beginningSAController.clear();
-      _beginningWAController.clear();
-      _deliveryController.clear();
-      _endingController.clear();
-      _endingSAController.clear();
-      _endingWAController.clear();
-      _offtakeController.clear();
-      _expiryFields.clear(); // Clear expiry fields when switching categories
-
-      if (status == 'Not Carried' || status == 'Delisted') {
-        _selectedNumberOfDaysOOS = 0;
+      if (index != null) {
+        // Updating additional inventory section separately
+        _inventorySections[index]['statusSelected'] = status;
+        _inventorySections[index]['showCarriedTextField'] = true;
+        _inventorySections[index]['showNotCarriedTextField'] = false;
+        _inventorySections[index]['showDelistedTextField'] = false;
+      } else {
+        // Updating the original inventory
+        _statusSelected = status;
+        _showCarriedTextField = true;
+        _showNotCarriedTextField = false;
+        _showDelistedTextField = false;
       }
     });
   }
 
-  void _toggleDelistedTextField(String status) {
+  void _toggleNotCarriedTextField(String status, [int? index]) {
     setState(() {
-      _statusSelected = status;
-      _showCarriedTextField = false;
-      _showNotCarriedTextField = false;
-      _showDelistedTextField = true;
-      _showNoDeliveryDropdown = false;
-      _showNoPOTextField = false;
-      _showUnservedTextField = false;
-      _beginningSAController.clear();
-      _beginningWAController.clear();
-      _beginningController.clear();
-      _deliveryController.clear();
-      _endingController.clear();
-      _endingSAController.clear();
-      _endingWAController.clear();
-      _offtakeController.clear();
-      _expiryFields.clear(); // Clear expiry fields when switching categories
-      if (status == 'Not Carried' || status == 'Delisted') {
-        _selectedNumberOfDaysOOS = 0;
+      if (index != null) {
+        _inventorySections[index]['statusSelected'] = status;
+        _inventorySections[index]['showCarriedTextField'] = false;
+        _inventorySections[index]['showNotCarriedTextField'] = true;
+        _inventorySections[index]['showDelistedTextField'] = false;
+      } else {
+        _statusSelected = status;
+        _showCarriedTextField = false;
+        _showNotCarriedTextField = true;
+        _showDelistedTextField = false;
+
+        // ✅ Reset OOS Fields
+        _selectedNumberOfDaysOOS = null;
+        _remarksOOS = null;
+        _reasonOOS = null;
+        _showNoDeliveryDropdown = false;
       }
     });
   }
 
-  DateTime _getNextTuesday() {
+  void _toggleDelistedTextField(String status, [int? index]) {
+    setState(() {
+      if (index != null) {
+        _inventorySections[index]['statusSelected'] = status;
+        _inventorySections[index]['showCarriedTextField'] = false;
+        _inventorySections[index]['showNotCarriedTextField'] = false;
+        _inventorySections[index]['showDelistedTextField'] = true;
+      } else {
+        _statusSelected = status;
+        _showCarriedTextField = false;
+        _showNotCarriedTextField = false;
+        _showDelistedTextField = true;
+
+        // ✅ Reset OOS Fields
+        _selectedNumberOfDaysOOS = null;
+        _remarksOOS = null;
+        _reasonOOS = null;
+        _showNoDeliveryDropdown = false;
+      }
+    });
+  }
+
+  DateTime _getStartOfWeek() {
     DateTime now = DateTime.now();
-    int daysUntilNextTuesday = (DateTime.tuesday - now.weekday + 7) % 7;
+    int currentWeekday = now.weekday;
 
-    // Return the next Tuesday at exactly 12:00 AM
-    DateTime nextTuesday = DateTime(now.year, now.month, now.day)
-        .add(Duration(days: daysUntilNextTuesday));
+    // Move back to the Monday of the current week
+    now = now.subtract(Duration(days: currentWeekday - DateTime.monday));
 
-    return DateTime(nextTuesday.year, nextTuesday.month, nextTuesday.day, 0, 0,
-        0); // 12:00 AM
+    return DateTime(
+        now.year, now.month, now.day, 0, 0, 0); // Monday at 12:00 AM
   }
 
-  Future<void> _saveSelectedSku(String selectedSku) async {
-    final prefs = await SharedPreferences.getInstance();
-    String branch = widget.selectedAccount;
-    String key = 'disabledSkus_$branch';
+// Get end of the week (Saturday)
+  DateTime _getEndOfWeek() {
+    DateTime startOfWeek = _getStartOfWeek();
+    return startOfWeek.add(Duration(days: 5)); // Saturday at 12:00 AM
+  }
 
-    // Load current disabled SKUs
-    String? disabledSkusData = prefs.getString(key);
-    List<String> currentDisabledSkus = [];
+  Future<void> _saveSelectedSku(String selectedSku,
+      {bool isDelisted = false}) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      String branch = widget.selectedAccount;
+      String key = 'disabledSkus_$branch';
 
-    if (disabledSkusData != null) {
-      Map<String, dynamic> storedData = jsonDecode(disabledSkusData);
-      currentDisabledSkus = List<String>.from(storedData['skus']);
-      DateTime expirationDate = DateTime.parse(storedData['expiration']);
-      DateTime now = DateTime.now();
+      // Load current SKUs
+      String? disabledSkusData = prefs.getString(key);
+      Map<String, dynamic> storedData =
+          disabledSkusData != null ? jsonDecode(disabledSkusData) : {};
+      List<String> currentDisabledSkus =
+          List<String>.from(storedData['skus'] ?? []);
+      List<String> currentDelistedSkus =
+          List<String>.from(storedData['Delisted'] ?? []);
 
-      // Check if we are exactly at 12:00 AM on Tuesday
-      if (now.weekday == DateTime.tuesday && now.hour == 0 && now.minute == 0) {
-        // It's exactly 12:00 AM on Tuesday, reset SKUs
-        // print("It's 12:00 AM Tuesday, resetting SKUs.");
-        // currentDisabledSkus.clear();
-        prefs.remove(key); // Clear the prefs as well
-      } else if (now.isAfter(expirationDate)) {
-        // If it's past expiration, do NOT reset the SKUs
-        print("Current time is past expiration but not resetting SKUs.");
+      // Re-enable previous SKU if different from current selection
+      if (_previousSelectedSku != null && _previousSelectedSku != selectedSku) {
+        currentDisabledSkus.remove(_previousSelectedSku);
+        print("SKU $_previousSelectedSku re-enabled.");
       }
-    }
 
-    // Add the new SKU to the list if it's not already there
-    if (!currentDisabledSkus.contains(selectedSku)) {
+      // Update SKU lists
+      if (isDelisted) {
+        if (!currentDelistedSkus.contains(selectedSku)) {
+          currentDelistedSkus.add(selectedSku);
+          print("SKU $selectedSku marked as Delisted.");
+        }
+      } else {
+        if (!currentDisabledSkus.contains(selectedSku) &&
+            !currentDelistedSkus.contains(selectedSku)) {
+          currentDisabledSkus.add(selectedSku);
+          print("SKU $selectedSku added to Disabled list.");
+        }
+      }
+
+      // Collect all selected SKUs from inventory
+      Set<String> allSelectedSkus = {};
+      if (_selectedDropdownValue != null) {
+        allSelectedSkus.add(_selectedDropdownValue!);
+      }
+      for (var section in _inventorySections) {
+        if (section['skuDescription'] != null) {
+          allSelectedSkus.add(section['skuDescription']);
+        }
+      }
+
+      // Merge selected SKUs with disabled list
+      currentDisabledSkus =
+          List<String>.from({...currentDisabledSkus, ...allSelectedSkus});
+
+      // Update expiration only on Sunday
+      DateTime now = DateTime.now();
+      if (now.weekday == DateTime.sunday) {
+        storedData['expiration'] = _getStartOfWeek().toIso8601String();
+      }
+
+      // Prepare data to store
+      Map<String, dynamic> dataToStore = {
+        'expiration':
+            storedData['expiration'] ?? _getStartOfWeek().toIso8601String(),
+        'skus': currentDisabledSkus,
+        'Delisted': currentDelistedSkus,
+      };
+
+      // Save to SharedPreferences
+      await prefs.setString(key, jsonEncode(dataToStore));
+
+      // Update state
       setState(() {
-        currentDisabledSkus.add(selectedSku);
-        _disabledSkus = currentDisabledSkus; // Update the state
+        _disabledSkus = currentDisabledSkus;
+        _delistedSkus = currentDelistedSkus;
       });
-    } else {
-      print("SKU $selectedSku is already disabled.");
+
+      print("Updated Disabled SKUs: $_disabledSkus");
+
+      // Save previous SKU for next selection
+      _previousSelectedSku = selectedSku;
+
+      // Save selected SKUs separately
+      await _saveSelectedSkusState(allSelectedSkus);
+    } catch (e) {
+      print("Error saving SKU: $e");
     }
+  }
 
-    // Save the updated SKUs with new expiration
-    DateTime nextTuesday = _getNextTuesday();
-    Map<String, dynamic> dataToStore = {
-      'expiration': nextTuesday.toIso8601String(),
-      'skus': _disabledSkus,
-    };
-
-    String jsonData = jsonEncode(dataToStore);
-    await prefs.setString(key, jsonData);
-
-    print("SKUs saved: $_disabledSkus");
-
-    // Force reload after saving
-    await _loadDisabledSkus();
+  Future<void> _saveSelectedSkusState(Set<String> skus) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('selectedSkus', jsonEncode(skus.toList()));
+      print("Selected SKUs saved: $skus");
+    } catch (e) {
+      print("Error saving selected SKUs: $e");
+    }
   }
 
   Future<void> _loadDisabledSkus() async {
-    final prefs = await SharedPreferences.getInstance();
-    String branch = widget.selectedAccount;
-    String key = 'disabledSkus_$branch';
-
-    String? disabledSkusData = prefs.getString(key);
-
-    if (disabledSkusData == null) {
-      print("No disabled SKUs found for branch: $branch");
-      _disabledSkus.clear();
-      return;
-    }
-
     try {
-      Map<String, dynamic> storedData = jsonDecode(disabledSkusData);
-      DateTime expirationDate = DateTime.parse(storedData['expiration']);
-      DateTime now = DateTime.now();
+      final prefs = await SharedPreferences.getInstance();
+      String branch = widget.selectedAccount;
+      String key = 'disabledSkus_$branch';
 
-      print("Loading disabled SKUs. Expiration Date: $expirationDate");
-      print("Current Date: $now");
+      String? disabledSkusData = prefs.getString(key);
+      List<String> allSkus = _categoryToSkuDescriptions[_versionSelected] ?? [];
+      List<String> savedDisabledSkus = [];
+      _delistedSkus = []; // Reset before loading
 
-      // Only reset if it's exactly 12:00 AM on Tuesday
-      if (now.weekday == DateTime.tuesday && now.hour == 0 && now.minute == 0) {
-        // It's exactly 12:00 AM on Tuesday
-        _disabledSkus.clear();
-        prefs.remove(key); // Remove the key from shared preferences
-        print("SKUs reset for a new week at 12:00 AM Tuesday.");
-      } else if (now.isAfter(expirationDate)) {
-        // If we are past the expiration date, do NOT clear the SKUs
-        print("Current time is past expiration. SKUs are still valid.");
-        List<String> skus = List<String>.from(storedData['skus']);
-        setState(() {
-          _disabledSkus = skus;
-          print("Disabled SKUs loaded: $_disabledSkus");
-        });
-      } else {
-        // SKUs are still valid
-        List<String> skus = List<String>.from(storedData['skus']);
-        setState(() {
-          _disabledSkus = skus;
-          print("Disabled SKUs loaded: $_disabledSkus");
-        });
+      if (disabledSkusData == null) {
+        print("No disabled SKUs found for branch: $branch");
+        _disabledSkus = [];
+        return;
       }
+
+      Map<String, dynamic> storedData = jsonDecode(disabledSkusData);
+      DateTime now = DateTime.now();
+      DateTime expirationDate = DateTime.parse(storedData['expiration']);
+      savedDisabledSkus = List<String>.from(storedData['skus'] ?? []);
+      _delistedSkus = List<String>.from(storedData['Delisted'] ?? []);
+
+      print("Loaded Data from SharedPreferences: $storedData");
+
+      // Ensure expiration is not reset prematurely
+      if (now.weekday == DateTime.sunday) {
+        print("Sunday reset: Clearing disabled SKUs (keeping delisted).");
+        savedDisabledSkus.clear(); // Reset disabled SKUs, keep delisted SKUs
+
+        // Save the reset data
+        Map<String, dynamic> updatedData = {
+          'expiration': _getStartOfWeek().toIso8601String(),
+          'skus': savedDisabledSkus,
+          'Delisted': _delistedSkus,
+        };
+        await prefs.setString(key, jsonEncode(updatedData));
+        print("Disabled SKUs reset and saved.");
+      } else if (now.isAfter(expirationDate)) {
+        print("Expiration passed, updating for the next week.");
+        storedData['expiration'] = _getStartOfWeek().toIso8601String();
+        await prefs.setString(key, jsonEncode(storedData));
+      }
+
+      // Load SKUs for Monday-Saturday
+      if (now.weekday >= DateTime.monday && now.weekday <= DateTime.saturday) {
+        _disabledSkus = [...savedDisabledSkus, ..._delistedSkus];
+      }
+
+      setState(() {
+        print("Disabled SKUs loaded: $_disabledSkus");
+        print("Delisted SKUs loaded: $_delistedSkus");
+      });
     } catch (e) {
       print("Error loading disabled SKUs: $e");
-      _disabledSkus.clear();
-      prefs.remove(key); // Cleanup in case of error
+      _disabledSkus = [];
+      _delistedSkus = [];
     }
+  }
+
+  bool _checkIfDelisted(String selectedSku) {
+    // Example logic to check if the SKU should be delisted
+    if (selectedSku.contains("Delisted")) {
+      // Replace with your actual condition
+      return true;
+    }
+    return false;
+  }
+
+  // Future<void> updateDropdown() async {
+  //   List<InventoryItem> inventoryItems =
+  //       await getUserInventoryItems(widget.userEmail, widget.selectedAccount);
+
+  //   // Initialize a map to group SKUs by category
+  //   Map<String, List<String>> categoryToSkuDescriptions = {};
+
+  //   for (var item in inventoryItems) {
+  //     // Check if the category exists, and then add the SKU description to that category
+  //     if (categoryToSkuDescriptions.containsKey(item.category)) {
+  //       categoryToSkuDescriptions[item.category]!.add(item.skuDescription);
+  //     } else {
+  //       categoryToSkuDescriptions[item.category] = [item.skuDescription];
+  //     }
+  //   }
+
+  //   setState(() {
+  //     _categoryToSkuDescriptions =
+  //         categoryToSkuDescriptions; // Update the dropdown items
+  //   });
+  // }
+
+  void _updateDropdownState() {
+    // Get the current weekday (1 = Monday, ..., 7 = Sunday)
+    final int today = DateTime.now().weekday;
+
+    // Enable dropdown only from Friday to Sunday
+    setState(() {
+      _disabledDropdown = !(today == 5 || today == 6 || today == 7);
+    });
   }
 
   @override
   void initState() {
     super.initState();
     _inputid = generateInputID();
+    _updateDropdownState();
 
     // Load disabled SKUs after the frame is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       _loadDisabledSkus();
     });
 
-    // Keep other listeners intact
-    _beginningController.addListener(_calculateBeginning);
+    // Add listeners with lambda functions to pass index
+    for (int i = 0; i < _inventorySections.length; i++) {
+      _inventorySections[i]['beginningController'].addListener(() {
+        _calculateOfftake(i);
+      });
+
+      _inventorySections[i]['deliveryController'].addListener(() {
+        _calculateOfftake(i);
+      });
+
+      _inventorySections[i]['endingController'].addListener(() {
+        _calculateOfftake(i);
+      });
+
+      _inventorySections[i]['offtakeController'].addListener(() {
+        _calculateInventoryDaysLevel(i);
+      });
+    }
+
+    // // Keep other listeners intact
+    // _beginningController.addListener(_calculateBeginning);
     _beginningController.addListener(_calculateOfftake);
     _deliveryController.addListener(_calculateOfftake);
     _endingController.addListener(_calculateOfftake);
@@ -1622,7 +1859,7 @@ class _SKUInventoryState extends State<SKUInventory> {
     });
 
     // Update the accountNotifier when widget.selectedAccount changes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       if (currentAccount != widget.selectedAccount) {
         currentAccount = widget.selectedAccount;
         accountNotifier.value = currentAccount;
@@ -1643,96 +1880,205 @@ class _SKUInventoryState extends State<SKUInventory> {
     super.dispose();
   }
 
-  void _calculateBeginning() {
-    try {
-      // Parse input values, default to 0 if empty
+  void _calculateBeginning([int? index]) {
+    if (index == null) {
       int beginningSA = int.tryParse(_beginningSAController.text) ?? 0;
       int beginningWA = int.tryParse(_beginningWAController.text) ?? 0;
-
-      // Calculate new beginning value
-      int newBeginning = beginningSA + beginningWA;
-
-      // Update the beginning controller with formatted integer value
-      _beginningController.text = newBeginning.toString();
-    } catch (e) {
-      print('Error calculating beginning: $e');
-      // Handle error appropriately (e.g., show an error message to the user)
+      int totalBeginning = beginningSA + beginningWA;
+      _beginningController.text = totalBeginning.toString();
+    } else {
+      int beginningSA = int.tryParse(
+              _inventorySections[index]['beginningSAController'].text) ??
+          0;
+      int beginningWA = int.tryParse(
+              _inventorySections[index]['beginningWAController'].text) ??
+          0;
+      int totalBeginning = beginningSA + beginningWA;
+      _inventorySections[index]['beginningController'].text =
+          totalBeginning.toString();
     }
   }
 
-  void _calculateEnding() {
-    try {
-      // Parse input values, default to 0 if empty
+  void _calculateEnding([int? index]) {
+    if (index == null) {
       int endingSA = int.tryParse(_endingSAController.text) ?? 0;
       int endingWA = int.tryParse(_endingWAController.text) ?? 0;
-
-      // Calculate new beginning value
-      int newEnding = endingSA + endingWA;
-
-      // Update the beginning controller with formatted integer value
-      _endingController.text = newEnding.toString();
-    } catch (e) {
-      print('Error calculating beginning: $e');
-      // Handle error appropriately (e.g., show an error message to the user)
+      int totalEnding = endingSA + endingWA;
+      _endingController.text = totalEnding.toString();
+    } else {
+      int endingSA =
+          int.tryParse(_inventorySections[index]['endingSAController'].text) ??
+              0;
+      int endingWA =
+          int.tryParse(_inventorySections[index]['endingWAController'].text) ??
+              0;
+      int totalEnding = endingSA + endingWA;
+      _inventorySections[index]['endingController'].text =
+          totalEnding.toString();
     }
   }
 
-  void _calculateOfftake() {
-    double beginning = double.tryParse(_beginningController.text) ?? 0;
-    double delivery = double.tryParse(_deliveryController.text) ?? 0;
-    double ending = double.tryParse(_endingController.text) ?? 0;
-    double offtake = beginning + delivery - ending;
-    _offtakeController.text = offtake.toStringAsFixed(2);
+  void _calculateOfftake([int? index]) {
+    if (index == null) {
+      double beginning = double.tryParse(_beginningController.text) ?? 0;
+      double delivery = double.tryParse(_deliveryController.text) ?? 0;
+      double ending = double.tryParse(_endingController.text) ?? 0;
+      double offtake = beginning + delivery - ending;
+      _offtakeController.text = offtake.toStringAsFixed(2);
+    } else {
+      double beginning = double.tryParse(
+              _inventorySections[index]['beginningController'].text) ??
+          0;
+      double delivery = double.tryParse(
+              _inventorySections[index]['deliveryController'].text) ??
+          0;
+      double ending =
+          double.tryParse(_inventorySections[index]['endingController'].text) ??
+              0;
+      double offtake = beginning + delivery - ending;
+      _inventorySections[index]['offtakeController'].text =
+          offtake.toStringAsFixed(2);
+    }
+
+    _calculateInventoryDaysLevel(index);
   }
 
-  void _calculateInventoryDaysLevel() {
-    double ending = double.tryParse(_endingController.text) ?? 0;
-    double offtake = double.tryParse(_offtakeController.text) ?? 0;
+  void _calculateInventoryDaysLevel([int? index]) {
+    if (index == null) {
+      double ending = double.tryParse(_endingController.text) ?? 0;
+      double offtake = double.tryParse(_offtakeController.text) ?? 0;
+      double inventoryDaysLevel = (offtake == 0) ? 0 : ending / (offtake / 7);
+      _inventoryDaysLevelController.text =
+          inventoryDaysLevel == 0 ? '' : inventoryDaysLevel.toStringAsFixed(2);
+    } else {
+      double ending =
+          double.tryParse(_inventorySections[index]['endingController'].text) ??
+              0;
+      double offtake = double.tryParse(
+              _inventorySections[index]['offtakeController'].text) ??
+          0;
+      double inventoryDaysLevel = (offtake == 0) ? 0 : ending / (offtake / 7);
+      _inventorySections[index]['inventoryDaysLevelController'].text =
+          inventoryDaysLevel == 0 ? '' : inventoryDaysLevel.toStringAsFixed(2);
+    }
+  }
 
-    double inventoryDaysLevel = 0; // Default to 0
+  bool _isInventoryComplete(int index) {
+    final section = _inventorySections[index];
 
-    if (offtake != 0 && ending != double.infinity && !ending.isNaN) {
-      inventoryDaysLevel = ending / (offtake / 7);
+    // If status is Not Carried or Delisted, no need to check fields
+    if (section['statusSelected'] == 'Not Carried' ||
+        section['statusSelected'] == 'Delisted') {
+      return true;
     }
 
-    if (inventoryDaysLevel.isNaN || inventoryDaysLevel.isInfinite) {
-      inventoryDaysLevel = 0; // Assign 0 if the result is NaN or infinite
+    // If status is Carried, check if all required fields are filled
+    if (section['statusSelected'] == 'Carried') {
+      // Check required fields
+      bool areRequiredFieldsFilled =
+          section['beginningSAController'].text.trim().isNotEmpty &&
+              section['beginningWAController'].text.trim().isNotEmpty &&
+              section['endingSAController'].text.trim().isNotEmpty &&
+              section['endingWAController'].text.trim().isNotEmpty &&
+              section['deliveryController'].text.trim().isNotEmpty;
+
+      // Check No. of Days OOS and related fields
+      bool areOOSFieldsValid = true;
+      if (section['selectedNumberOfDaysOOS'] == null) {
+        areOOSFieldsValid = false; // Ensure a selection is required
+      } else if (section['selectedNumberOfDaysOOS']! > 0) {
+        areOOSFieldsValid = section['remarksOOS'] != null &&
+            (section['remarksOOS'] != 'No Delivery' ||
+                section['selectedNoDeliveryOption'] != null);
+      }
+
+      return areRequiredFieldsFilled && areOOSFieldsValid;
     }
 
-    _inventoryDaysLevelController.text = inventoryDaysLevel == 0
-        ? '' // Leave it empty if the value is 0
-        : inventoryDaysLevel.toStringAsFixed(2);
+    // Default to false if status is not set
+    return false;
   }
 
   void checkSaveEnabled() {
-    setState(() {
-      if (_statusSelected == 'Carried') {
-        if (_selectedNumberOfDaysOOS == 0) {
-          // Enable Save button when "0" is selected, but only if other fields are filled
-          _isSaveEnabled = _endingController.text.isNotEmpty &&
-              _deliveryController.text.isNotEmpty &&
-              _beginningSAController.text.isNotEmpty &&
-              _beginningWAController.text.isNotEmpty &&
-              _endingSAController.text.isNotEmpty &&
-              _endingWAController.text.isNotEmpty;
-        } else {
-          // Existing logic for when _selectedNumberOfDaysOOS is not 0
-          _isSaveEnabled = _endingController.text.isNotEmpty &&
-              _deliveryController.text.isNotEmpty &&
-              _beginningSAController.text.isNotEmpty &&
-              _beginningWAController.text.isNotEmpty &&
-              _endingSAController.text.isNotEmpty &&
-              _endingWAController.text.isNotEmpty;
-          (_remarksOOS == "No P.O" ||
-              _remarksOOS == "Unserved" ||
-              (_remarksOOS == "No Delivery" &&
-                  _selectedNoDeliveryOption != null));
-        }
-      } else {
-        // Enable Save button for "Not Carried" and "Delisted" categories
-        _isSaveEnabled = true;
+    bool allInventoriesComplete = true;
+
+    // If status is 'Carried', check if original inventory is complete
+    if (_statusSelected == 'Carried' && !_isOriginalInventoryComplete()) {
+      allInventoriesComplete = false;
+    }
+
+    // If status is NOT 'Delisted', check OOS fields
+    if (_statusSelected != 'Delisted' && _statusSelected != 'Not Carried') {
+      // Ensure No. of Days OOS is selected
+      if (_selectedNumberOfDaysOOS == null) {
+        allInventoriesComplete = false;
       }
+
+      // Ensure Remarks is selected when OOS Days is greater than 0
+      void checkSaveEnabled() {
+        bool allInventoriesComplete = true;
+
+        // If status is 'Carried', check if original inventory is complete
+        if (_statusSelected == 'Carried' && !_isOriginalInventoryComplete()) {
+          allInventoriesComplete = false;
+        }
+
+        // If status is NOT 'Delisted', check OOS fields
+        if (_statusSelected != 'Delisted' && _statusSelected != 'Not Carried') {
+          // Ensure No. of Days OOS is selected
+          if (_selectedNumberOfDaysOOS == null) {
+            allInventoriesComplete = false;
+          }
+
+          // Ensure Remarks is selected when OOS Days is greater than 0
+          if (_selectedNumberOfDaysOOS != null &&
+              _selectedNumberOfDaysOOS! > 0) {
+            if (_remarksOOS == null) {
+              allInventoriesComplete = false;
+            }
+
+            // Ensure Reason is selected if "No Delivery" is chosen in Remarks
+            if (_remarksOOS == 'No Delivery' && _reasonOOS == null) {
+              allInventoriesComplete = false;
+            }
+          }
+        }
+
+        // Check each additional inventory section
+        for (int i = 0; i < _inventorySections.length; i++) {
+          if (!_isInventoryComplete(i)) {
+            allInventoriesComplete = false;
+            break;
+          }
+        }
+
+        // Enable the save button only if all conditions are met
+        setState(() {
+          _isSaveEnabled = allInventoriesComplete;
+        });
+      }
+    }
+
+    // Check each additional inventory section
+    for (int i = 0; i < _inventorySections.length; i++) {
+      if (!_isInventoryComplete(i)) {
+        allInventoriesComplete = false;
+        break;
+      }
+    }
+
+    // Enable the save button only if all conditions are met
+    setState(() {
+      _isSaveEnabled = allInventoriesComplete;
     });
+  }
+
+// New function to check if the original inventory is complete
+  bool _isOriginalInventoryComplete() {
+    return _beginningController.text.isNotEmpty &&
+        _deliveryController.text.isNotEmpty &&
+        _endingController.text.isNotEmpty &&
+        _offtakeController.text.isNotEmpty;
   }
 
   void RemarkSaveEnable() {
@@ -1750,18 +2096,32 @@ class _SKUInventoryState extends State<SKUInventory> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return new WillPopScope(
         onWillPop: () async => false,
-        child: MaterialApp(
+        child: new MaterialApp(
             debugShowCheckedModeBanner: false,
             home: Scaffold(
               appBar: AppBar(
-                  backgroundColor: Color.fromARGB(255, 26, 20, 71),
-                  elevation: 0,
                   title: Text(
-                    'INVENTORY',
+                    'INVENTORY PROCESS',
                     style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  elevation: 0,
+                  flexibleSpace: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color.fromARGB(255, 26, 20, 71),
+                          Color.fromARGB(255, 33, 26, 87),
+                          Color.fromARGB(255, 255, 196, 0),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
                   ),
                   leading: IconButton(
                     icon: Icon(Icons.arrow_back),
@@ -1789,7 +2149,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                     children: <Widget>[
                       SizedBox(height: 10),
                       Text(
-                        'INVENTORY NUMBER',
+                        'Input ID',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
@@ -1805,7 +2165,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'WEEK',
+                        'Week Number',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
@@ -1820,7 +2180,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'MONTH',
+                        'Month',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
@@ -1835,7 +2195,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'OUTLET',
+                        'Branch/Outlet',
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
@@ -1849,41 +2209,39 @@ class _SKUInventoryState extends State<SKUInventory> {
                         ),
                       ),
                       SizedBox(height: 20),
-                      // Text(
-                      //   'Category',
-                      //   style: TextStyle(
-                      //       fontWeight: FontWeight.bold, fontSize: 16),
-                      // ),
+                      Text(
+                        'Category',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
                       SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: _versionSelected == 'Variant' ||
-                                      _versionSelected == null
-                                  ? () => _toggleDropdown('Variant')
-                                  : null,
+                              onPressed: () => _toggleDropdown('Variant'),
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(
-                                    width: 2.0,
-                                    color: _versionSelected == 'Variant'
-                                        ? Color.fromARGB(255, 26, 20, 71)
-                                        : Colors.blueGrey.shade200),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
+                                  width: 2.0,
+                                  color: _versionSelected == 'Variant'
+                                      ? Color.fromARGB(255, 26, 20, 71)
+                                      : Colors.blueGrey.shade200,
                                 ),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4)),
                               ),
-                              child: Text(
-                                'VARIANT',
-                                style: TextStyle(color: Colors.black),
-                              ),
+                              child: Text('Variant',
+                                  style: TextStyle(color: Colors.black)),
                             ),
                           ),
                         ],
                       ),
+
+// Add space between version buttons and dropdown
                       SizedBox(height: 20),
-                      // Add text fields where user input is expected, and assign controllers
+
+// SKU Description dropdown
                       if (_isDropdownVisible && _versionSelected != null)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1892,78 +2250,86 @@ class _SKUInventoryState extends State<SKUInventory> {
                               padding:
                                   const EdgeInsets.symmetric(vertical: 4.0),
                               child: Text(
-                                'SKUs',
+                                'SKU Description',
                                 style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16, // Adjust as needed
-                                ),
+                                    fontWeight: FontWeight.bold, fontSize: 16),
                               ),
                             ),
                             DropdownButtonFormField<String>(
+                              hint: Text('Select SKU Description'),
+                              value: _selectedDropdownValue, // This can be null
                               onChanged: (String? newValue) {
-                                if (!_disabledSkus.contains(newValue)) {
+                                if (newValue != null &&
+                                    !_disabledSkus.contains(newValue) &&
+                                    !_delistedSkus.contains(newValue)) {
+                                  setState(() {
+                                    _selectedDropdownValue = newValue;
+                                  });
                                   _selectSKU(newValue);
                                 }
                               },
-                              items:
-                                  _categoryToSkuDescriptions[_versionSelected]!
-                                      .map<DropdownMenuItem<String>>(
+                              items: (_categoryToSkuDescriptions[
+                                          _versionSelected] ??
+                                      [])
+                                  .map<DropdownMenuItem<String>>(
                                 (String value) {
+                                  bool isMainSelection =
+                                      value == _selectedDropdownValue;
+
+                                  bool isSelectedInInventory =
+                                      _inventorySections.any((section) =>
+                                          section['skuDescription'] == value);
+
+                                  bool isDisabled =
+                                      _disabledSkus.contains(value) ||
+                                          _delistedSkus.contains(value) ||
+                                          isSelectedInInventory;
+
+                                  String displayText = value;
+                                  Color textColor = Colors.black;
+
+                                  if (isMainSelection) {
+                                    displayText = "$value (SELECTED)";
+                                    textColor = Color.fromARGB(255, 26, 20, 71);
+                                  } else if (isSelectedInInventory) {
+                                    int inventoryIndex = _inventorySections
+                                        .indexWhere((section) =>
+                                            section['skuDescription'] == value);
+                                    displayText =
+                                        "$value (IN INVENTORY ${inventoryIndex + 2})";
+                                    textColor = Colors.blue;
+                                  } else if (isDisabled) {
+                                    displayText = "$value (DISABLED)";
+                                    textColor = Colors.red;
+                                  }
+
                                   return DropdownMenuItem<String>(
                                     value: value,
-                                    enabled: !_disabledSkus.contains(
-                                        value), // Disable if already selected for the branch
+                                    enabled: !isDisabled,
                                     child: Container(
-                                      width: 315,
+                                      width: double
+                                          .infinity, // Ensures full width is available
                                       child: Text(
-                                        _disabledSkus.contains(value)
-                                            ? "$value (DONE)"
-                                            : value,
-                                        overflow: TextOverflow.ellipsis,
-                                        softWrap: false,
-                                        style: TextStyle(
-                                          color: _disabledSkus.contains(value)
-                                              ? Colors.red
-                                              : Colors.black,
-                                        ),
+                                        displayText,
+                                        style: TextStyle(color: textColor),
+                                        overflow: TextOverflow
+                                            .ellipsis, // Apply ellipsis if text overflows
                                       ),
                                     ),
                                   );
                                 },
                               ).toList(),
+                              isExpanded:
+                                  true, // Ensure dropdown takes up full width
                               decoration: InputDecoration(
-                                // labelText:
-                                //     'Select SKU Description', // Label for the dropdown
-                                border:
-                                    OutlineInputBorder(), // Apply border to the TextField
+                                labelText: 'Select SKU Description',
+                                border: OutlineInputBorder(),
                                 contentPadding:
                                     EdgeInsets.symmetric(horizontal: 12),
                               ),
                             ),
-                            if (_productDetails != null) ...[
-                              SizedBox(height: 20),
-                              Text(
-                                '4-PACK BARCODE',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
-                              ),
-                              TextField(
-                                readOnly: true,
-                                controller:
-                                    _skuCodeController, // Assigning controller
-                                decoration: InputDecoration(
-                                  border:
-                                      OutlineInputBorder(), // Apply border to the TextField
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal:
-                                          12), // Padding inside the TextField
-                                  hintText: _skuCode,
-                                ),
-                              ),
-                            ],
                           ],
                         ),
-
                       SizedBox(height: 15),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -2049,7 +2415,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       // Conditionally showing the 'Beginning' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'BEGINNING (Selling Area)',
+                          'Beginning PCS (Selling Area)',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -2080,7 +2446,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       // Conditionally showing the 'BeginningWA' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'BEGINNING (Warehouse Area)',
+                          'Beginning PCS (Warehouse Area)',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -2110,7 +2476,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       SizedBox(height: 15),
                       if (_showCarriedTextField) ...[
                         Text(
-                          'ENDING (Selling Area)',
+                          'Ending PCS (Selling Area)',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -2141,7 +2507,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       // Conditionally showing the 'BeginningWA' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'ENDING (Warehouse Area)',
+                          'Ending PCS (Warehouse Area)',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -2172,7 +2538,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       // Conditionally showing the 'Beginning' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'TOTAL BEGINNING',
+                          'Beginning',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -2201,7 +2567,7 @@ class _SKUInventoryState extends State<SKUInventory> {
 // Conditionally showing the 'Delivery' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'DELIVERY',
+                          'Delivery PCS',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -2228,7 +2594,7 @@ class _SKUInventoryState extends State<SKUInventory> {
 // Conditionally showing the 'Ending' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'TOTAL ENDING',
+                          'Ending',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -2259,7 +2625,8 @@ class _SKUInventoryState extends State<SKUInventory> {
                           child: SizedBox(
                             width: 450, // Set the width of the button
                             child: OutlinedButton(
-                              onPressed: _addExpiryField,
+                              onPressed: () => _addExpiryField(
+                                  -1), // Pass -1 for original inventory
                               style: OutlinedButton.styleFrom(
                                 side: BorderSide(
                                     width: 2.0,
@@ -2282,14 +2649,14 @@ class _SKUInventoryState extends State<SKUInventory> {
                             children: [
                               for (int i = 0; i < _expiryFields.length; i++)
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment
-                                      .center, // Align rows to center
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Expanded(child: _expiryFields[i]),
                                     IconButton(
                                       icon: Icon(Icons.delete),
                                       onPressed: () {
-                                        _removeExpiryField(i);
+                                        _removeExpiryField(-1,
+                                            i); // Pass -1 for original inventory
                                       },
                                     ),
                                   ],
@@ -2301,7 +2668,7 @@ class _SKUInventoryState extends State<SKUInventory> {
                       SizedBox(height: 16),
                       if (_showCarriedTextField) ...[
                         Text(
-                          'OFFTAKE',
+                          'Offtake',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -2328,7 +2695,7 @@ class _SKUInventoryState extends State<SKUInventory> {
 // Conditionally showing the 'Inventory Days Level' field with its label
                       if (_showCarriedTextField) ...[
                         Text(
-                          'INVETORY DAYS LEVEL',
+                          'Inventory Days Level',
                           style: TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 16),
                         ),
@@ -2441,9 +2808,20 @@ class _SKUInventoryState extends State<SKUInventory> {
                             });
                           },
                         ),
+                        SizedBox(height: 30),
                       ],
-
-                      SizedBox(height: 20),
+                      Column(
+                        children: [
+                          for (int i = 0; i < _inventorySections.length; i++)
+                            if (_inventorySections[i] != null)
+                              Column(
+                                children: [
+                                  _buildInventorySection(i),
+                                  SizedBox(height: 20),
+                                ],
+                              ),
+                        ],
+                      ),
                       if (_showCarriedTextField ||
                           _showNotCarriedTextField ||
                           _showDelistedTextField)
@@ -2452,475 +2830,119 @@ class _SKUInventoryState extends State<SKUInventory> {
                           children: [
                             ElevatedButton(
                               onPressed: _isSaveEnabled
+                                  ? () {
+                                      setState(() {
+                                        int newIndex =
+                                            _inventorySections.length;
+
+                                        _inventorySections.add({
+                                          'versionSelected': '',
+                                          'skuDescription': '',
+                                          'productDetails': '',
+                                          'skuCode': '',
+                                          'beginningSAController':
+                                              TextEditingController(),
+                                          'beginningWAController':
+                                              TextEditingController(),
+                                          'endingSAController':
+                                              TextEditingController(),
+                                          'endingWAController':
+                                              TextEditingController(),
+                                          'beginningController':
+                                              TextEditingController(),
+                                          'endingController':
+                                              TextEditingController(),
+                                          'deliveryController':
+                                              TextEditingController(),
+                                          'offtakeController':
+                                              TextEditingController(),
+                                          'inventoryDaysLevelController':
+                                              TextEditingController(),
+                                          'selectedNumberOfDaysOOS': 0,
+                                          'remarksOOS': '',
+                                          'selectedNoDeliveryOption': '',
+                                          'reasonOOS': '',
+                                          'showNoDeliveryDropdown': false,
+                                          'expiryFields': [],
+                                        });
+
+                                        // Attach listeners for auto-updating calculations
+                                        _inventorySections[newIndex]
+                                                ['beginningController']
+                                            .addListener(() {
+                                          _calculateOfftake(newIndex);
+                                        });
+
+                                        _inventorySections[newIndex]
+                                                ['deliveryController']
+                                            .addListener(() {
+                                          _calculateOfftake(newIndex);
+                                        });
+
+                                        _inventorySections[newIndex]
+                                                ['endingController']
+                                            .addListener(() {
+                                          _calculateOfftake(newIndex);
+                                        });
+
+                                        _inventorySections[newIndex]
+                                                ['offtakeController']
+                                            .addListener(() {
+                                          _calculateInventoryDaysLevel(
+                                              newIndex);
+                                        });
+
+                                        checkSaveEnabled(); // Ensure buttons enable/disable dynamically
+                                      });
+                                    }
+                                  : null, // Disabled until the first inventory form is completed
+                              style: ButtonStyle(
+                                padding: MaterialStateProperty.all<
+                                    EdgeInsetsGeometry>(
+                                  const EdgeInsets.symmetric(vertical: 15),
+                                ),
+                                minimumSize: MaterialStateProperty.all<Size>(
+                                  const Size(150, 50),
+                                ),
+                                backgroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        _isSaveEnabled
+                                            ? Color.fromARGB(255, 255, 196, 0)
+                                            : Colors.grey),
+                              ),
+                              child: const Text(
+                                'Add Inventory',
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 26, 20, 71),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(width: 20), // Space between buttons
+
+                            ElevatedButton(
+                              onPressed: _isSaveEnabled
                                   ? () async {
-                                      // Show confirmation dialog with preview
                                       bool confirmed = await showDialog(
                                         context: context,
                                         builder: (BuildContext context) {
                                           return AlertDialog(
                                             title: Text('Save Confirmation'),
-                                            content: SingleChildScrollView(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: <Widget>[
-                                                  Text(
-                                                      'Preview Inventory Item:'),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: 'Date: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                          text: DateFormat(
-                                                                  'dd-MM-yyyy')
-                                                              .format(DateTime
-                                                                  .now()),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: 'Input ID: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text: _inputid),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: 'Name: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                          text:
-                                                              '${widget.userName} ${widget.userLastName}',
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              'Account Name Branch ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text: widget
-                                                                .selectedAccount),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: 'Period: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text: widget
-                                                                .SelectedPeriod),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: 'Month: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text: widget
-                                                                .selectedMonth),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: 'Week: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text: widget
-                                                                .selectedWeek),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: 'Category: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text:
-                                                                _versionSelected),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              'SKU Description: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text:
-                                                                _selectedDropdownValue),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: 'Products: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text:
-                                                                _productDetails),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: 'SKU Code: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text: _skuCode),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: 'Status: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text:
-                                                                _statusSelected),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              'Beginning (Selling Area): ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                          text:
-                                                              '${int.tryParse(_beginningSAController.text) ?? 0}',
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              'Beginning (Warehouse Area): ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                          text:
-                                                              '${int.tryParse(_beginningWAController.text) ?? 0}',
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              'Ending (Selling Area): ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                          text:
-                                                              '${int.tryParse(_endingSAController.text) ?? 0}',
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              'Ending (WAREHOUSE AREA): ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                          text:
-                                                              '${int.tryParse(_endingWAController.text) ?? 0}',
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              'Beginning Value: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                          text:
-                                                              '${int.tryParse(_beginningController.text) ?? 0}',
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              'Delivery Value: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                          text:
-                                                              '${int.tryParse(_deliveryController.text) ?? 0}',
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              'Ending Value: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                          text:
-                                                              '${int.tryParse(_endingController.text) ?? 0}',
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              'Offtake Value: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                          text: double.tryParse(
-                                                                      _offtakeController
-                                                                          .text)
-                                                                  ?.toStringAsFixed(
-                                                                      2) ??
-                                                              '0.00',
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              'Inventory Days Level: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                          text: double.tryParse(
-                                                                      _inventoryDaysLevelController
-                                                                          .text)
-                                                                  ?.toStringAsFixed(
-                                                                      2) ??
-                                                              '0.00',
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              'No of Days OOS: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text:
-                                                                '$_selectedNumberOfDaysOOS'),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text:
-                                                              'Expiry Fields: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text:
-                                                                '$_expiryFieldsValues'),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(height: 10),
-                                                  Text.rich(
-                                                    TextSpan(
-                                                      children: [
-                                                        TextSpan(
-                                                          text: 'Remarks OOS: ',
-                                                          style: TextStyle(
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                        TextSpan(
-                                                            text:
-                                                                '$_remarksOOS'),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
+                                            content: Text(
+                                                'Are you sure you want to save this inventory?'),
                                             actions: <Widget>[
                                               TextButton(
                                                 onPressed: () {
-                                                  Navigator.of(context).pop(
-                                                      false); // Close dialog without saving
+                                                  Navigator.of(context)
+                                                      .pop(false); // Cancel
                                                 },
                                                 child: Text('Cancel'),
                                               ),
                                               TextButton(
                                                 onPressed: () {
-                                                  Navigator.of(context).pop(
-                                                      true); // Confirm saving
+                                                  Navigator.of(context)
+                                                      .pop(true); // Confirm
                                                 },
                                                 child: Text('Confirm'),
                                               ),
@@ -2930,12 +2952,21 @@ class _SKUInventoryState extends State<SKUInventory> {
                                       );
 
                                       if (confirmed ?? false) {
-                                        _saveInventoryItem(); // Call your save function here
+                                        _saveInventoryItem();
 
-                                        // Disable the selected SKU after saving the inventory item
                                         if (_selectedDropdownValue != null) {
+                                          bool isDelisted =
+                                              (_statusSelected == "Delisted");
+                                          if (isDelisted) {
+                                            _delistedSkus
+                                                .add(_selectedDropdownValue!);
+                                          } else {
+                                            _disabledSkus
+                                                .add(_selectedDropdownValue!);
+                                          }
                                           _saveSelectedSku(
-                                              _selectedDropdownValue!);
+                                              _selectedDropdownValue!,
+                                              isDelisted: isDelisted);
                                         }
 
                                         ScaffoldMessenger.of(context)
@@ -2959,10 +2990,10 @@ class _SKUInventoryState extends State<SKUInventory> {
                                                   widget.userMiddleName,
                                             ),
                                           ),
-                                        ); // Close the current screen after saving
+                                        );
                                       }
                                     }
-                                  : null, // Disable button if !_isSaveEnabled
+                                  : null,
                               style: ButtonStyle(
                                 padding: MaterialStateProperty.all<
                                     EdgeInsetsGeometry>(
@@ -2992,6 +3023,654 @@ class _SKUInventoryState extends State<SKUInventory> {
                 ),
               ),
             )));
+  }
+
+  Widget _buildInventorySection(int index) {
+    final section = _inventorySections[index];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: 10),
+        Divider(thickness: 8, color: Color.fromARGB(255, 26, 20, 71)),
+        Center(
+          child: Text(
+            'INVENTORY  #${index + 2}',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
+          ),
+        ),
+
+        SizedBox(height: 15),
+        Text(
+          'Input ID',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        SizedBox(height: 8),
+        TextFormField(
+          initialValue: generateInputID(),
+          readOnly: true,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            hintText: 'Auto-generated Input ID',
+          ),
+        ),
+        SizedBox(height: 15),
+
+        // Version Selection Buttons (V1, V2, V3)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // Category V1 Button
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () {
+                  setState(() {
+                    String previousVersion =
+                        _inventorySections[index]['versionSelected'];
+                    String? previousSku =
+                        _inventorySections[index]['skuDescription'];
+
+                    // If changing the version, reset dependent fields
+                    if (previousVersion != 'Variant') {
+                      _inventorySections[index]['skuDescription'] = null;
+                      _inventorySections[index]['productDetails'] = "";
+                      _inventorySections[index]['skuCode'] = "";
+
+                      _inventorySections[index]['beginningSAController']
+                          .clear();
+                      _inventorySections[index]['beginningWAController']
+                          .clear();
+                      _inventorySections[index]['endingSAController'].clear();
+                      _inventorySections[index]['endingWAController'].clear();
+                      _inventorySections[index]['beginningController'].clear();
+                      _inventorySections[index]['endingController'].clear();
+                      _inventorySections[index]['deliveryController'].clear();
+
+                      _inventorySections[index]['selectedNumberOfDaysOOS'] =
+                          null;
+                      _inventorySections[index]['remarksOOS'] = null;
+                      _inventorySections[index]['selectedNoDeliveryOption'] =
+                          null;
+                      _inventorySections[index]['reasonOOS'] = null;
+                      _inventorySections[index]['showNoDeliveryDropdown'] =
+                          false;
+                      _inventorySections[index]['expiryFields'].clear();
+
+                      // ✅ Only remove the previous SKU if no inventory section is using it
+                      if (previousSku != null) {
+                        bool isSkuStillUsed = _inventorySections.any(
+                            (section) =>
+                                section['skuDescription'] == previousSku &&
+                                section['versionSelected'] == previousVersion);
+
+                        if (!isSkuStillUsed) {
+                          _selectedSkus.remove(previousSku);
+                          _disabledSkus.remove(previousSku);
+                        }
+                      }
+                    }
+
+                    // Toggle version selection
+                    _inventorySections[index]['versionSelected'] =
+                        previousVersion == 'Variant' ? "" : 'Variant';
+                  });
+
+                  checkSaveEnabled(); // Ensure save button logic is updated
+                },
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                    width: 2.0,
+                    color: _inventorySections[index]['versionSelected'] ==
+                            'Variant'
+                        ? Color.fromARGB(255, 26, 20, 71)
+                        : Colors.blueGrey.shade200,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                child: Text('Variant', style: TextStyle(color: Colors.black)),
+              ),
+            ),
+          ],
+        ),
+
+        SizedBox(height: 20),
+
+// SKU Description Dropdown (only enabled if V1, V2, or V3 is selected)
+        if (['Variant']
+            .contains(_inventorySections[index]['versionSelected'])) ...[
+          Text(
+            'SKU Description',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          DropdownButtonFormField<String>(
+            isExpanded: true, // Makes the dropdown use full available width
+            value: _inventorySections[index]['skuDescription'] != null &&
+                    (_categoryToSkuDescriptions[_inventorySections[index]
+                                    ['versionSelected']
+                                ?.toString()] ??
+                            [])
+                        .contains(_inventorySections[index]['skuDescription'])
+                ? _inventorySections[index]['skuDescription']
+                : null,
+            onChanged: (String? newValue) async {
+              if (newValue != null && !_selectedSkus.contains(newValue)) {
+                _selectSKUnewinventory(newValue, index);
+                await _saveSelectedSku(newValue);
+              }
+            },
+            items: (_categoryToSkuDescriptions[_inventorySections[index]
+                            ['versionSelected']
+                        ?.toString()] ??
+                    [])
+                .toSet()
+                .map<DropdownMenuItem<String>>((String value) {
+              bool isMainSelection =
+                  value == _inventorySections[index]['skuDescription'];
+
+              // Check if the SKU is selected in any inventory section
+              bool isSelectedInInventory = _inventorySections
+                  .any((section) => section['skuDescription'] == value);
+
+              // Check if the SKU is disabled or delisted
+              bool isDisabled = _disabledSkus.contains(value) ||
+                  _delistedSkus.contains(value) ||
+                  isSelectedInInventory;
+
+              String displayText = value;
+              Color textColor = Colors.black;
+
+              // Apply the selection logic
+              if (isMainSelection) {
+                displayText = "$value (SELECTED)";
+                textColor = Color.fromARGB(255, 26, 20, 71);
+              } else if (isSelectedInInventory) {
+                // Show which inventory this is selected in
+                int inventoryIndex = _inventorySections.indexWhere(
+                    (section) => section['skuDescription'] == value);
+                displayText = "$value (IN INVENTORY ${inventoryIndex + 2})";
+                textColor = Colors.blue;
+              } else if (isDisabled) {
+                displayText = "$value (DISABLED)";
+                textColor = Colors.red;
+              }
+
+              return DropdownMenuItem<String>(
+                value: value,
+                enabled: !isDisabled,
+                child: Text(
+                  displayText,
+                  style: TextStyle(color: textColor),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              );
+            }).toList(),
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+          ),
+        ],
+
+// Product Details and SKU Code (only shown if SKU is selected)
+        if (['Variant']
+            .contains(_inventorySections[index]['versionSelected'])) ...[
+          SizedBox(height: 10),
+          Text('Products',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          TextField(
+            controller: _inventorySections[index]['productsController'],
+            readOnly: true,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+              hintText: _inventorySections[index]['productDetails'],
+            ),
+          ),
+          SizedBox(height: 10),
+          Text('SKU Code',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          TextField(
+            readOnly: true,
+            controller: _inventorySections[index]['skuCodeController'],
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+              hintText: _inventorySections[index]['skuCode'],
+            ),
+          ),
+        ],
+
+// Status Buttons (only shown if SKU is selected)
+        if (_inventorySections[index]['skuDescription'] != null &&
+            _inventorySections[index]['skuDescription'].isNotEmpty) ...[
+          SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              // Carried Button
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      _inventorySections[index]['statusSelected'] =
+                          _inventorySections[index]['statusSelected'] ==
+                                  'Carried'
+                              ? null // ✅ Toggle off if already selected
+                              : 'Carried';
+                    });
+                    _toggleCarriedTextField('Carried', index);
+                    checkSaveEnabled();
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      width: 2.0,
+                      color: _inventorySections[index]['statusSelected'] ==
+                              'Carried'
+                          ? Color.fromARGB(255, 26, 20, 71)
+                          : Colors.blueGrey.shade200,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  child: Text('Carried', style: TextStyle(color: Colors.black)),
+                ),
+              ),
+              SizedBox(width: 8),
+              // Not Carried Button
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      _inventorySections[index]['statusSelected'] =
+                          _inventorySections[index]['statusSelected'] ==
+                                  'Not Carried'
+                              ? null // ✅ Toggle off if already selected
+                              : 'Not Carried';
+                    });
+                    _toggleCarriedTextField('Not Carried', index);
+                    checkSaveEnabled();
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      width: 2.0,
+                      color: _inventorySections[index]['statusSelected'] ==
+                              'Not Carried'
+                          ? Color.fromARGB(255, 26, 20, 71)
+                          : Colors.blueGrey.shade200,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  child: Text('Not Carried',
+                      style: TextStyle(color: Colors.black)),
+                ),
+              ),
+              SizedBox(width: 8),
+              // Delisted Button
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      _inventorySections[index]['statusSelected'] =
+                          _inventorySections[index]['statusSelected'] ==
+                                  'Delisted'
+                              ? null // ✅ Toggle off if already selected
+                              : 'Delisted';
+                    });
+                    _toggleCarriedTextField('Delisted', index);
+                    checkSaveEnabled();
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(
+                      width: 2.0,
+                      color: _inventorySections[index]['statusSelected'] ==
+                              'Delisted'
+                          ? Color.fromARGB(255, 26, 20, 71)
+                          : Colors.blueGrey.shade200,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  child:
+                      Text('Delisted', style: TextStyle(color: Colors.black)),
+                ),
+              ),
+            ],
+          ),
+        ],
+
+        // Beginning and Ending Fields
+        if (_inventorySections[index]['statusSelected'] == 'Carried') ...[
+          SizedBox(height: 15),
+          Text(
+            'Beginning PCS (Selling Area)',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          SizedBox(height: 10),
+          TextField(
+            controller: _inventorySections[index]['beginningSAController'],
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+            onChanged: (_) {
+              _calculateBeginning(index); // Calculate on change
+              checkSaveEnabled(); // Call here
+            },
+          ),
+          SizedBox(height: 10),
+          Text(
+            'Beginning PCS (Warehouse Area)',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          SizedBox(height: 10),
+          TextField(
+            controller: _inventorySections[index]['beginningWAController'],
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+            onChanged: (_) {
+              _calculateBeginning(index); // Calculate on change
+              checkSaveEnabled(); // Call here
+            },
+          ),
+          SizedBox(height: 10),
+          Text(
+            'Ending PCS (Selling Area)',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          SizedBox(height: 10),
+          TextField(
+            controller: _inventorySections[index]['endingSAController'],
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+            onChanged: (_) {
+              _calculateEnding(index); // Calculate on change
+              checkSaveEnabled(); // Call here
+            },
+          ),
+          SizedBox(height: 10),
+          Text(
+            'Ending PCS (Warehouse Area)',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          SizedBox(height: 10),
+          TextField(
+            controller: _inventorySections[index]['endingWAController'],
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+            onChanged: (_) {
+              _calculateEnding(index); // Calculate on change
+              checkSaveEnabled(); // Call here
+            },
+          ),
+          SizedBox(height: 10),
+          Text(
+            'Beginning',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          SizedBox(height: 10),
+          TextField(
+            readOnly: true,
+            controller: _inventorySections[index]['beginningController'],
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+            onChanged: (_) => checkSaveEnabled(), // Call here
+          ),
+          SizedBox(height: 10),
+          Text(
+            'Ending',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          SizedBox(height: 10),
+          TextField(
+            readOnly: true,
+            controller: _inventorySections[index]['endingController'],
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+            onChanged: (_) => checkSaveEnabled(), // Call here
+          ),
+        ],
+
+        // Delivery, Offtake, and Inventory Days Level
+        if (_inventorySections[index]['statusSelected'] == 'Carried') ...[
+          SizedBox(height: 10),
+          Text(
+            'Delivery PCS',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          SizedBox(height: 10),
+          TextField(
+            controller: _inventorySections[index]['deliveryController'],
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+            onChanged: (_) => checkSaveEnabled(), // Call here
+          ),
+          SizedBox(height: 10),
+          Text(
+            'Offtake',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          SizedBox(height: 10),
+          TextField(
+            controller: _inventorySections[index]['offtakeController'],
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            readOnly: true,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+          ),
+          SizedBox(height: 10),
+          Text(
+            'Inventory Days Level',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          SizedBox(height: 10),
+          TextField(
+            controller: _inventorySections[index]
+                ['inventoryDaysLevelController'],
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            readOnly: true,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+          ),
+        ],
+
+        if (_inventorySections[index]['statusSelected'] == 'Carried') ...[
+          SizedBox(height: 20),
+          Center(
+            child: SizedBox(
+              width: 450,
+              child: OutlinedButton(
+                onPressed: () =>
+                    _addExpiryField(index), // Pass the section index
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                      width: 2.0, color: Color.fromARGB(255, 26, 20, 71)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                child: Text(
+                  'Add Expiry',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+          if (_inventorySections[index]['expiryFields'].isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                for (int i = 0;
+                    i < _inventorySections[index]['expiryFields'].length;
+                    i++)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                          child: _inventorySections[index]['expiryFields'][i]),
+                      IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          _removeExpiryField(
+                              index, i); // Pass the section index
+                          checkSaveEnabled(); // Call here
+                        },
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+        ],
+
+        // No. of Days OOS, Remarks, and Reason
+        if (_inventorySections[index]['statusSelected'] == 'Carried') ...[
+          SizedBox(height: 10),
+          Text(
+            'No. of Days OOS',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          SizedBox(height: 10),
+          DropdownButtonFormField<int>(
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+            value: _inventorySections[index]['selectedNumberOfDaysOOS'],
+            onChanged: (newValue) {
+              setState(() {
+                _inventorySections[index]['selectedNumberOfDaysOOS'] = newValue;
+                _inventorySections[index]['remarksOOS'] = null;
+                _inventorySections[index]['selectedNoDeliveryOption'] = null;
+                _inventorySections[index]['reasonOOS'] = null;
+                _inventorySections[index]['showNoDeliveryDropdown'] =
+                    newValue != 0;
+                checkSaveEnabled(); // Call here
+              });
+            },
+            items: List.generate(8, (index) {
+              return DropdownMenuItem<int>(
+                value: index,
+                child: Text(index.toString()),
+              );
+            }),
+          ),
+          SizedBox(height: 10),
+          if (_inventorySections[index]['selectedNumberOfDaysOOS'] != null &&
+              _inventorySections[index]['selectedNumberOfDaysOOS']! > 0) ...[
+            Text(
+              'Remarks',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 12),
+              ),
+              value: _inventorySections[index]['remarksOOS'],
+              onChanged: (newValue) {
+                setState(() {
+                  _inventorySections[index]['remarksOOS'] = newValue;
+                  _inventorySections[index]['showNoDeliveryDropdown'] =
+                      newValue == 'No Delivery';
+                  checkSaveEnabled(); // Call here
+                });
+              },
+              items: [
+                DropdownMenuItem<String>(
+                  value: 'No P.O',
+                  child: Text('No P.O'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'Unserved',
+                  child: Text('Unserved'),
+                ),
+                DropdownMenuItem<String>(
+                  value: 'No Delivery',
+                  child: Text('No Delivery'),
+                ),
+              ],
+            ),
+            SizedBox(height: 10),
+            if (_inventorySections[index]['showNoDeliveryDropdown'] &&
+                _inventorySections[index]['selectedNumberOfDaysOOS']! > 0) ...[
+              Text(
+                'Reason',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              SizedBox(height: 10),
+              DropdownButtonFormField<String>(
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                ),
+                value: _inventorySections[index]['selectedNoDeliveryOption'],
+                onChanged: (newValue) {
+                  setState(() {
+                    _inventorySections[index]['selectedNoDeliveryOption'] =
+                        newValue;
+                    _inventorySections[index]['reasonOOS'] = newValue;
+                    checkSaveEnabled(); // Call here
+                  });
+                },
+                items: [
+                  DropdownMenuItem<String>(
+                    value: 'With S.O but without P.O',
+                    child: Text('With S.O but without P.O'),
+                  ),
+                  DropdownMenuItem<String>(
+                    value: 'With P.O but without Delivery',
+                    child: Text('With P.O but without Delivery'),
+                  ),
+                  DropdownMenuItem<String>(
+                    value: 'AR ISSUES',
+                    child: Text('AR ISSUES'),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ],
+      ],
+    );
   }
 
   Widget _buildDropdown(
@@ -3030,7 +3709,7 @@ class ExpiryField extends StatefulWidget {
   final int index;
   final Function(String, int, int) onExpiryFieldChanged;
   final VoidCallback onDeletePressed;
-  final DateTime? initialDate; // Initial date value for the date picker
+  final String? initialDate; // Initial value for the selected date
   final int? initialPcs; // Nullable initial value for the TextField
 
   ExpiryField({
@@ -3038,7 +3717,7 @@ class ExpiryField extends StatefulWidget {
     required this.onExpiryFieldChanged,
     required this.onDeletePressed,
     this.initialDate,
-    this.initialPcs, // Make this nullable to allow an empty state
+    this.initialPcs,
   });
 
   @override
@@ -3046,25 +3725,25 @@ class ExpiryField extends StatefulWidget {
 }
 
 class _ExpiryFieldState extends State<ExpiryField> {
-  DateTime? _selectedDate;
+  String? _selectedDate;
   final TextEditingController _expiryController = TextEditingController();
-  final DateFormat _dateFormat = DateFormat("ddMMMyy"); // Custom format
-  bool _isDateSelected = false; // Flag to track if date is selected
+  final TextEditingController _dateController =
+      TextEditingController(); // Controller for date field
+  bool _isDateSelected = false; // Track date selection
 
   @override
   void initState() {
     super.initState();
 
-    // Set initial date if provided
     _selectedDate = widget.initialDate;
-    if (_selectedDate != null) {
-      _isDateSelected = true;
-    }
-
-    // Set initial pcs value if provided
     if (widget.initialPcs != null) {
       _expiryController.text = widget.initialPcs.toString();
     }
+    if (_selectedDate != null) {
+      _dateController.text = _selectedDate!;
+      _isDateSelected = true;
+    }
+
     _expiryController.addListener(_onExpiryFieldChanged);
   }
 
@@ -3072,36 +3751,47 @@ class _ExpiryFieldState extends State<ExpiryField> {
   void dispose() {
     _expiryController.removeListener(_onExpiryFieldChanged);
     _expiryController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
   void _onExpiryFieldChanged() {
     if (_isDateSelected) {
       widget.onExpiryFieldChanged(
-        _dateFormat
-            .format(_selectedDate!)
-            .toUpperCase(), // Convert to uppercase
+        _selectedDate!,
         int.tryParse(_expiryController.text) ?? 0,
         widget.index,
       );
     }
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? pickedDate = await showDatePicker(
+  Future<void> _pickDate() async {
+    DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate:
+          DateTime.now().add(Duration(days: 365 * 5)), // Up to 5 years ahead
     );
 
     if (pickedDate != null) {
       setState(() {
-        _selectedDate = pickedDate;
+        _selectedDate = _formatDate(pickedDate);
+        _dateController.text = _selectedDate!;
         _isDateSelected = true;
+        _onExpiryFieldChanged();
       });
-      _onExpiryFieldChanged();
     }
+  }
+
+  String _formatDate(DateTime date) {
+    String day = date.day.toString().padLeft(2, '0'); // Two-digit day
+    String month = DateFormat('MMM')
+        .format(date)
+        .toUpperCase(); // Get month abbreviation in uppercase
+    String year =
+        date.year.toString().substring(2); // Last two digits of the year
+    return '$day$month$year';
   }
 
   @override
@@ -3111,33 +3801,20 @@ class _ExpiryFieldState extends State<ExpiryField> {
       children: [
         SizedBox(height: 10),
         Text(
-          'EXPIRY DATE',
+          'Expiry Date',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         SizedBox(height: 10),
-        GestureDetector(
-          onTap: () => _selectDate(context),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: Color.fromARGB(210, 46, 0, 77),
-                width: 1.5,
-              ),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Text(
-              _selectedDate != null
-                  ? _dateFormat
-                      .format(_selectedDate!)
-                      .toUpperCase() // Display formatted date in uppercase
-                  : 'Select Expiry Date',
-              style: TextStyle(
-                color: _selectedDate != null ? Colors.black : Colors.grey,
-                fontSize: 16,
-              ),
-            ),
+        TextField(
+          controller: _dateController,
+          readOnly: true, // Prevent manual input
+          decoration: InputDecoration(
+            hintText: 'Select Expiry Date',
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            suffixIcon: Icon(Icons.calendar_today),
           ),
+          onTap: _pickDate, // Open date picker
         ),
         SizedBox(height: 16),
         Text(
@@ -3147,7 +3824,8 @@ class _ExpiryFieldState extends State<ExpiryField> {
         SizedBox(height: 8),
         TextField(
           controller: _expiryController,
-          enabled: _isDateSelected, // Enable only when a date is selected
+          enabled:
+              _isDateSelected, // Enable TextField only when a date is selected
           decoration: InputDecoration(
             hintText: 'Enter PCS of expiry',
             border: OutlineInputBorder(),
