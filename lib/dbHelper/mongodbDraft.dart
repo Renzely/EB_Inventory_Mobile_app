@@ -178,7 +178,6 @@ class InventoryItem {
   dynamic noOfDaysOOS;
   final List<Map<String, dynamic>> expiryFields;
   final bool isEditing; // New field
-  final bool isDone;
 
   InventoryItem({
     required this.id,
@@ -190,9 +189,7 @@ class InventoryItem {
     required this.period,
     required this.month,
     required this.week,
-    //required this.category,
     required this.skuDescription,
-    //required this.products,
     required this.skuCode,
     required this.status,
     required this.beginning,
@@ -207,9 +204,7 @@ class InventoryItem {
     required this.noOfDaysOOS,
     required this.expiryFields,
     required this.remarksOOS,
-    //required this.reasonOOS,
     required this.isEditing,
-    required this.isDone,
   });
 
   factory InventoryItem.fromJson(Map<String, dynamic> json) => InventoryItem(
@@ -222,9 +217,7 @@ class InventoryItem {
         period: json['period'] ?? '',
         month: json['month'] ?? '',
         week: json['week'] ?? '',
-        //category: json['category'] ?? '',
         skuDescription: json['skuDescription'] ?? '',
-        //products: json['products'] ?? '',
         skuCode: json['skuCode'] ?? '',
         status: json['status'] ?? '',
         beginning: json['beginning'] ?? 0,
@@ -244,9 +237,7 @@ class InventoryItem {
                 .toList() ??
             [], // Ensure expiryFields is not null
         remarksOOS: json['remarksOOS'] ?? '',
-        //reasonOOS: json['reasonOOS'] ?? '',
         isEditing: json['isEditing'] ?? false, // Default value if null
-        isDone: json['isDone'] ?? false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -259,9 +250,7 @@ class InventoryItem {
         'period': period,
         'month': month,
         'week': week,
-        //'category': category,
         'skuDescription': skuDescription,
-        //'products': products,
         'skuCode': skuCode,
         'status': status,
         'beginning': beginning,
@@ -276,9 +265,9 @@ class InventoryItem {
         'noOfDaysOOS': noOfDaysOOS,
         'expiryFields': expiryFields,
         'remarksOOS': remarksOOS,
-        //'reasonOOS': reasonOOS,
         'isEditing': isEditing, // Include in JSON
       };
+
   void _saveToDatabase(InventoryItem newItem) async {
     // Connect to your MongoDB database
     final db = Db(MONGO_CONN_URL);

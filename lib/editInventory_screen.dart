@@ -11,7 +11,7 @@ import 'dart:math';
 import 'package:intl/intl.dart'; // Import for Random
 
 class EditInventoryScreen extends StatefulWidget {
-  final InventoryItem inventoryItem;
+  final List<InventoryItem> inventoryItems;
   final String userEmail;
   final String userName;
   final String userLastName;
@@ -21,8 +21,8 @@ class EditInventoryScreen extends StatefulWidget {
   final VoidCallback onSave; // Declare the save callback
 
   const EditInventoryScreen({
-    super.key,
-    required this.inventoryItem,
+    Key? key,
+    required this.inventoryItems,
     required this.userEmail,
     required this.userContactNum,
     required this.userLastName,
@@ -30,186 +30,166 @@ class EditInventoryScreen extends StatefulWidget {
     required this.userName,
     required this.onCancel, // Add this line
     required this.onSave,
-  });
+  }) : super(key: key);
 
   @override
   _EditInventoryScreenState createState() => _EditInventoryScreenState();
 }
 
 class _EditInventoryScreenState extends State<EditInventoryScreen> {
-  late TextEditingController _dateController;
-  late TextEditingController _inputIdController;
-  late TextEditingController _nameController;
-  late TextEditingController _branchController;
-  late TextEditingController _periodController;
-  late TextEditingController _weekController;
-  late TextEditingController _monthController;
-  // late TextEditingController _categoryController;
-  late TextEditingController _skuDesController;
-  //late TextEditingController _productController;
-  late TextEditingController _skuCodeController;
-  late TextEditingController _statusController;
-  late TextEditingController _beginningController;
-  late TextEditingController _beginningSAController;
-  late TextEditingController _beginningWAController;
-  late TextEditingController _deliveryController;
-  late TextEditingController _endingController;
-  late TextEditingController _endingSAController;
-  late TextEditingController _endingWAController;
-  late TextEditingController _offtakeController;
-  late TextEditingController _IDLController;
-  late TextEditingController _OOSController;
-  late TextEditingController _remarksOOSController;
-  late TextEditingController _reasonOOSController;
-
-  final List<Widget> _expiryFields = [];
-  final List<Map<String, dynamic>> _expiryFieldsValues = [];
   List<TextEditingController> _dateControllers = [];
+  List<TextEditingController> _inputIdControllers = [];
+  List<TextEditingController> _nameControllers = [];
+  List<TextEditingController> _branchControllers = [];
+  List<TextEditingController> _periodControllers = [];
+  List<TextEditingController> _weekControllers = [];
+  List<TextEditingController> _monthControllers = [];
+  List<TextEditingController> _skuDesControllers = [];
+  List<TextEditingController> _skuCodeControllers = [];
+  List<TextEditingController> _statusControllers = [];
+  List<TextEditingController> _beginningControllers = [];
+  List<TextEditingController> _deliveryControllers = [];
+  List<TextEditingController> _endingControllers = [];
+  List<TextEditingController> _endingSAControllers = [];
+  List<TextEditingController> _endingWAControllers = [];
+  List<TextEditingController> _offtakeControllers = [];
+  List<TextEditingController> _IDLControllers = [];
+  List<TextEditingController> _OOSControllers = [];
+  List<TextEditingController> _remarksOOSControllers = [];
+
+  List<int?> _selectedNumberOfDaysOOSList = [];
+  List<String?> _remarksOOSList = [];
+
   List<TextEditingController> _pcsControllers = [];
   List<String?> _selectedMonths = [];
+  List<Widget> _expiryFields = [];
+  List<bool> _isSaveEnabledList = [];
+  List<String?> _originalBeginningValues = [];
+  List<Map<String, String>> _expiryFieldsValues = [];
   String? _selectedPeriod;
   bool _isSaveEnabled = false;
   int? _selectedNumberOfDaysOOS;
   String? _remarksOOS;
 
+  String? _selectedNoDeliveryOption;
   String? selectedMonth;
   String currentStatus = ''; // Variable to hold the current status
   bool editing = false;
   List<DropdownMenuItem<String>> _periodItems = [];
-  final DateTime _currentWeekStart = DateTime.now();
+  DateTime _currentWeekStart = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     _updatePeriodItems();
 
-    _endingSAController = TextEditingController();
-    _endingWAController = TextEditingController();
+    int itemCount = widget.inventoryItems.length;
 
-    int endingSA = int.tryParse(_endingSAController.text) ?? 0;
-    int endingWA = int.tryParse(_endingWAController.text) ?? 0;
+    _selectedNumberOfDaysOOSList = List.generate(itemCount, (index) => null);
+    _isSaveEnabledList = List.filled(itemCount, false);
+    _originalBeginningValues =
+        List.filled(itemCount, null); // Ensure initialization
 
-    int newEnding = endingSA + endingWA;
+    print("widget.inventoryItems length: $itemCount");
+    print(
+        "_selectedNumberOfDaysOOSList initialized with length: ${_selectedNumberOfDaysOOSList.length}");
+    print(
+        "_isSaveEnabledList initialized with length: ${_isSaveEnabledList.length}");
 
-    // Set the current date and generate a new Input ID
-    String todayDate = DateFormat('dd-MM-yyyy').format(DateTime.now());
-    String newInputId = generateInputID();
+    initializeLists(itemCount);
+    updateListsIfNeeded(itemCount);
 
-    _dateController = TextEditingController(text: todayDate);
-    _inputIdController = TextEditingController(text: newInputId);
-    _nameController =
-        TextEditingController(text: widget.inventoryItem.name ?? '');
-    _branchController = TextEditingController(
-        text: widget.inventoryItem.accountNameBranchManning ?? '');
+    for (var i = 0; i < itemCount; i++) {
+      var item = widget.inventoryItems[i];
 
-    // Set "Month" and "Week" fields to be empty initially
-    _periodController = TextEditingController(text: '');
-    _weekController = TextEditingController(text: '');
-    _monthController = TextEditingController(text: '');
+      _dateControllers.add(TextEditingController(
+          text: DateFormat('yyyy-MM-dd').format(DateTime.now())));
+      _inputIdControllers.add(TextEditingController(text: generateInputID()));
+      _nameControllers.add(TextEditingController(text: item.name ?? ''));
+      _branchControllers.add(
+          TextEditingController(text: item.accountNameBranchManning ?? ''));
+      _periodControllers.add(TextEditingController(text: ''));
+      _weekControllers.add(TextEditingController(text: ''));
+      _monthControllers.add(TextEditingController(text: ''));
+      // _categoryControllers
+      //     .add(TextEditingController(text: item.category ?? ''));
+      _skuDesControllers
+          .add(TextEditingController(text: item.skuDescription ?? ''));
+      _skuCodeControllers.add(TextEditingController(text: item.skuCode ?? ''));
+      _statusControllers.add(TextEditingController(text: item.status ?? ''));
+      _beginningControllers
+          .add(TextEditingController(text: item.ending?.toString() ?? ''));
+      _deliveryControllers.add(TextEditingController(text: ''));
 
-    // _categoryController =
-    //     TextEditingController(text: widget.inventoryItem.category ?? '');
-    _skuDesController =
-        TextEditingController(text: widget.inventoryItem.skuDescription ?? '');
-    // _productController =
-    //     TextEditingController(text: widget.inventoryItem.products ?? '');
-    _skuCodeController =
-        TextEditingController(text: widget.inventoryItem.skuCode ?? '');
-    _statusController =
-        TextEditingController(text: widget.inventoryItem.status ?? '');
+      _endingSAControllers.add(TextEditingController());
+      _endingWAControllers.add(TextEditingController());
+      _endingControllers.add(TextEditingController());
 
-    // Initialize with beginning value and attach listeners for calculations
-    _beginningController = TextEditingController(
-        text: widget.inventoryItem.ending?.toString() ?? '');
-    _beginningSAController = TextEditingController(
-        text: widget.inventoryItem.endingSA?.toString() ?? '');
-    _beginningWAController = TextEditingController(
-        text: widget.inventoryItem.endingWA?.toString() ?? '');
-    _deliveryController = TextEditingController(text: '');
-    _endingController = TextEditingController(text: '');
-    _offtakeController = TextEditingController(text: '');
-    _IDLController = TextEditingController(text: '0');
+      _offtakeControllers.add(TextEditingController(text: ''));
+      _IDLControllers.add(TextEditingController(text: '0'));
+      _OOSControllers.add(TextEditingController(text: ''));
+      _remarksOOSControllers.add(TextEditingController(text: ''));
 
-    // Set "No. of Days OOS", "Remarks OOS", and "Reason OOS" fields to be empty initially
-    _OOSController = TextEditingController(text: '');
-    _remarksOOSController = TextEditingController(text: '');
-    _reasonOOSController = TextEditingController(text: '');
+      _endingSAControllers[i].addListener(() => _calculateEnding(i));
+      _endingWAControllers[i].addListener(() => _calculateEnding(i));
 
-    // Attach listeners to calculate offtake and inventory days level
-    _beginningController.addListener(_calculateOfftake);
-    _deliveryController.addListener(_calculateOfftake);
-    _endingController.addListener(_calculateOfftake);
-    _offtakeController.addListener(_calculateInventoryDaysLevel);
-    _endingController.addListener(_calculateEnding);
-
-    _statusController.addListener(() {
-      checkSaveEnabled();
-    });
-
-    _beginningController.addListener(() {
-      checkSaveEnabled();
-    });
-
-    // _expiryFieldControllers = widget.inventoryItem.expiryFields.map((expiry) {
-    //   return TextEditingController(text: expiry['expiryMonth'] ?? '');
-    // }).toList();
-
-    // Set initial values for the new fields
-    _selectedNumberOfDaysOOS = null; // Initially set to null
-    _remarksOOS = null; // Initially set to null
-
-    checkSaveEnabled();
+      _beginningControllers[i].addListener(() => _calculateOfftake(i));
+      _deliveryControllers[i].addListener(() => _calculateOfftake(i));
+      _endingControllers[i].addListener(() => _calculateOfftake(i));
+      _offtakeControllers[i].addListener(() => _calculateInventoryDaysLevel(i));
+    }
   }
 
-  void _calculateEnding() {
-    try {
-      // Parse input values, default to 0 if empty
-      int endingSA = int.tryParse(_endingSAController.text) ?? 0;
-      int endingWA = int.tryParse(_endingWAController.text) ?? 0;
+  void updateListsIfNeeded(int length) {
+    if (_remarksOOSList.length < length) {
+      _remarksOOSList
+          .addAll(List.generate(length - _remarksOOSList.length, (_) => null));
+    }
+  }
 
-      // Calculate new ending value
+  void initializeLists(int length) {
+    _remarksOOSList = List.generate(length, (_) => null);
+  }
+
+  void _calculateEnding(int index) {
+    try {
+      int endingSA = int.tryParse(_endingSAControllers[index].text) ?? 0;
+      int endingWA = int.tryParse(_endingWAControllers[index].text) ?? 0;
       int newEnding = endingSA + endingWA;
 
-      // Update the ending controller with the total
-      _endingController.text = newEnding.toString();
+      setState(() {
+        _endingControllers[index].text = newEnding.toString();
+      });
     } catch (e) {
-      print('Error calculating ending: $e');
-      // Handle error appropriately (e.g., show an error message to the user)
+      print('Error calculating ending for inventory #${index + 1}: $e');
     }
   }
 
   @override
   void dispose() {
-    // Dispose controllers
-    _dateController.dispose();
-    _inputIdController.dispose();
-    _nameController.dispose();
-    _branchController.dispose();
-    _periodController.dispose();
-    _weekController.dispose();
-    _monthController.dispose();
-    //_categoryController.dispose();
-    _skuDesController.dispose();
-    //_productController.dispose();
-    _skuCodeController.dispose();
-    _statusController.dispose();
-    _beginningController.dispose();
-    _beginningSAController.dispose();
-    _beginningWAController.dispose();
-    _deliveryController.dispose();
-    _endingController.dispose();
-    _endingSAController.dispose();
-    _endingWAController.dispose();
-    _offtakeController.dispose();
-    _IDLController.dispose();
-    _OOSController.dispose();
-    _remarksOOSController.dispose();
-    _reasonOOSController.dispose();
-
-    for (var controller in _pcsControllers) {
+    for (var controller in [
+      ..._dateControllers,
+      ..._inputIdControllers,
+      ..._nameControllers,
+      ..._branchControllers,
+      ..._periodControllers,
+      ..._weekControllers,
+      ..._monthControllers,
+      ..._skuDesControllers,
+      ..._skuCodeControllers,
+      ..._statusControllers,
+      ..._beginningControllers,
+      ..._deliveryControllers,
+      ..._endingControllers,
+      ..._endingSAControllers,
+      ..._endingWAControllers,
+      ..._offtakeControllers,
+      ..._IDLControllers,
+      ..._OOSControllers,
+      ..._remarksOOSControllers,
+    ]) {
       controller.dispose();
     }
-
     super.dispose();
   }
 
@@ -219,130 +199,55 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
     });
   }
 
+// Method to get filtered period items
   List<DropdownMenuItem<String>> _getFilteredPeriodItems() {
     List<DropdownMenuItem<String>> items = [];
 
-    // Get current date or use the override date if set
-    DateTime currentDate = getCurrentWeekStartDate();
+    // Get the current date
+    DateTime currentDate = DateTime.now();
 
-    List<List<DateTime>> periods = [
-      // January
-      [DateTime(2025, 1, 6), DateTime(2025, 1, 12)], // Week 1
-      [DateTime(2025, 1, 13), DateTime(2025, 1, 19)], // Week 2
-      [DateTime(2025, 1, 20), DateTime(2025, 1, 26)], // Week 3
-      [DateTime(2025, 1, 27), DateTime(2025, 2, 2)], // Week 4
+    // Find the most recent Monday (start of the period)
+    DateTime startOfWeek = currentDate
+        .subtract(Duration(days: (currentDate.weekday - DateTime.monday) % 7));
 
-      // February
-      [DateTime(2025, 2, 3), DateTime(2025, 2, 9)], // Week 5
-      [DateTime(2025, 2, 10), DateTime(2025, 2, 16)], // Week 6
-      [DateTime(2025, 2, 17), DateTime(2025, 2, 23)], // Week 7
-      [DateTime(2025, 2, 24), DateTime(2025, 3, 2)], // Week 8
+    // Calculate the end of the period (Saturday)
+    DateTime endOfWeek = startOfWeek.add(Duration(days: 5));
 
-      // March
-      [DateTime(2025, 3, 3), DateTime(2025, 3, 9)], // Week 9
-      [DateTime(2025, 3, 10), DateTime(2025, 3, 16)], // Week 10
-      [DateTime(2025, 3, 17), DateTime(2025, 3, 23)], // Week 11
-      [DateTime(2025, 3, 24), DateTime(2025, 3, 30)], // Week 12
-      [DateTime(2025, 3, 31), DateTime(2025, 4, 6)], // Week 13
+    // Format the period string
+    String periodString =
+        '${DateFormat('MMMdd').format(startOfWeek)}-${DateFormat('MMMdd').format(endOfWeek)}';
 
-      // April
-      [DateTime(2025, 4, 7), DateTime(2025, 4, 13)], // Week 14
-      [DateTime(2025, 4, 14), DateTime(2025, 4, 20)], // Week 15
-      [DateTime(2025, 4, 21), DateTime(2025, 4, 27)], // Week 16
-      [DateTime(2025, 4, 28), DateTime(2025, 5, 4)], // Week 17
+    items.add(DropdownMenuItem(child: Text(periodString), value: periodString));
 
-      // May
-      [DateTime(2025, 5, 5), DateTime(2025, 5, 11)], // Week 18
-      [DateTime(2025, 5, 12), DateTime(2025, 5, 18)], // Week 19
-      [DateTime(2025, 5, 19), DateTime(2025, 5, 25)], // Week 20
-      [DateTime(2025, 5, 26), DateTime(2025, 6, 1)], // Week 21
-
-      // June
-      [DateTime(2025, 6, 2), DateTime(2025, 6, 8)], // Week 22
-      [DateTime(2025, 6, 9), DateTime(2025, 6, 15)], // Week 23
-      [DateTime(2025, 6, 16), DateTime(2025, 6, 22)], // Week 24
-      [DateTime(2025, 6, 23), DateTime(2025, 6, 29)], // Week 25
-      [DateTime(2025, 6, 30), DateTime(2025, 7, 6)], // Week 26
-
-      // July
-      [DateTime(2025, 7, 7), DateTime(2025, 7, 13)], // Week 27
-      [DateTime(2025, 7, 14), DateTime(2025, 7, 20)], // Week 28
-      [DateTime(2025, 7, 21), DateTime(2025, 7, 27)], // Week 29
-      [DateTime(2025, 7, 28), DateTime(2025, 8, 3)], // Week 30
-
-      // August
-      [DateTime(2025, 8, 4), DateTime(2025, 8, 10)], // Week 31
-      [DateTime(2025, 8, 11), DateTime(2025, 8, 17)], // Week 32
-      [DateTime(2025, 8, 18), DateTime(2025, 8, 24)], // Week 33
-      [DateTime(2025, 8, 25), DateTime(2025, 8, 31)], // Week 34
-
-      // September
-      [DateTime(2025, 9, 1), DateTime(2025, 9, 7)], // Week 35
-      [DateTime(2025, 9, 8), DateTime(2025, 9, 14)], // Week 36
-      [DateTime(2025, 9, 15), DateTime(2025, 9, 21)], // Week 37
-      [DateTime(2025, 9, 22), DateTime(2025, 9, 28)], // Week 38
-      [DateTime(2025, 9, 29), DateTime(2025, 10, 5)], // Week 39
-
-      // October
-      [DateTime(2025, 10, 6), DateTime(2025, 10, 12)], // Week 40
-      [DateTime(2025, 10, 13), DateTime(2025, 10, 19)], // Week 41
-      [DateTime(2025, 10, 20), DateTime(2025, 10, 26)], // Week 42
-      [DateTime(2025, 10, 27), DateTime(2025, 11, 2)], // Week 43
-
-      // November
-      [DateTime(2025, 11, 3), DateTime(2025, 11, 9)], // Week 44
-      [DateTime(2025, 11, 10), DateTime(2025, 11, 16)], // Week 45
-      [DateTime(2025, 11, 17), DateTime(2025, 11, 23)], // Week 46
-      [DateTime(2025, 11, 24), DateTime(2025, 11, 30)], // Week 47
-
-      // December
-      [DateTime(2025, 12, 1), DateTime(2025, 12, 7)], // Week 48
-      [DateTime(2025, 12, 8), DateTime(2025, 12, 14)], // Week 49
-      [DateTime(2025, 12, 15), DateTime(2025, 12, 21)], // Week 50
-      [DateTime(2025, 12, 22), DateTime(2025, 12, 28)], // Week 51
-      [
-        DateTime(2025, 12, 29),
-        DateTime(2026, 1, 4)
-      ] // Week 52 (spans into 2026)
-    ];
-
-    List<DateTime> currentPeriod = periods.firstWhere(
-        (period) =>
-            currentDate.isAfter(period[0].subtract(const Duration(days: 1))) &&
-            currentDate.isBefore(period[1].add(const Duration(days: 1))),
-        orElse: () => [DateTime(0), DateTime(0)]);
-
-    if (currentPeriod.isNotEmpty) {
-      // Displayed workweek: Monday to Saturday
-      String displayString =
-          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1].subtract(Duration(days: 2)))}';
-
-      // Covered week: Monday to Sunday
-      String coveredString =
-          '${DateFormat('MMMdd').format(currentPeriod[0])}-${DateFormat('MMMdd').format(currentPeriod[1])}';
-
-      items.add(DropdownMenuItem(
-          child: Text(displayString),
-          value: coveredString // Store the full covered week as value
-          ));
-
-      print("Displayed week: $displayString");
-      print("Covered week: $coveredString");
-    } else {
-      // Handle the case where no period is found
-      print("No matching period found.");
-    }
+    print(
+        "Selected period: ${DateFormat('MMM dd').format(startOfWeek)} - ${DateFormat('MMM dd').format(endOfWeek)}");
 
     return items;
   }
 
-  DateTime getCurrentWeekStartDate({DateTime? overrideDate}) {
-    // Use the overrideDate if provided, otherwise use the actual current date
-    var now = overrideDate ?? DateTime.now();
-    var today = DateTime(now.year, now.month, now.day);
-    var firstDayOfWeek = today.subtract(Duration(days: today.weekday - 1));
-    return firstDayOfWeek;
-  }
+// // Method to get the current week start date
+//   DateTime getCurrentWeekStartDate({DateTime? overrideDate}) {
+//     // Use the overrideDate if provided, otherwise use the actual current date
+//     var now = overrideDate ?? DateTime.now();
+//     var today = DateTime(now.year, now.month, now.day);
+//     var firstDayOfWeek = today.subtract(Duration(days: today.weekday - 1));
+//     return firstDayOfWeek;
+//   }
+
+//  List<List<DateTime>> _generatePeriods(DateTime startDate) {
+//     List<List<DateTime>> periods = [];
+
+//     // Generate 5 periods (Monday to Saturday)
+//     for (int i = 0; i < 5; i++) {
+//       DateTime periodStart =
+//           startDate.add(Duration(days: i * 7)); // Start of each week (Monday)
+//       DateTime periodEnd =
+//           periodStart.add(Duration(days: 5)); // End of each week (Saturday)
+//       periods.add([periodStart, periodEnd]);
+//     }
+
+//     return periods;
+//   }
 
   // Function to generate a new Input ID
   String generateInputID() {
@@ -355,72 +260,192 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
   }
 
   // Method to calculate offtake
-  void _calculateOfftake() {
-    double beginning = double.tryParse(_beginningController.text) ?? 0;
-    double delivery = double.tryParse(_deliveryController.text) ?? 0;
-    double ending = double.tryParse(_endingController.text) ?? 0;
+  void _calculateOfftake(int index) {
+    double beginning = double.tryParse(_beginningControllers[index].text) ?? 0;
+    double delivery = double.tryParse(_deliveryControllers[index].text) ?? 0;
+    double ending = double.tryParse(_endingControllers[index].text) ?? 0;
     double offtake = beginning + delivery - ending;
 
     setState(() {
-      _offtakeController.text = offtake.toStringAsFixed(2);
+      _offtakeControllers[index].text = offtake.toStringAsFixed(2);
     });
 
-    _calculateInventoryDaysLevel(); // Recalculate inventory days level when offtake changes
+    _calculateInventoryDaysLevel(
+        index); // Recalculate inventory days level when offtake changes
   }
 
   // Method to calculate inventory days level
-  void _calculateInventoryDaysLevel() {
-    double ending = double.tryParse(_endingController.text) ?? 0;
-    double offtake = double.tryParse(_offtakeController.text) ?? 0;
+  void _calculateInventoryDaysLevel(int index) {
+    double ending = double.tryParse(_endingControllers[index].text) ?? 0;
+    double offtake = double.tryParse(_offtakeControllers[index].text) ?? 0;
 
     if (offtake != 0) {
       double inventoryDaysLevel = ending / (offtake / 7);
 
       setState(() {
-        _IDLController.text = inventoryDaysLevel.toStringAsFixed(2);
+        _IDLControllers[index].text = inventoryDaysLevel.toStringAsFixed(2);
       });
     } else {
       setState(() {
-        _IDLController.text = '0';
+        _IDLControllers[index].text = '0';
       });
     }
   }
 
-  void checkSaveEnabled() {
+  void checkSaveEnabled(int index) {
     setState(() {
-      if (_statusController.text == 'Carried') {
-        // Restore the original value of _beginningController if status changes from 'Delisted'
-        if (_beginningController.text == 'Delisted') {
-          _beginningController.text =
-              widget.inventoryItem.ending?.toString() ?? '';
-        }
+      print("Checking index: $index");
+      print("_statusControllers length: ${_statusControllers.length}");
+      print(
+          "_selectedNumberOfDaysOOSList length: ${_selectedNumberOfDaysOOSList.length}");
+      print("_isSaveEnabledList length: ${_isSaveEnabledList.length}");
 
-        // Enable Save button when _selectedNumberOfDaysOOS is 0, ensuring selectedPeriod and delivery fields are filled
-        if (_selectedNumberOfDaysOOS == 0) {
-          _isSaveEnabled =
-              _selectedPeriod != null && // Ensure _selectedPeriod is not null
-                  _deliveryController.text
-                      .isNotEmpty && // Ensure deliveryController is not empty
-                  _endingController
-                      .text.isNotEmpty; // Ensure endingController is not empty
-        } else {
-          // When _selectedNumberOfDaysOOS is not 0, enable Save button if all required fields are filled and valid
-          _isSaveEnabled = _beginningController.text.isNotEmpty &&
-              _deliveryController.text.isNotEmpty &&
-              _endingController.text.isNotEmpty &&
-              _endingSAController.text.isNotEmpty &&
-              _endingWAController.text.isNotEmpty &&
-              _selectedPeriod != null && // Ensure _selectedPeriod is not null
-              _remarksOOS != null;
-        }
-      } else if (_statusController.text == 'Delisted') {
-        // If status is 'Delisted', set beginning to 'Delisted'
-        _beginningController.text = 'Delisted';
-
-        // Enable Save button without requiring all fields, as they may not apply
-        _isSaveEnabled = true;
+      // Ensure index is within bounds
+      if (index >= _statusControllers.length ||
+          index >= _selectedNumberOfDaysOOSList.length ||
+          index >= _isSaveEnabledList.length) {
+        print("Index out of range, skipping checkSaveEnabled");
+        return;
       }
+
+      if (_statusControllers[index].text == 'Carried') {
+        if (_selectedNumberOfDaysOOSList[index] == 0) {
+          _remarksOOSList[index] = null;
+
+          _isSaveEnabledList[index] = _selectedPeriod != null &&
+              _deliveryControllers[index].text.isNotEmpty &&
+              _endingControllers[index].text.isNotEmpty;
+        } else {
+          _isSaveEnabledList[index] =
+              _beginningControllers[index].text.isNotEmpty &&
+                  _deliveryControllers[index].text.isNotEmpty &&
+                  _endingControllers[index].text.isNotEmpty &&
+                  _selectedPeriod != null &&
+                  _remarksOOSList[index] != null;
+        }
+      } else if (_statusControllers[index].text == 'Delisted') {
+        // Do NOT overwrite the beginning value
+        // We DO NOT change the _beginningControllers[index].text here
+
+        // Enable save only if a period is selected
+        _isSaveEnabledList[index] = _selectedPeriod != null;
+      } else {
+        _isSaveEnabledList[index] = false;
+      }
+
+      // Debugging output
+      print('_isSaveEnabledList: $_isSaveEnabledList');
+
+      // Update save button state
+      _isSaveEnabled = _isSaveEnabledList.every((enabled) {
+        int i = _isSaveEnabledList.indexOf(enabled);
+        if (_statusControllers[i].text == "Delisted") {
+          return _selectedPeriod != null; // Require period for 'Delisted' items
+        }
+        return enabled; // Only enable if valid
+      });
     });
+  }
+
+  Widget _buildExpiryField(int index) {
+    if (index >= _pcsControllers.length || index >= _selectedMonths.length) {
+      return SizedBox.shrink(); // Prevent crash if index is out of range
+    }
+
+    TextEditingController pcsController = _pcsControllers[index];
+
+    // Use a controller for the date field to update it dynamically
+    TextEditingController dateController = TextEditingController(
+      text: _selectedMonths[index] ?? '',
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                readOnly: true, // Prevent manual input
+                controller: dateController, // Use controller for updates
+                decoration: InputDecoration(
+                  hintText: 'Select Expiry Date',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                  suffixIcon: Icon(Icons.calendar_today), // Calendar icon
+                ),
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now()
+                        .add(Duration(days: 365 * 5)), // Up to 5 years ahead
+                  );
+
+                  if (pickedDate != null) {
+                    setState(() {
+                      String formattedDate = _formatDate(pickedDate);
+                      _selectedMonths[index] = formattedDate;
+                      dateController.text = formattedDate; // Update text field
+                      _updateExpiryField(
+                          index, formattedDate, pcsController.text);
+                    });
+                  }
+                },
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () {
+                _removeExpiryField(index);
+              },
+            ),
+          ],
+        ),
+        SizedBox(height: 16),
+        TextField(
+          controller: pcsController,
+          decoration: InputDecoration(
+            hintText: 'Manual PCS Input',
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12),
+          ),
+          keyboardType: TextInputType.number,
+          onChanged: (value) {
+            _updateExpiryField(index, _selectedMonths[index] ?? '', value);
+          },
+        ),
+      ],
+    );
+  }
+
+// Helper function to format the date as ddMMMyy
+  String _formatDate(DateTime date) {
+    String day = date.day.toString().padLeft(2, '0'); // Ensure two-digit day
+    String month = _monthToAbbreviation(date.month);
+    String year =
+        date.year.toString().substring(2); // Get last two digits of the year
+    return '$day$month$year';
+  }
+
+// Convert numeric month to three-letter abbreviation
+  String _monthToAbbreviation(int month) {
+    List<String> months = [
+      "JAN",
+      "FEB",
+      "MAR",
+      "APR",
+      "MAY",
+      "JUN",
+      "JUL",
+      "AUG",
+      "SEP",
+      "OCT",
+      "NOV",
+      "DEC"
+    ];
+    return months[month - 1]; // Get corresponding month abbreviation
   }
 
   void _saveChanges() async {
@@ -434,118 +459,131 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
       // Reference the correct collection
       final collection = db.collection(USER_INVENTORY);
 
-      // Prepare the data for insertion
-      String endingSA = _endingSAController.text;
-      String endingWA = _endingWAController.text;
-      String accountManning = _branchController.text;
-      String status = _statusController.text;
-      int beginning = int.tryParse(_beginningController.text) ?? 0;
-      int beginningSA = int.tryParse(_beginningSAController.text) ?? 0;
-      int beginningWA = int.tryParse(_beginningWAController.text) ?? 0;
-      String beginningvalue = _beginningController.text;
-      String beginningSAvalue = _beginningSAController.text;
-      String beginningWAvalue = _beginningWAController.text;
-      String deliveryValue;
-      String endingValue;
-      String offtakevalue = '0.00';
-      double inventoryDaysLevel = 0;
-      String noOfDaysOOSValue = '0';
-      String remarksOOSValue = '';
-      String reasonOOSValue = '';
+      // Loop through each inventory item and save its data
+      for (int i = 0; i < widget.inventoryItems.length; i++) {
+        // Prepare the data for insertion
+        String endingSA = _endingSAControllers[i].text;
+        String endingWA = _endingWAControllers[i].text;
+        String accountManning = _branchControllers[i].text;
+        String status = _statusControllers[i].text;
+        //int beginning = int.tryParse(_beginningControllers[i].text) ?? 0;
+        String beginningValue = _beginningControllers[i].text;
+        String deliveryValue;
+        String endingValue;
+        String offtakeValue = _offtakeControllers[i].text.isNotEmpty
+            ? _offtakeControllers[i].text
+            : '0.00';
+        double inventoryDaysLevel = 0;
+        String noOfDaysOOSValue = _selectedNumberOfDaysOOSList.isNotEmpty &&
+                i < _selectedNumberOfDaysOOSList.length &&
+                _selectedNumberOfDaysOOSList[i] != null
+            ? _selectedNumberOfDaysOOSList[i].toString()
+            : '0';
+        String remarksOOSValue = _remarksOOSList.isNotEmpty &&
+                i < _remarksOOSList.length &&
+                _remarksOOSList[i] != null
+            ? _remarksOOSList[i]!
+            : '';
 
-      if (status == 'Delisted') {
-        beginningvalue = 'Delisted';
-        beginningWAvalue = 'Delisted';
-        beginningSAvalue = 'Delisted';
-        deliveryValue = 'Delisted';
-        endingValue = 'Delisted';
-        endingWA = 'Delisted';
-        endingSA = 'Delisted';
-        remarksOOSValue = 'Delisted';
-        reasonOOSValue = 'Delisted';
-      } else {
-        deliveryValue =
-            int.tryParse(_deliveryController.text)?.toString() ?? '0';
-        endingValue = int.tryParse(_endingController.text)?.toString() ?? '0';
-        offtakevalue = int.tryParse(_offtakeController.text)?.toString() ?? '0';
-      }
-
-      // Calculate offtake
-      int beginningValue = beginning;
-      int delivery = int.tryParse(_deliveryController.text) ?? 0;
-      int ending = int.tryParse(_endingController.text) ?? 0;
-      int offtake = beginningValue + delivery - ending;
-
-      if (status != 'Delisted') {
-        if (offtake != 0 && ending != double.infinity && !ending.isNaN) {
-          inventoryDaysLevel = ending / (offtake / 7);
-        }
-      }
-
-      List<Map<String, String>> expiryFieldsData = []; // Explicitly define type
-      int maxIndex = max(_selectedMonths.length, _pcsControllers.length);
-
-      for (int i = 0; i < maxIndex; i++) {
-        String expiryMonth =
-            i < _selectedMonths.length ? _selectedMonths[i] ?? '' : '';
-        String expiryPcs =
-            i < _pcsControllers.length ? _pcsControllers[i].text : '';
-
-        if (expiryMonth.isNotEmpty || expiryPcs.isNotEmpty) {
-          expiryFieldsData.add({
-            'expiryMonth': expiryMonth,
-            'expiryPcs': expiryPcs,
-          });
-          print("Added expiry field: ${expiryFieldsData.last}");
+        if (status == 'Delisted') {
+          beginningValue = 'Delisted';
+          deliveryValue = 'Delisted';
+          endingValue = 'Delisted';
+          endingWA = 'Delisted';
+          endingSA = 'Delisted';
+          remarksOOSValue = 'Delisted';
         } else {
-          print("Skipping empty field at index $i");
+          deliveryValue =
+              int.tryParse(_deliveryControllers[i].text)?.toString() ?? '0';
+          endingValue =
+              int.tryParse(_endingControllers[i].text)?.toString() ?? '0';
+          offtakeValue = double.tryParse(_offtakeControllers[i].text)
+                  ?.toStringAsFixed(2) ??
+              '0.00';
         }
+
+        // Calculate offtake
+        double beginningVal =
+            double.tryParse(_beginningControllers[i].text) ?? 0;
+        double delivery = double.tryParse(_deliveryControllers[i].text) ?? 0;
+        double ending = double.tryParse(_endingControllers[i].text) ?? 0;
+        double offtake = beginningVal + delivery - ending;
+
+        if (status != 'Delisted') {
+          if (offtake != 0 && ending != double.infinity && !ending.isNaN) {
+            inventoryDaysLevel = ending / (offtake / 7);
+          }
+        }
+
+        // Prepare expiry fields data
+        List<Map<String, String>> expiryFieldsData = [];
+
+// Ensure lists are not empty before calculating maxIndex
+        if (_selectedMonths.isNotEmpty || _pcsControllers.isNotEmpty) {
+          int maxIndex = max(_selectedMonths.length, _pcsControllers.length);
+
+          for (int j = 0; j < maxIndex; j++) {
+            // Fix: Ensure expiryMonth is always a valid String
+            String expiryMonth =
+                j < _selectedMonths.length ? _selectedMonths[j] ?? '' : '';
+            String expiryPcs =
+                j < _pcsControllers.length ? _pcsControllers[j].text : '';
+
+            if (expiryMonth.isNotEmpty || expiryPcs.isNotEmpty) {
+              expiryFieldsData.add({
+                'expiryMonth': expiryMonth,
+                'expiryPcs': expiryPcs,
+              });
+              print("Added expiry field: ${expiryFieldsData.last}");
+            } else {
+              print("Skipping empty field at index $j");
+            }
+          }
+        } else {
+          print("No expiry fields available.");
+        }
+
+        // Prepare the document to insert
+        var newDocument = {
+          'userEmail': widget.userEmail,
+          'date': _dateControllers[i].text,
+          'inputId': _inputIdControllers[i].text,
+          'name': _nameControllers[i].text,
+          'accountNameBranchManning': accountManning,
+          'period': _selectedPeriod,
+          'month': _monthControllers[i].text,
+          'week': _weekControllers[i].text,
+          'skuDescription': _skuDesControllers[i].text,
+          'skuCode': _skuCodeControllers[i].text,
+          'status': status,
+          'beginning': beginningValue,
+          'delivery': deliveryValue,
+          'ending': endingValue,
+          'endingSA': endingSA,
+          'endingWA': endingWA,
+          'offtake': offtakeValue,
+          'inventoryDaysLevel':
+              double.parse(inventoryDaysLevel.toStringAsFixed(2)),
+          'noOfDaysOOS': noOfDaysOOSValue,
+          'expiryFields': expiryFieldsData,
+          'remarksOOS': remarksOOSValue,
+          'isEditing': true,
+        };
+
+        // Log the final document before insertion
+        print('Final Document to Insert: $newDocument');
+
+        // Insert the new document into the collection
+        await collection.insertOne(newDocument);
+        print('New inventory item #${i + 1} inserted successfully.');
       }
-
-      // Prepare the document to insert
-      var newDocument = {
-        'userEmail': widget.userEmail,
-        'date': _dateController.text,
-        'inputId': _inputIdController.text,
-        'name': _nameController.text,
-        'accountNameBranchManning': accountManning,
-        'period': _selectedPeriod,
-        'month': _monthController.text,
-        'week': _weekController.text,
-        //'category': _categoryController.text,
-        'skuDescription': _skuDesController.text,
-        //'products': _productController.text,
-        'skuCode': _skuCodeController.text,
-        'status': status,
-        'beginning': beginningValue.toString(),
-        'beginningSA': beginningSAvalue.toString(),
-        'beginningWA': beginningWAvalue.toString(),
-        'delivery': deliveryValue,
-        'ending': endingValue,
-        'endingSA': endingSA,
-        'endingWA': endingWA,
-        'offtake': offtake.toString(),
-        'inventoryDaysLevel': inventoryDaysLevel,
-        'noOfDaysOOS': _selectedNumberOfDaysOOS,
-        'expiryFields': expiryFieldsData,
-        'remarksOOS': _remarksOOS,
-        //'reasonOOS': reasonOOSValue,
-        'isEditing': false, // Add the editing status here
-      };
-
-      // Log the final document before insertion
-      print('Final Document to Insert: $newDocument');
-
-      // Insert the new document into the collection
-      await collection.insertOne(newDocument);
-      print('New inventory item inserted successfully.');
 
       // Check if the widget is still mounted before navigating
       if (mounted) {
         Navigator.pop(context, true); // Indicate that editing is done
       }
     } catch (e) {
-      print('Error inserting new inventory item: $e');
+      print('Error inserting new inventory items: $e');
       // Check if the widget is still mounted before navigating
       if (mounted) {
         Navigator.pop(context,
@@ -559,65 +597,248 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
     }
   }
 
-  bool _isFieldsEnabled() {
-    return _statusController.text == 'Carried';
+  bool _isFieldsEnabled(int index) {
+    return _statusControllers[index].text == 'Carried';
   }
 
-  void _resetFields() {
-    _deliveryController.clear();
-    _endingController.clear();
-    _offtakeController.clear();
-    _endingSAController.clear();
-    _endingWAController.clear();
-    // _selectedPeriod = null;
-    // _monthController.clear();
-    // _weekController.clear();
-    _IDLController.clear();
+  void _resetFields(int index) {
+    _deliveryControllers[index].clear();
+    _endingControllers[index].clear();
+    _offtakeControllers[index].clear();
+    _endingSAControllers[index].clear();
+    _endingWAControllers[index].clear();
+    _IDLControllers[index].clear();
     _expiryFields.clear();
     _pcsControllers.clear();
     _selectedMonths.clear();
     _selectedNumberOfDaysOOS = null;
     _remarksOOS = null;
+    _selectedNoDeliveryOption = null;
+  }
+
+  void _updateAllFields(int index, String value) {
+    setState(() {
+      _selectedPeriod = value;
+      _isSaveEnabled = _selectedPeriod != null;
+
+      String selectedMonth = '';
+      String selectedWeek = '';
+
+      // Determine the corresponding month and week
+      switch (value) {
+        case 'Mar24-Mar29':
+          selectedMonth = 'March';
+          selectedWeek = 'Week 13';
+          break;
+        case 'Mar31-Apr05':
+          selectedMonth = 'March';
+          selectedWeek = 'Week 14';
+          break;
+        case 'Apr07-Apr12':
+          selectedMonth = 'April';
+          selectedWeek = 'Week 15';
+          break;
+        case 'Apr14-Apr19': // Corrected to Monday-Saturday
+          selectedMonth = 'April';
+          selectedWeek = 'Week 16';
+          break;
+        case 'Apr21-Apr26': // Corrected to Monday-Saturday
+          selectedMonth = 'April';
+          selectedWeek = 'Week 17';
+          break;
+        case 'Apr28-May03': // Corrected to Monday-Saturday
+          selectedMonth = 'April';
+          selectedWeek = 'Week 18';
+          break;
+        case 'May05-May10': // Corrected to Monday-Saturday
+          selectedMonth = 'May';
+          selectedWeek = 'Week 19';
+          break;
+        case 'May12-May17':
+          selectedMonth = 'May';
+          selectedWeek = 'Week 20';
+          break;
+        case 'May19-May24':
+          selectedMonth = 'May';
+          selectedWeek = 'Week 21';
+          break;
+        case 'May26-May31':
+          selectedMonth = 'May';
+          selectedWeek = 'Week 22';
+          break;
+        case 'Jun02-Jun07':
+          selectedMonth = 'June';
+          selectedWeek = 'Week 23';
+          break;
+        case 'Jun09-Jun14':
+          selectedMonth = 'June';
+          selectedWeek = 'Week 24';
+          break;
+        case 'Jun16-Jun21':
+          selectedMonth = 'June';
+          selectedWeek = 'Week 25';
+          break;
+        case 'Jun23-Jun28':
+          selectedMonth = 'June';
+          selectedWeek = 'Week 26';
+          break;
+        case 'Jun30-Jul05':
+          selectedMonth = 'June';
+          selectedWeek = 'Week 27';
+          break;
+        case 'Jul07-Jul12':
+          selectedMonth = 'July';
+          selectedWeek = 'Week 28';
+          break;
+        case 'Jul14-Jul19':
+          selectedMonth = 'July';
+          selectedWeek = 'Week 29';
+          break;
+        case 'Jul21-Jul26':
+          selectedMonth = 'July';
+          selectedWeek = 'Week 30';
+          break;
+        case 'Jul28-Aug02':
+          selectedMonth = 'July';
+          selectedWeek = 'Week 31';
+          break;
+        case 'Aug04-Aug09':
+          selectedMonth = 'August';
+          selectedWeek = 'Week 32';
+          break;
+        case 'Aug11-Aug16':
+          selectedMonth = 'August';
+          selectedWeek = 'Week 33';
+          break;
+        case 'Aug18-Aug23':
+          selectedMonth = 'August';
+          selectedWeek = 'Week 34';
+          break;
+        case 'Aug25-Aug30':
+          selectedMonth = 'August';
+          selectedWeek = 'Week 35';
+          break;
+        case 'Sep01-Sep06':
+          selectedMonth = 'September';
+          selectedWeek = 'Week 36';
+          break;
+        case 'Sep08-Sep13':
+          selectedMonth = 'September';
+          selectedWeek = 'Week 37';
+          break;
+        case 'Sep15-Sep20':
+          selectedMonth = 'September';
+          selectedWeek = 'Week 38';
+          break;
+        case 'Sep22-Sep27':
+          selectedMonth = 'September';
+          selectedWeek = 'Week 39';
+          break;
+        case 'Sep29-Oct04':
+          selectedMonth = 'September';
+          selectedWeek = 'Week 40';
+          break;
+        case 'Oct06-Oct11':
+          selectedMonth = 'October';
+          selectedWeek = 'Week 41';
+          break;
+        case 'Oct13-Oct18':
+          selectedMonth = 'October';
+          selectedWeek = 'Week 42';
+          break;
+        case 'Oct20-Oct25':
+          selectedMonth = 'October';
+          selectedWeek = 'Week 43';
+          break;
+        case 'Oct27-Nov01':
+          selectedMonth = 'October';
+          selectedWeek = 'Week 44';
+          break;
+        case 'Nov03-Nov08':
+          selectedMonth = 'November';
+          selectedWeek = 'Week 45';
+          break;
+        case 'Nov10-Nov15':
+          selectedMonth = 'November';
+          selectedWeek = 'Week 46';
+          break;
+        case 'Nov17-Nov22':
+          selectedMonth = 'November';
+          selectedWeek = 'Week 47';
+          break;
+        case 'Nov24-Nov29':
+          selectedMonth = 'November';
+          selectedWeek = 'Week 48';
+          break;
+        case 'Dec01-Dec06':
+          selectedMonth = 'December';
+          selectedWeek = 'Week 49';
+          break;
+        case 'Dec08-Dec13':
+          selectedMonth = 'December';
+          selectedWeek = 'Week 50';
+          break;
+        case 'Dec15-Dec20':
+          selectedMonth = 'December';
+          selectedWeek = 'Week 51';
+          break;
+        case 'Dec22-Dec27':
+          selectedMonth = 'December';
+          selectedWeek = 'Week 52';
+          break;
+        case 'Dec29-Jan03':
+          selectedMonth = 'December';
+          selectedWeek = 'Week 1';
+          break;
+        case 'Jan05-Jan10':
+          selectedMonth = 'January';
+          selectedWeek = 'Week 2';
+          break;
+      }
+
+// Update all inventory items with the selected month & week
+      for (int i = 0; i < _monthControllers.length; i++) {
+        _monthControllers[i].text = selectedMonth;
+        _weekControllers[i].text = selectedWeek;
+      }
+
+      // Update all inventory items with the selected month & week
+      for (int i = 0; i < _monthControllers.length; i++) {
+        _monthControllers[i].text = selectedMonth;
+        _weekControllers[i].text = selectedWeek;
+      }
+    });
   }
 
   void _addExpiryField() {
-    if (currentStatus != 'Delisted') {
-      setState(() {
-        if (_dateControllers.length < 6) {
-          _pcsControllers.add(TextEditingController());
-          _dateControllers.add(TextEditingController());
-          _selectedMonths.add(null);
-          _expiryFieldsValues.add({
-            'expiryMonth': '', // Initialize with default values
-            'expiryPcs': '',
-          });
-        }
-      });
-    } else {
-      print('Cannot add expiry fields for delisted or not carried items');
-    }
+    setState(() {
+      if (_pcsControllers.length < 6) {
+        // Limit to 6 expiry fields
+        _pcsControllers.add(TextEditingController()); // Add a new controller
+        _selectedMonths.add(''); // Use an empty string instead of null
+        _expiryFields
+            .add(_buildExpiryField(_pcsControllers.length - 1)); // Add widget
+      }
+    });
   }
 
   void _removeExpiryField(int index) {
     setState(() {
-      if (index < _pcsControllers.length) _pcsControllers.removeAt(index);
-      if (index < _dateControllers.length) _dateControllers.removeAt(index);
-      if (index < _selectedMonths.length) _selectedMonths.removeAt(index);
+      if (index < _pcsControllers.length) {
+        _pcsControllers[index].dispose(); // Dispose controller to free memory
+        _pcsControllers.removeAt(index);
+        _selectedMonths.removeAt(index);
+        _expiryFields.removeAt(index);
+      }
     });
   }
 
-  void _updateExpiryField(int index, String expiryMonth, String expiryPcs) {
-    // Ensure the list has been initialized with enough elements
-    if (index < _expiryFieldsValues.length) {
-      setState(() {
-        _expiryFieldsValues[index] = {
-          'expiryMonth': expiryMonth,
-          'expiryPcs': expiryPcs,
-        };
-      });
-    } else {
-      print("Index out of bounds: Unable to update expiry field.");
-    }
+  void _updateExpiryField(int index, String selectedMonth, String pcsValue) {
+    setState(() {
+      if (index < _selectedMonths.length) {
+        _selectedMonths[index] = selectedMonth;
+      }
+    });
   }
 
   void _resetExpiryFields() {
@@ -635,1017 +856,674 @@ class _EditInventoryScreenState extends State<EditInventoryScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-        onWillPop: () async => false,
-        child: Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              backgroundColor: Color.fromARGB(255, 26, 20, 71),
-              elevation: 0,
-              title: Text(
-                'NEXT WEEK INVENTORY',
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
+  Widget _buildInventorySection(int index) {
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      if (index == 1) ...[
+        SizedBox(height: 16),
+        Divider(thickness: 8, color: Color.fromARGB(255, 26, 20, 71)),
+        SizedBox(height: 8),
+      ],
+      Center(
+        child: Text(
+          'INVENTORY #${index + 1}',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Date',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextField(
+        readOnly: true,
+        controller: _dateControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Input ID',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextField(
+        readOnly: true,
+        controller: _inputIdControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Merchandiser',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextField(
+        readOnly: true,
+        controller: _nameControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        enabled: false,
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Branch/Outlet',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextField(
+        controller: _branchControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        enabled: false,
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Weeks Covered',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      Container(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: Colors.black,
+              width: 1.0,
             ),
-            body: SingleChildScrollView(
-                child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'DATE',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      readOnly: true,
-                      controller: _dateController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'INVENTORY NUMBER',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      readOnly: true,
-                      controller: _inputIdController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'MERCHANDISER',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      readOnly: true,
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                      enabled: false,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'OUTLET',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _branchController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                      enabled: false,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'WEEKS COVERED',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: Colors.black,
-                            width: 1.0,
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Stack(
-                              alignment: Alignment.centerRight,
-                              children: [
-                                DropdownButtonFormField<String>(
-                                  value: _selectedPeriod,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _selectedPeriod = value;
-                                      _isSaveEnabled = _selectedPeriod != null;
-                                      if (value != null) {
-                                        String actualValue = value.split('-')[
-                                            0]; // Use the first date (start date)
-                                        print('Selected Period: $value');
-                                        switch (actualValue) {
-                                          case 'Jan06': // Week 2
-                                            _monthController.text = 'January';
-                                            _weekController.text = 'Week 2';
-                                            break;
-                                          case 'Jan13': // Week 3
-                                            _monthController.text = 'January';
-                                            _weekController.text = 'Week 3';
-                                            break;
-                                          case 'Jan20': // Week 4
-                                            _monthController.text = 'January';
-                                            _weekController.text = 'Week 4';
-                                            break;
-                                          case 'Jan27': // Week 5
-                                            _monthController.text = 'January';
-                                            _weekController.text = 'Week 5';
-                                            break;
-
-                                          // February
-                                          case 'Feb03': // Week 6
-                                            _monthController.text = 'February';
-                                            _weekController.text = 'Week 6';
-                                            break;
-                                          case 'Feb10': // Week 7
-                                            _monthController.text = 'February';
-                                            _weekController.text = 'Week 7';
-                                            break;
-                                          case 'Feb17': // Week 8
-                                            _monthController.text = 'February';
-                                            _weekController.text = 'Week 8';
-                                            break;
-                                          case 'Feb24': // Week 9
-                                            _monthController.text = 'February';
-                                            _weekController.text = 'Week 9';
-                                            break;
-
-                                          // March
-                                          case 'Mar03': // Week 10
-                                            _monthController.text = 'March';
-                                            _weekController.text = 'Week 10';
-                                            break;
-                                          case 'Mar10': // Week 11
-                                            _monthController.text = 'March';
-                                            _weekController.text = 'Week 11';
-                                            break;
-                                          case 'Mar17': // Week 12
-                                            _monthController.text = 'March';
-                                            _weekController.text = 'Week 12';
-                                            break;
-                                          case 'Mar24': // Week 13
-                                            _monthController.text = 'March';
-                                            _weekController.text = 'Week 13';
-                                            break;
-                                          case 'Mar31': // Week 14
-                                            _monthController.text = 'March';
-                                            _weekController.text = 'Week 14';
-                                            break;
-
-                                          // April
-                                          case 'Apr07': // Week 15
-                                            _monthController.text = 'April';
-                                            _weekController.text = 'Week 15';
-                                            break;
-                                          case 'Apr14': // Week 16
-                                            _monthController.text = 'April';
-                                            _weekController.text = 'Week 16';
-                                            break;
-                                          case 'Apr21': // Week 17
-                                            _monthController.text = 'April';
-                                            _weekController.text = 'Week 17';
-                                            break;
-                                          case 'Apr28': // Week 18
-                                            _monthController.text = 'April';
-                                            _weekController.text = 'Week 18';
-                                            break;
-
-                                          // May
-                                          case 'May05': // Week 19
-                                            _monthController.text = 'May';
-                                            _weekController.text = 'Week 19';
-                                            break;
-                                          case 'May12': // Week 20
-                                            _monthController.text = 'May';
-                                            _weekController.text = 'Week 20';
-                                            break;
-                                          case 'May19': // Week 21
-                                            _monthController.text = 'May';
-                                            _weekController.text = 'Week 21';
-                                            break;
-                                          case 'May26': // Week 22
-                                            _monthController.text = 'May';
-                                            _weekController.text = 'Week 22';
-                                            break;
-
-                                          // June
-                                          case 'Jun02': // Week 23
-                                            _monthController.text = 'June';
-                                            _weekController.text = 'Week 23';
-                                            break;
-                                          case 'Jun09': // Week 24
-                                            _monthController.text = 'June';
-                                            _weekController.text = 'Week 24';
-                                            break;
-                                          case 'Jun16': // Week 25
-                                            _monthController.text = 'June';
-                                            _weekController.text = 'Week 25';
-                                            break;
-                                          case 'Jun23': // Week 26
-                                            _monthController.text = 'June';
-                                            _weekController.text = 'Week 26';
-                                            break;
-                                          case 'Jun30': // Week 27
-                                            _monthController.text = 'June';
-                                            _weekController.text = 'Week 27';
-                                            break;
-
-                                          // July
-                                          case 'Jul07': // Week 28
-                                            _monthController.text = 'July';
-                                            _weekController.text = 'Week 28';
-                                            break;
-                                          case 'Jul14': // Week 29
-                                            _monthController.text = 'July';
-                                            _weekController.text = 'Week 29';
-                                            break;
-                                          case 'Jul21': // Week 30
-                                            _monthController.text = 'July';
-                                            _weekController.text = 'Week 30';
-                                            break;
-                                          case 'Jul28': // Week 31
-                                            _monthController.text = 'July';
-                                            _weekController.text = 'Week 31';
-                                            break;
-
-                                          // August
-                                          case 'Aug04': // Week 32
-                                            _monthController.text = 'August';
-                                            _weekController.text = 'Week 32';
-                                            break;
-                                          case 'Aug11': // Week 33
-                                            _monthController.text = 'August';
-                                            _weekController.text = 'Week 33';
-                                            break;
-                                          case 'Aug18': // Week 34
-                                            _monthController.text = 'August';
-                                            _weekController.text = 'Week 34';
-                                            break;
-                                          case 'Aug25': // Week 35
-                                            _monthController.text = 'August';
-                                            _weekController.text = 'Week 35';
-                                            break;
-
-                                          // September
-                                          case 'Sep01': // Week 36
-                                            _monthController.text = 'September';
-                                            _weekController.text = 'Week 36';
-                                            break;
-                                          case 'Sep08': // Week 37
-                                            _monthController.text = 'September';
-                                            _weekController.text = 'Week 37';
-                                            break;
-                                          case 'Sep15': // Week 38
-                                            _monthController.text = 'September';
-                                            _weekController.text = 'Week 38';
-                                            break;
-                                          case 'Sep22': // Week 39
-                                            _monthController.text = 'September';
-                                            _weekController.text = 'Week 39';
-                                            break;
-                                          case 'Sep29': // Week 40
-                                            _monthController.text = 'September';
-                                            _weekController.text = 'Week 40';
-                                            break;
-
-                                          // October
-                                          case 'Oct06': // Week 41
-                                            _monthController.text = 'October';
-                                            _weekController.text = 'Week 41';
-                                            break;
-                                          case 'Oct13': // Week 42
-                                            _monthController.text = 'October';
-                                            _weekController.text = 'Week 42';
-                                            break;
-                                          case 'Oct20': // Week 43
-                                            _monthController.text = 'October';
-                                            _weekController.text = 'Week 43';
-                                            break;
-                                          case 'Oct27': // Week 44
-                                            _monthController.text = 'October';
-                                            _weekController.text = 'Week 44';
-                                            break;
-
-                                          // November
-                                          case 'Nov03': // Week 45
-                                            _monthController.text = 'November';
-                                            _weekController.text = 'Week 45';
-                                            break;
-                                          case 'Nov10': // Week 46
-                                            _monthController.text = 'November';
-                                            _weekController.text = 'Week 46';
-                                            break;
-                                          case 'Nov17': // Week 47
-                                            _monthController.text = 'November';
-                                            _weekController.text = 'Week 47';
-                                            break;
-                                          case 'Nov24': // Week 48
-                                            _monthController.text = 'November';
-                                            _weekController.text = 'Week 48';
-                                            break;
-
-                                          // December
-                                          case 'Dec01': // Week 49
-                                            _monthController.text = 'December';
-                                            _weekController.text = 'Week 49';
-                                            break;
-                                          case 'Dec08': // Week 50
-                                            _monthController.text = 'December';
-                                            _weekController.text = 'Week 50';
-                                            break;
-                                          case 'Dec15': // Week 51
-                                            _monthController.text = 'December';
-                                            _weekController.text = 'Week 51';
-                                            break;
-                                          case 'Dec22': // Week 52
-                                            _monthController.text = 'December';
-                                            _weekController.text = 'Week 52';
-                                            break;
-                                          case 'Dec29': // Week 1 (spans into 2026)
-                                            _monthController.text = 'December';
-                                            _weekController.text = 'Week 1';
-                                            break;
-                                        }
-                                        checkSaveEnabled(); // Ensure button state is updated
-                                      }
-                                    });
-                                  },
-                                  items: _periodItems,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    contentPadding:
-                                        EdgeInsets.symmetric(horizontal: 12),
-                                  ),
-                                ),
-                                if (_selectedPeriod != null)
-                                  Positioned(
-                                    right: 0,
-                                    child: IconButton(
-                                      icon: Icon(Icons.arrow_drop_down),
-                                      onPressed: () {
-                                        // Dropdown button action
-                                      },
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16), // Adjust spacing as needed
-                    Text(
-                      'MONTH',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    TextFormField(
-                      controller: _monthController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                      ),
-                      readOnly:
-                          true, // Keep readOnly to prevent direct user input
-                    ),
-                    SizedBox(height: 16), // Adjust spacing as needed
-                    Text(
-                      'WEEK',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    TextFormField(
-                      controller: _weekController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                      ),
-                      readOnly:
-                          true, // Keep readOnly to prevent direct user input
-                    ),
-                    //SizedBox(height: 16),
-                    // Text(
-                    //   'Category',
-                    //   style: TextStyle(
-                    //     fontWeight: FontWeight.bold,
-                    //     fontSize: 16,
-                    //   ),
-                    // ),
-                    // SizedBox(height: 16),
-                    // TextField(
-                    //   controller: _categoryController,
-                    //   decoration: InputDecoration(
-                    //       border: OutlineInputBorder(),
-                    //       contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                    //   enabled: false,
-                    // ),
-                    SizedBox(height: 16),
-                    Text(
-                      'SKUs',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _skuDesController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                      enabled: false,
-                    ),
-                    // SizedBox(height: 16),
-                    // Text(
-                    //   'Product',
-                    //   style: TextStyle(
-                    //     fontWeight: FontWeight.bold,
-                    //     fontSize: 16,
-                    //   ),
-                    // ),
-                    // SizedBox(height: 16),
-                    // TextField(
-                    //   controller: _productController,
-                    //   decoration: InputDecoration(
-                    //       border: OutlineInputBorder(),
-                    //       contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                    //   enabled: false,
-                    // ),
-                    SizedBox(height: 16),
-                    Text(
-                      '4-PACK BARCODE',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _skuCodeController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                      enabled: false,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'STATUS',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: _statusController.text,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                      ),
-                      items: <String>['Carried', 'Delisted']
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _statusController.text = newValue!;
-
-                          if (newValue == 'Delisted') {
-                            _resetFields();
-                          }
-                        });
-                      },
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'BEGINNING (SELLING AREA)',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _beginningSAController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                      keyboardType: TextInputType.number,
-                      readOnly: true,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'BEGINNING (BACK ROOMS)',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _beginningWAController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                      keyboardType: TextInputType.number,
-                      readOnly: true,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'BEGINNING',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _beginningController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                      keyboardType: TextInputType.number,
-                      readOnly: true,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'DELIVERY',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _deliveryController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                      keyboardType: TextInputType.number,
-                      enabled:
-                          _isFieldsEnabled(), // Enable or disable based on status
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'ENDING (Selling Area)',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _endingSAController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                      ),
-                      keyboardType: TextInputType.number,
-                      enabled: _isFieldsEnabled(),
-                      onChanged: (_) =>
-                          _calculateEnding(), // Call calculate on change
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'ENDING (Warehouse Area)',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _endingWAController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                      ),
-                      keyboardType: TextInputType.number,
-                      enabled: _isFieldsEnabled(),
-                      onChanged: (_) =>
-                          _calculateEnding(), // Call calculate on change
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'TOTAL ENDING',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _endingController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                      ),
-                      keyboardType: TextInputType.number,
-                      enabled: _isFieldsEnabled(),
-                    ),
-                    SizedBox(height: 20),
-                    SizedBox(height: 20),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'EXPIRATION',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        SizedBox(height: 16),
-
-                        // Use ListView.builder to render fields dynamically
-                        ListView.builder(
-                          shrinkWrap:
-                              true, // Allows ListView to be inside a Column
-                          physics:
-                              NeverScrollableScrollPhysics(), // Disable scrolling for nested ListView
-                          itemCount: _dateControllers.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(
-                                  bottom: 30.0), // Adds space between fields
-                              child: _buildExpiryField(index),
-                            );
-                          },
-                        ),
-                        SizedBox(height: 16),
-
-                        // Add Expiry Button
-                        Center(
-                          child: OutlinedButton(
-                            onPressed: _isFieldsEnabled() &&
-                                    _dateControllers.length < 6
-                                ? _addExpiryField
-                                : null, // Enable button if _isFieldsEnabled() and under limit
-                            style: OutlinedButton.styleFrom(
-                              side: BorderSide(
-                                width: 2.0,
-                                color: _isFieldsEnabled() &&
-                                        _dateControllers.length < 6
-                                    ? Color.fromARGB(255, 26, 20, 71)
-                                    : Colors.grey,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                            child: Text(
-                              'Add Expiry',
-                              style: TextStyle(
-                                color: _isFieldsEnabled() &&
-                                        _dateControllers.length < 6
-                                    ? Colors.black
-                                    : Color.fromARGB(210, 46, 0,
-                                        77), // Change text color when disabled
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 16),
-                    Text(
-                      'OFFTAKE',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _offtakeController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                      keyboardType: TextInputType.number,
-                      readOnly: true,
-                      enabled:
-                          _isFieldsEnabled(), // Enable or disable based on status
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'INVENTORY DAYS LEVEL',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    TextField(
-                      controller: _IDLController,
-                      decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12)),
-                      keyboardType: TextInputType.number,
-                      readOnly: true,
-                      enabled:
-                          _isFieldsEnabled(), // Enable or disable based on status
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'No. of Days OOS',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    DropdownButtonFormField<int>(
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                        labelStyle: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                        enabled:
-                            _isFieldsEnabled(), // Enable or disable based on status
-                      ),
-                      value: _selectedNumberOfDaysOOS,
-                      onChanged: _isFieldsEnabled()
-                          ? (newValue) {
-                              setState(() {
-                                _selectedNumberOfDaysOOS = newValue;
-                                _remarksOOS = null; // Reset remarks and reason
-
-                                checkSaveEnabled(); // Check if Save button should be enabled
-                              });
-                            }
-                          : null, // Disable dropdown if fields are not enabled
-                      items: List.generate(8, (index) {
-                        return DropdownMenuItem<int>(
-                          value: index,
-                          child: Text(index.toString()),
-                        );
-                      }),
-                    ),
-                    SizedBox(height: 16),
-                    if (_selectedNumberOfDaysOOS != null &&
-                        _selectedNumberOfDaysOOS! > 0 &&
-                        _isFieldsEnabled()) ...[
-                      SizedBox(height: 10),
-                      if (_selectedNumberOfDaysOOS != null &&
-                          _selectedNumberOfDaysOOS! > 0) ...[
-                        Text(
-                          'REMARKS',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        TextFormField(
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            contentPadding:
-                                EdgeInsets.symmetric(horizontal: 12),
-                            labelStyle: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              _remarksOOS = value;
-
-                              // Check if Save button should be enabled
-                              checkSaveEnabled();
-                            });
-                          },
-                        ),
-                      ],
-                    ],
-
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            // Perform cancel action
-                            widget.onCancel(); // Call the onCancel callback
-                            Navigator.of(context)
-                                .pop(); // Just pop without pushing a new route
-                          },
-                          style: ButtonStyle(
-                            padding:
-                                MaterialStateProperty.all<EdgeInsetsGeometry>(
-                              const EdgeInsets.symmetric(vertical: 15),
-                            ),
-                            minimumSize: MaterialStateProperty.all<Size>(
-                              const Size(150, 50),
-                            ),
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                Color.fromARGB(255, 26, 20, 71)),
-                          ),
-                          child: const Text(
-                            'Cancel',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ElevatedButton(
-                              onPressed: _isSaveEnabled
-                                  ? () async {
-                                      // Show confirmation dialog before saving
-                                      bool confirmed = await showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return AlertDialog(
-                                            title: Text('Save Confirmation'),
-                                            content: Text(
-                                                'Do you want to save the changes?'),
-                                            actions: <Widget>[
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop(
-                                                      false); // Close dialog
-                                                },
-                                                child: Text('Cancel'),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.of(context).pop(
-                                                      true); // Confirm save
-                                                },
-                                                child: Text('Confirm'),
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                      );
-
-                                      // If user confirmed, proceed to save
-                                      if (confirmed ?? false) {
-                                        _saveChanges(); // Call the save function
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                                'Changes saved successfully'),
-                                            duration: Duration(seconds: 2),
-                                          ),
-                                        );
-                                        widget.onSave();
-                                        Navigator.pop(
-                                            context); // Navigate back if needed
-                                      }
-                                    }
-                                  : null, // Disable button if save is not enabled
-                              style: ButtonStyle(
-                                padding: MaterialStateProperty.all<
-                                    EdgeInsetsGeometry>(
-                                  const EdgeInsets.symmetric(vertical: 15),
-                                ),
-                                minimumSize: MaterialStateProperty.all<Size>(
-                                  const Size(150, 50),
-                                ),
-                                backgroundColor:
-                                    MaterialStateProperty.all<Color>(
-                                  _isSaveEnabled
-                                      ? Color.fromARGB(255, 26, 20, 71)
-                                      : Colors.grey,
-                                ),
-                              ),
-                              child: const Text(
-                                'Save Changes',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ]),
-            ))));
-  }
-
-  Widget _buildExpiryField(int index) {
-    TextEditingController pcsController = _pcsControllers[index];
-    TextEditingController dateController = _dateControllers[index];
-    String? selectedDate = _selectedMonths[index];
-
-    if (selectedDate != null && dateController.text.isEmpty) {
-      dateController.text = selectedDate;
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+          ),
+        ),
+        child: Row(
           children: [
             Expanded(
-              child: GestureDetector(
-                onTap: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(Duration(days: 365 * 2)),
-                  );
-
-                  if (pickedDate != null) {
-                    setState(() {
-                      String formattedDate = DateFormat("ddMMMyy")
-                          .format(pickedDate)
-                          .toUpperCase();
-                      _selectedMonths[index] = formattedDate;
-                      dateController.text = formattedDate;
-                      pcsController.clear();
-                      _updateExpiryField(
-                          index, formattedDate, pcsController.text);
-                    });
-                  }
-                },
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8.0),
+              child: Stack(
+                alignment: Alignment.centerRight,
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: _selectedPeriod,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedPeriod = value;
+                        if (value != null) {
+                          String actualValue = value.split('-')[1];
+                          print('Selected period: $value');
+                          _updateAllFields(index, value);
+                        }
+                        checkSaveEnabled(
+                            index); // This will properly update _isSaveEnabled
+                      });
+                    },
+                    items: _periodItems,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12),
                     ),
                   ),
-                  child: Text(
-                    dateController.text.isNotEmpty
-                        ? dateController.text
-                        : 'Select Date',
-                    style: TextStyle(
-                      color: dateController.text.isEmpty
-                          ? Colors.grey
-                          : Colors.black,
+                  if (_selectedPeriod != null)
+                    Positioned(
+                      right: 0,
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_drop_down),
+                        onPressed: () {
+                          // Dropdown button action
+                        },
+                      ),
                     ),
-                  ),
-                ),
+                ],
               ),
-            ),
-            IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () => _removeExpiryField(index),
             ),
           ],
         ),
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Month',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextFormField(
+        controller: _monthControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        readOnly: true,
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Week',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextFormField(
+        controller: _weekControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        readOnly: true,
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Category',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      // SizedBox(height: 8),
+      // TextField(
+      //   controller: _categoryControllers[index],
+      //   decoration: InputDecoration(
+      //     border: OutlineInputBorder(),
+      //     contentPadding: EdgeInsets.symmetric(horizontal: 12),
+      //   ),
+      //   enabled: false,
+      // ),
+      SizedBox(height: 16),
+      Text(
+        'SKU Description',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextField(
+        controller: _skuDesControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        enabled: false,
+      ),
+      SizedBox(height: 16),
+      Text(
+        'SKU Code',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextField(
+        controller: _skuCodeControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        enabled: false,
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Status',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      DropdownButtonFormField<String>(
+        value: _statusControllers[index].text.isNotEmpty
+            ? _statusControllers[index].text
+            : null,
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        items: <String>['Carried', 'Delisted']
+            .map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          setState(() {
+            _statusControllers[index].text = newValue!;
+
+            if (newValue == 'Delisted') {
+              // Clear other fields but leave the beginning value unchanged
+              _deliveryControllers[index].clear(); // Clear delivery field
+              _endingSAControllers[index].clear();
+              _endingWAControllers[index].clear();
+              _endingControllers[index].clear(); // Clear ending field
+              _selectedNumberOfDaysOOSList[index] = null;
+              _remarksOOSList[index] = null;
+
+              _offtakeControllers[index].text =
+                  '0.00'; // Reset offtake to '0.00'
+
+              // The beginning value remains **unchanged** here
+            } else if (newValue == 'Carried') {
+              // If status changes to 'Carried', **do not reset or alter** the beginning value
+              // Simply leave _beginningControllers[index].text as is (it will stay as it was)
+            }
+
+            // Update the save button state
+            checkSaveEnabled(index);
+          });
+        },
+      ),
+
+      SizedBox(height: 16),
+      Text(
+        'Beginning',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextField(
+        controller: _beginningControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        keyboardType: TextInputType.number,
+        readOnly: true,
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Delivery',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextField(
+        controller: _deliveryControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        keyboardType: TextInputType.number,
+        enabled: _isFieldsEnabled(index),
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Ending (Selling Area)',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextField(
+        controller: _endingSAControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        keyboardType: TextInputType.number,
+        enabled: _isFieldsEnabled(index),
+        onChanged: (_) => _calculateEnding(index),
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Ending (Warehouse Area)',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextField(
+        controller: _endingWAControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        keyboardType: TextInputType.number,
+        enabled: _isFieldsEnabled(index),
+        onChanged: (_) => _calculateEnding(index),
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Ending',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextField(
+        readOnly: true,
+        controller: _endingControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        keyboardType: TextInputType.number,
+        enabled: _isFieldsEnabled(index),
+      ),
+      SizedBox(height: 20),
+      Text(
+        'Expiry Pcs',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 30.0),
+            child: (_expiryFields.length > index)
+                ? _expiryFields[index]
+                : SizedBox.shrink(),
+          ),
+        ],
+      ),
+      SizedBox(height: 16),
+      Center(
+        child: OutlinedButton(
+          onPressed: _isFieldsEnabled(index) ? _addExpiryField : null,
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(
+              width: 2.0,
+              color: _isFieldsEnabled(index)
+                  ? Color.fromARGB(255, 26, 20, 71)
+                  : Colors.grey,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          child: Text(
+            'Add Expiry',
+            style: TextStyle(
+              color: _isFieldsEnabled(index) ? Colors.black : Colors.grey,
+            ),
+          ),
+        ),
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Offtake',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextField(
+        controller: _offtakeControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        keyboardType: TextInputType.number,
+        readOnly: true,
+        enabled: _isFieldsEnabled(index),
+      ),
+      SizedBox(height: 16),
+      Text(
+        'Inventory Days Level',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      TextField(
+        controller: _IDLControllers[index],
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+        keyboardType: TextInputType.number,
+        readOnly: true,
+        enabled: _isFieldsEnabled(index),
+      ),
+      SizedBox(height: 16),
+      Text(
+        'No. of Days OOS',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+      SizedBox(height: 8),
+      DropdownButtonFormField<int>(
+        decoration: InputDecoration(
+          border: OutlineInputBorder(),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
+          labelStyle: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+          enabled: _isFieldsEnabled(index),
+        ),
+        value: (index < _selectedNumberOfDaysOOSList.length)
+            ? _selectedNumberOfDaysOOSList[index]
+            : null, // Prevent accessing out of range
+        onChanged: _isFieldsEnabled(index)
+            ? (int? newValue) {
+                setState(() {
+                  if (index < _selectedNumberOfDaysOOSList.length) {
+                    _selectedNumberOfDaysOOSList[index] = newValue;
+                  }
+
+                  // Reset fields when No. of Days OOS is 0
+                  if (newValue == 0) {
+                    _remarksOOSList[index] = null;
+                  }
+
+                  checkSaveEnabled(index);
+                });
+              }
+            : null,
+
+        items: List.generate(8, (i) {
+          return DropdownMenuItem<int>(
+            value: i,
+            child: Text(i.toString()),
+          );
+        }),
+      ),
+      if (_selectedNumberOfDaysOOSList[index] != null &&
+          _selectedNumberOfDaysOOSList[index]! > 0 &&
+          _isFieldsEnabled(index)) ...[
         SizedBox(height: 16),
-        TextField(
-          controller: pcsController,
+        Text(
+          'Remarks',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        SizedBox(height: 8),
+        TextFormField(
           decoration: InputDecoration(
-            hintText: 'Manual PCS Input',
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            labelText: 'Enter Remarks', // Placeholder for input
+            labelStyle: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
           ),
-          keyboardType: TextInputType.number,
           onChanged: (value) {
-            if (dateController.text.isNotEmpty) {
-              _updateExpiryField(
-                  index, dateController.text, pcsController.text);
-            } else {
-              print('Please select a date before entering PCS.');
-            }
+            setState(() {
+              _remarksOOSList[index] = value.trim(); // Ensure no extra spaces
+
+              checkSaveEnabled(index); // Ensure save button is updated
+            });
           },
+          initialValue: _remarksOOSList[index], // Preserve previous input
         ),
       ],
+    ]);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'INVENTORY FOR NEXT WEEK',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          elevation: 0,
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.fromARGB(255, 26, 20, 71),
+                  Color.fromARGB(255, 33, 26, 87),
+                  Color.fromARGB(255, 255, 196, 0),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Loop through each inventory item and build its UI
+                for (int index = 0;
+                    index < widget.inventoryItems.length;
+                    index++)
+                  _buildInventorySection(index),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        widget.onCancel();
+                        Navigator.of(context).pop();
+                      },
+                      style: ButtonStyle(
+                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                          const EdgeInsets.symmetric(vertical: 15),
+                        ),
+                        minimumSize: MaterialStateProperty.all<Size>(
+                          const Size(150, 50),
+                        ),
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            Color.fromARGB(255, 26, 20, 71)),
+                      ),
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: _isSaveEnabled
+                          ? () async {
+                              bool confirmed = await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: Text('Save Confirmation'),
+                                    content: Text(
+                                        'Do you want to save the changes?'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(false);
+                                        },
+                                        child: Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(true);
+                                        },
+                                        child: Text('Confirm'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+
+                              if (confirmed ?? false) {
+                                _saveChanges();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Changes saved successfully'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                                widget.onSave();
+                                Navigator.pop(context);
+                              }
+                            }
+                          : null, // Disable if no valid inventory
+                      style: ButtonStyle(
+                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+                          const EdgeInsets.symmetric(vertical: 15),
+                        ),
+                        minimumSize: MaterialStateProperty.all<Size>(
+                          const Size(150, 50),
+                        ),
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                          _isSaveEnabled
+                              ? Color.fromARGB(255, 26, 20, 71)
+                              : Colors.grey,
+                        ),
+                      ),
+                      child: const Text(
+                        'Save Changes',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
